@@ -1,0 +1,9 @@
+# Sweep outputs: ~2.4 GB of saved runs, logs and test renders. They stay on the machine that made them.
+sweeps/results/
+
+# Input data (HDF5, ~150 MB). Copy separately to a machine that needs it.
+data/*.h5
+
+# Editor / Jupyter scratch
+.ipynb_checkpoints/
+*.err

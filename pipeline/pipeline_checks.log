@@ -1,0 +1,128 @@
+description: Zodiacal light predictions for SPHEREx pointing directions
+wavelength:  5.0 micron
+units:       MJy/sr
+N = 423607 exposures;  emission range = (0.31956938511238003, 1.0941130974339088)
+n·n     median  1.000e+00   iqr  0.000e+00
+n·S     median  4.851e-03   iqr  3.475e-01
+n·z     median  9.747e-03   iqr  1.361e+00
+n·E     median  4.805e-03   iqr  3.475e-01
+n·vS    median  1.615e-02   iqr  1.356e+00
+n·vE    median  3.680e-02   iqr  1.383e+00
+n·J     median -5.953e-02   iqr  2.659e+00
+n·x     median  5.145e-02   iqr  8.549e-01
+n·y     median -1.072e-03   iqr  5.523e-01
+S·S     median  1.037e+00   iqr  1.341e-02
+S·z     median  2.050e-04   iqr  6.195e-05
+S·E     median  1.037e+00   iqr  1.341e-02
+S·vS    median -1.048e-02   iqr  5.980e-02
+S·vE    median -5.250e-03   iqr  2.289e-02
+S·J     median -4.519e+00   iqr  1.400e+00
+S·x     median  2.056e-01   iqr  1.095e+00
+S·y     median -8.518e-01   iqr  3.210e-01
+z·z     median  1.000e+00   iqr  0.000e+00
+z·E     median  2.096e-04   iqr  2.321e-05
+z·vS    median  4.858e-03   iqr  3.580e-01
+z·vE    median -2.169e-05   iqr  6.366e-05
+z·J     median -1.353e-02   iqr  1.195e-02
+z·x     median  0.000e+00   iqr  0.000e+00
+z·y     median  0.000e+00   iqr  0.000e+00
+E·E     median  1.037e+00   iqr  1.341e-02
+E·vS    median -1.049e-02   iqr  5.984e-02
+E·vE    median -5.259e-03   iqr  2.289e-02
+E·J     median -4.519e+00   iqr  1.400e+00
+E·x     median  2.056e-01   iqr  1.095e+00
+E·y     median -8.518e-01   iqr  3.210e-01
+vS·vS   median  1.000e+00   iqr  1.110e-16
+vS·vE   median  9.832e-01   iqr  2.444e-02
+vS·J    median  7.208e-01   iqr  5.168e+00
+vS·x    median  8.157e-01   iqr  3.163e-01
+vS·y    median  2.061e-01   iqr  1.078e+00
+vE·vE   median  1.000e+00   iqr  3.331e-16
+vE·J    median  7.200e-01   iqr  5.245e+00
+vE·x    median  8.301e-01   iqr  3.206e-01
+vE·y    median  2.064e-01   iqr  1.094e+00
+J·J     median  2.643e+01   iqr  2.613e-01
+J·x     median -3.462e-01   iqr  5.323e-01
+J·y     median  5.124e+00   iqr  1.338e-02
+x·x     median  1.000e+00   iqr  0.000e+00
+x·y     median  0.000e+00   iqr  0.000e+00
+y·y     median  1.000e+00   iqr  0.000e+00
+
+Mission span: 139.7 days
+25/75 Chronological  train  105901   test  317706   (25% train)
+30 day split         train  243441   test  180166   (57% train)
+50/50 Chronological  train  211803   test  211804   (50% train)
+50/50 mid-mission    train  211803   test  211804   (50% train)
+7-day alternating    train  212510   test  211097   (50% train)
+75/25 Chronological  train  317705   test  105902   (75% train)
+80/20 Chronological  train  338885   test   84722   (80% train)
+85/15 Chronological  train  360065   test   63542   (85% train)
+random split         train  211803   test  211804   (50% train)
+All splits initialized.
+
+=== 1. Exposure table from the simulated data ===
+ExposureTable(423607 exposures, 423607 kept, JD 2460790.251–2460929.999)
+[PASS] table validates (unit vectors, lengths, finite times)
+
+=== 2. Features reproduce the training features exactly ===
+  n·S         max |pipeline − training| = 0.0e+00
+  n·z         max |pipeline − training| = 0.0e+00
+  n·E         max |pipeline − training| = 0.0e+00
+  n·vS        max |pipeline − training| = 5.6e-16
+  n·vE        max |pipeline − training| = 4.4e-16
+  n·J         max |pipeline − training| = 0.0e+00
+  n·x         max |pipeline − training| = 0.0e+00
+  n·y         max |pipeline − training| = 0.0e+00
+  sinλE       max |pipeline − training| = 0.0e+00
+  cosλE       max |pipeline − training| = 0.0e+00
+  band1       max |pipeline − training| = 0.0e+00
+  band2       max |pipeline − training| = 0.0e+00
+  band3       max |pipeline − training| = 0.0e+00
+  band1@1.25  max |pipeline − training| = 0.0e+00
+  band1@1.5   max |pipeline − training| = 0.0e+00
+  band1@2.0   max |pipeline − training| = 0.0e+00
+  band2@1.25  max |pipeline − training| = 0.0e+00
+  band2@1.5   max |pipeline − training| = 0.0e+00
+  band2@2.0   max |pipeline − training| = 0.0e+00
+  band3@1.25  max |pipeline − training| = 0.0e+00
+  band3@1.5   max |pipeline − training| = 0.0e+00
+  band3@2.0   max |pipeline − training| = 0.0e+00
+[PASS] all 22 features identical to training (max diff 5.6e-16)
+
+=== 3. Coordinates ===
+  ecliptic lon/lat from nvec vs the pointing file: max |Δlon·cosβ| = 5.7e-14°, max |Δlat| = 3.3e-12°
+[PASS] ecliptic lon/lat match the pointing file (< 1e-6°)
+  RA/Dec round trip: max |Δn| = 5.3e-15
+[PASS] RA/Dec ↔ ecliptic round trip (< 1e-12)
+  north ecliptic pole (RA 270°, Dec 66.56°) → [0.0, -0.0, 1.0];  vernal equinox (0°, 0°) → [1.0, 0.0, 0.0]
+[PASS] NEP → +z and equinox → +x
+
+=== 4. Ephemerides: Horizons-format files + Hermite interpolation ===
+  file velocity → AU/day factor: Earth 1.0000, SPHEREx 1.0013 (1 = already AU/day; 86400/AU_km = 5.7755e-04 for km/s)
+  Earth      558 nodes every 0.25 d; file round trip 0.0e+00; interpolation error median 2.20e-11 AU (0.003 km), max 5.38e-11 AU (0.01 km)
+           Earth longitude λ⊕ error max 3.0e-09°
+[PASS] Earth: 6-hourly Horizons table interpolates to < 100 km and λ⊕ < 1e-4°
+  SPHEREx  72663 nodes every 0.0006944 d; file round trip 0.0e+00; interpolation error median 0.00e+00 AU (0.000 km), max 1.03e-11 AU (0.00 km)
+[PASS] SPHEREx: 1-minute table interpolates to < 10 km
+  Jupiter    140 daily nodes (finite-difference velocities): max error 7.40e-07 AU → max |Δ(n·J)| 7.40e-07 (n·J spans ±5)
+[PASS] Jupiter: daily table good to < 1e-5 AU
+[PASS] out-of-range JD is refused
+
+=== 5. What if no SPHEREx ephemeris is available (S → E, vS → vE)? ===
+    only S → E   (position, ≤ 5e-5 AU): median |err| 0.0320%, median |Δprediction| 0.00218%
+    only vS → vE (velocity direction)  : median |err| 0.0497%, median |Δprediction| 0.03608%
+  season model (n·* + sin/cos λ⊕), 30-day blocks, 5 members, 180166 test exposures
+    exact SPHEREx geometry : MSE 2.023e-07, median |err| 0.0325%, p95 0.137%
+    SPHEREx placed at Earth: MSE 5.191e-07, median |err| 0.0500%, p95 0.234%   (median |Δprediction| 0.0357%)
+    (v̂S vs v̂E differ by 0.0–14.9° — the 94-min orbit — so n·vS changes by up to 0.26)
+
+=== 6. Star mask hook (deliberately off) ===
+[PASS] mode :none returns the table unchanged
+[PASS] other modes refuse until implemented
+
+=== 7. Cluster lanes ===
+[PASS] 16 lanes cover all 100 round-9 configs exactly once
+  lane sizes: 7 7 7 7 6 6 6 6 6 6 6 6 6 6 6 6
+
+=== Summary ===
+12/12 checks passed

@@ -1,0 +1,104 @@
+﻿julia :   Activating project at `C:\JuliaProjects\More_zodi`
+At line:1 char:302
++ ... tch {} } }; julia --project=C:\JuliaProjects\More_zodi "C:\JuliaProje ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (  Activating pr...ects\More_zodi`:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+description: Zodiacal light predictions for SPHEREx pointing directions
+wavelength:  5.0 micron
+units:       MJy/sr
+N = 423607 exposures;  emission range = (0.31956938511238003, 1.0941130974339088)
+n·n     median  1.000e+00   iqr  0.000e+00
+n·S     median  4.851e-03   iqr  3.475e-01
+n·z     median  9.747e-03   iqr  1.361e+00
+n·E     median  4.805e-03   iqr  3.475e-01
+n·vS    median  1.615e-02   iqr  1.356e+00
+n·vE    median  3.680e-02   iqr  1.383e+00
+n·J     median -5.953e-02   iqr  2.659e+00
+n·x     median  5.145e-02   iqr  8.549e-01
+n·y     median -1.072e-03   iqr  5.523e-01
+S·S     median  1.037e+00   iqr  1.341e-02
+S·z     median  2.050e-04   iqr  6.195e-05
+S·E     median  1.037e+00   iqr  1.341e-02
+S·vS    median -1.048e-02   iqr  5.980e-02
+S·vE    median -5.250e-03   iqr  2.289e-02
+S·J     median -4.519e+00   iqr  1.400e+00
+S·x     median  2.056e-01   iqr  1.095e+00
+S·y     median -8.518e-01   iqr  3.210e-01
+z·z     median  1.000e+00   iqr  0.000e+00
+z·E     median  2.096e-04   iqr  2.321e-05
+z·vS    median  4.858e-03   iqr  3.580e-01
+z·vE    median -2.169e-05   iqr  6.366e-05
+z·J     median -1.353e-02   iqr  1.195e-02
+z·x     median  0.000e+00   iqr  0.000e+00
+z·y     median  0.000e+00   iqr  0.000e+00
+E·E     median  1.037e+00   iqr  1.341e-02
+E·vS    median -1.049e-02   iqr  5.984e-02
+E·vE    median -5.259e-03   iqr  2.289e-02
+E·J     median -4.519e+00   iqr  1.400e+00
+E·x     median  2.056e-01   iqr  1.095e+00
+E·y     median -8.518e-01   iqr  3.210e-01
+vS·vS   median  1.000e+00   iqr  1.110e-16
+vS·vE   median  9.832e-01   iqr  2.444e-02
+vS·J    median  7.208e-01   iqr  5.168e+00
+vS·x    median  8.157e-01   iqr  3.163e-01
+vS·y    median  2.061e-01   iqr  1.078e+00
+vE·vE   median  1.000e+00   iqr  3.331e-16
+vE·J    median  7.200e-01   iqr  5.245e+00
+vE·x    median  8.301e-01   iqr  3.206e-01
+vE·y    median  2.064e-01   iqr  1.094e+00
+J·J     median  2.643e+01   iqr  2.613e-01
+J·x     median -3.462e-01   iqr  5.323e-01
+J·y     median  5.124e+00   iqr  1.338e-02
+x·x     median  1.000e+00   iqr  0.000e+00
+x·y     median  0.000e+00   iqr  0.000e+00
+y·y     median  1.000e+00   iqr  0.000e+00
+
+Mission span: 139.7 days
+25/75 Chronological  train  105901   test  317706   (25% train)
+30 day split         train  243441   test  180166   (57% train)
+50/50 Chronological  train  211803   test  211804   (50% train)
+50/50 mid-mission    train  211803   test  211804   (50% train)
+7-day alternating    train  212510   test  211097   (50% train)
+75/25 Chronological  train  317705   test  105902   (75% train)
+80/20 Chronological  train  338885   test   84722   (80% train)
+85/15 Chronological  train  360065   test   63542   (85% train)
+random split         train  211803   test  211804   (50% train)
+All splits initialized.
+ZodiEmulator (5-member ensemble, n·* features, 64-64-32-16 gelu MLP, batch 512, Adam one-cycle peak 1e-3, 100 epochs, linear output/MSE)
+
+(1) reproduction
+  PASS  emulator == saved ensemble on all 423607 exposures (max |Δ| = 0.0e+00 MJy/sr)
+  PASS  module's own feature computation == notebook features
+
+(2) headline metrics
+  PASS  80/20 test MSE 9.399e-05 (expected 9.40e-5); median |frac err| 0.54%
+  PASS  every training exposure is in-domain
+        test exposures in-domain: 72.8%
+
+(3) all-sky physics at epoch TINDX = 13170 (model vs Kelsall truth)
+        in-domain 33.1% of sky, rms 0.0067 MJy/sr, median |frac err| 0.54%
+  PASS  positive everywhere on the sky (min 0.278 MJy/sr; truth min 0.266)
+  PASS  latitude profile matches truth to <3% per band, brightest at the ecliptic (model/truth MJy/sr per 10° |β| band):
+        0.59/0.60  0.53/0.54  0.45/0.45  0.41/0.41  0.36/0.37  0.33/0.34  0.34/0.35  0.37/0.37  0.40/0.39
+        median solar elongation of the in-domain pixels in each band: 105°  106°  109°  109°  111°  112°  105°  99°  92°
+        → the rise above |β| ≈ 60° (in BOTH model and truth) tracks the in-domain pixels there being closer to the Sun
+  PASS  elongation trend near the ecliptic matches truth (corr 1.000): fainter further from the Sun
+  PASS  north/south asymmetry (tilted cloud): same sign and pattern as truth — north brighter by +7.4% (model) vs +9.0% (truth),
+        pattern corr 0.77 over 124762 in-domain mirror pairs; model reproduces about 84% of the amplitude
+        (shortfall is largest above |β| 60° — consistent with n·* features only partly encoding Earth's
+         orbital phase relative to the tilted cloud)
+        trailing (n·v̂E < −0.5) vs leading (n·v̂E > 0.5), |β| < 10°, matched elongation:
+  PASS  elong 95–100°: trailing side brighter — truth +4.30%, model +4.13% (1375/1893 pixels)
+  PASS  elong 100–110°: trailing side brighter — truth +1.96%, model +2.75% (3806/2551 pixels)
+  PASS  every pixel within 60° of the Sun is flagged out-of-domain (196591 pixels; their median |frac err| 46%)
+
+(4) time behaviour at the ecliptic poles (deep-field exposures, |β| > 80°)
+        train  72008 exposures: corr(model, truth) 0.9927, rms 0.0034 MJy/sr (truth varies 0.346–0.474)
+        test   18997 exposures: corr(model, truth) 0.9606, rms 0.0173 MJy/sr (truth varies 0.349–0.486)
+
+(5) speed
+        full sky (786432 directions × 5 networks, CPU): 9.3 s (12 μs/direction)  |  single direction: 23 μs
+
+emulator checks done → emulator/emulator_checks.png
