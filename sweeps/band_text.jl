@@ -30,7 +30,19 @@ verified on the simulated data, plus a SLURM template for the cluster. A pipelin
 SPHEREx's *orbital velocity direction* (n·vS), so a **season − n·vS** control was added to Part A.
 
 ### Summary
-SUMMARY_PLACEHOLDER
+* **The band features do remove the β = 0 stripe:** on the held-out ecliptic patch, the median error within 2° of the
+  ecliptic drops from 0.092% to **0.042% / 0.041% / 0.035%** (sharp / parallax / both), and p95 drops from 0.18% to 0.11–0.13%.
+* **But they make the model worse overall.** Ensemble test MSE vs the season model: 30-day blocks **1.7× / 3.4× / 4.1×**
+  (0 of 5 seeds better), mid-latitude patch 1.3–3.5×, chronological 1.2–2.2×, and even the ecliptic patch 1.1–1.8× (a few
+  large misses outweigh the better median there). Only the near-pole patch improves slightly (0.8–0.98×). All-sky
+  in-domain median error: 0.166% → 0.170% / 0.229% / 0.270%.
+* The network uses the band features heavily (`band3@2.0` ranks first in permutation importance), although the bands are
+  only ~1–2% of the brightness near the ecliptic. So it uses them as extra *geometry/time coordinates* (the parallax
+  versions depend on SPHEREx's position, i.e. on time), not as band physics, and that does not generalize.
+* **n·vS control:** mixed on the held-out tests (0.73× to 1.73×), but in-domain all-sky error **halves**
+  (0.166% → 0.087% median), and the error no longer depends on having a SPHEREx ephemeris (0.035% → 0.035%, vs the
+  season model's 0.033% → 0.050%).
+* **Real-data pipeline:** all 12 checks pass. Features from the pipeline equal the training features to 6e-16.
 """,
 
 "code" => raw"""
@@ -99,6 +111,14 @@ AT
 AF["season"]
 """,
 
+"code" => raw"""
+AF["plx"]
+""",
+
+"code" => raw"""
+AF["novS"]
+""",
+
 "markdown" => raw"""
 ## A5. Does the network use the band features? (permutation importance)
 Ensemble test MSE after shuffling one feature (÷ unshuffled), on 20,000 test exposures of the 30-day blocks, for the
@@ -159,6 +179,22 @@ ephemeris_sensitivity()
 
 "markdown" => raw"""
 ## Conclusions
-CONCLUSIONS_PLACEHOLDER
+1. **Dust-band features: keep them out of the default model.** They fix the local symptom (the β = 0 stripe) but cost
+   1.7–4× in MSE on the 30-day blocks and most other tests, across all 5 seeds. The stripe is a ~0.1% effect. Trading it
+   for a general loss of accuracy is not worth it.
+2. **Why they fail:** the bands are ~1–2% of the 5 μm signal, yet the network leans on the band features more than on
+   most look-direction features. Like n·δ̂ (10/08) and n·vS, a feature that varies with SPHEREx's position or orbit gives
+   the network a shortcut through the survey's pointing pattern, and that shortcut does not carry over to new times or
+   sky. The all-sky residual stops following the Kelsall components, but only because the error has grown and become less
+   structured.
+3. **n·vS should probably go.** Physically, Kelsall has no velocity dependence. Dropping n·vS makes the model insensitive
+   to a missing spacecraft ephemeris and halves the all-sky in-domain error. Accuracy on the held-out tests is mixed:
+   better on 2 of 5 tests and worse on 3. This is a decision for the mentor. For real data, the season model needs the
+   SPHEREx ephemeris; the n·vS-free model does not.
+4. **Pipeline:** ready for real exposure tables and Horizons ephemerides, and verified on the simulated data. Star masking
+   stays off until we decide to apply it. The cluster template runs any sweep as a SLURM array.
+5. **Possible next steps:** (a) attack the stripe without new inputs, e.g. by up-weighting low-|β| exposures in the loss;
+   (b) a season − n·vS model with more seeds/tests, to decide (3); (c) the extrapolation test, once ZodiPy (Python) is
+   available.
 """,
 ]

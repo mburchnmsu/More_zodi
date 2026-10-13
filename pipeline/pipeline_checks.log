@@ -121,8 +121,8 @@ ExposureTable(423607 exposures, 423607 kept, JD 2460790.251–2460929.999)
 [PASS] other modes refuse until implemented
 
 === 7. Cluster lanes ===
-[PASS] 16 lanes cover all 100 round-9 configs exactly once
-  lane sizes: 7 7 7 7 6 6 6 6 6 6 6 6 6 6 6 6
+[PASS] 16 lanes cover all 125 round-9 configs exactly once
+  lane sizes: 8 8 8 8 8 8 8 8 8 8 8 8 8 7 7 7
 
 === Summary ===
 12/12 checks passed
