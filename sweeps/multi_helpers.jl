@@ -4,8 +4,12 @@
 @assert ZODI_DATA == "z115multi" "multi_helpers.jl needs ENV[\"ZODI_DATA\"] = \"z115multi\""
 const ARMS13L  = [("sunlin", "Sun frame + λ, MSE"), ("sunrel", "Sun frame + λ, fractional loss"),
                   ("sunrelbig", "Sun frame + λ, fractional loss, 128-128-64-32"), ("seasonrel", "old season inputs + λ, fractional loss"),
-                  ("sunphase", "Sun frame + λ + ZodiPy phase coefficients C1–C3, fractional loss")]   # round 14
-const ARMCOL13 = Dict("sunlin" => :orange, "sunrel" => :limegreen, "sunrelbig" => :deepskyblue, "seasonrel" => :magenta, "sunphase" => :red)
+                  ("sunphase", "Sun frame + λ + ZodiPy phase coefficients C1–C3, fractional loss"),   # round 14
+                  ("ep300", "… phase coefficients, 300 epochs"), ("bb", "… phase coefficients + blackbody inputs"),
+                  ("bb300", "… phase coefficients + blackbody inputs, 300 epochs")]                  # round 15
+const ARMCOL13 = Dict("sunlin" => :orange, "sunrel" => :limegreen, "sunrelbig" => :deepskyblue, "seasonrel" => :magenta, "sunphase" => :red,
+                      "ep300" => :gold, "bb" => :cyan, "bb300" => :white)
+const ARMS13_R13 = ARMS13L[1:4]; const ARMS13_R1415 = vcat([("sunrel", ARMS13L[2][2])], ARMS13L[5:8])
 const TESTS13L = [("chan", "held-out channels (16 of 64 wavelengths never seen)"), ("blk", "30-day blocks (all wavelengths)")]
 const CHAN_W   = h5open(f -> read(f["channel_wavelengths_um"]), emission_file)
 const _R13 = Dict{Tuple{String, String}, Vector{Any}}()
@@ -29,18 +33,20 @@ function multi_table()
 end
 
 """Median |error| per wavelength channel (left: held-out channels test; right: 30-day blocks)."""
-function err_vs_lambda_fig()
-    fig = Figure(size=(1200, 470), fontsize=14)
+function err_vs_lambda_fig(arms=ARMS13_R13)
+    fig = Figure(size=(1200, 540), fontsize=14)
     for (col, (t, tl)) in enumerate(TESTS13L)
         ax = Axis(fig[1, col], xlabel="wavelength (μm)", ylabel=col == 1 ? "median |error| (%)" : "", yscale=log10, title=tl, xscale=log10,
                   xticks=[1.25, 1.5, 2, 2.5, 3, 4, 5])
-        for (a, al) in ARMS13L
+        vlines!(ax, [1.725, 2.85, 4.2], color=(:red, 0.25), linestyle=:dash)        # ZodiPy's phase-coefficient steps
+        for (a, al) in arms
             rs = runs13(a, t); isempty(rs) && continue
             te, fe = fe13(rs); cs = sort(unique(CHANNEL[te]))
             scatterlines!(ax, CHAN_W[cs .+ 1], [median(fe[CHANNEL[te] .== c]) for c in cs], color=ARMCOL13[a], markersize=6, label=al)
         end
-        col == 1 && axislegend(ax, position=:lt, labelsize=11)
     end
+    # the blocks panel (right) has every variant → one legend under both panels
+    Legend(fig[2, 1:2], content(fig[1, 2]), orientation=:horizontal, nbanks=2, labelsize=11, framevisible=false)
     fig
 end
 
