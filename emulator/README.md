@@ -1,7 +1,21 @@
-# ZodiEmulator v1 — packaged Kelsall 5 μm zodiacal-light emulator
+# ZodiEmulator — packaged Kelsall 5 μm zodiacal-light emulator (v1, v2)
 
 Neural-network emulator of the Kelsall (1998) 5 μm zodiacal emission (as computed by ZodiPy) along any line of sight,
-trained on SPHEREx boresight geometry (More_zodi project, 2026-10-07).
+trained on SPHEREx boresight geometry (More_zodi project). The same module loads either file.
+
+## v2 (2026-10-14) — recommended
+| | v1 (Oct 7) | **v2 (Oct 14)** |
+|---|---|---|
+| inputs | n·S n·z n·E n·vS n·vE n·J n·x n·y | n·S n·z n·E n·vS n·vE **n·x⊕ n·y⊕ sinλ⊕ cosλ⊕** (Sun frame + season; no Jupiter) |
+| training data | original simulated data (has 2 generation errors) | **corrected** data (ZodiPy 1.1.5, `zodipy_gen/`) |
+| training split | mission days 0–111 | random 90% of the whole 140-day mission |
+| held-out accuracy | 80/20 chrono: median 0.54% | random 10%: **median 0.015%, p95 0.064%** |
+| outside the mission (+30…+540 d) | — | in-domain median 0.06%, out-of-domain 0.40%; ≤0.1% up to ~90 days |
+
+`n·x⊕, n·y⊕` = the pointing in a frame turned by Earth's ecliptic longitude λ⊕ (x⊕ = Sun→Earth). v2 does not need
+Jupiter's position (`J` is optional). Files: `zodi_emulator_v2.jld2`, `export_emulator_v2.jl`,
+`test_emulator_v2.jl` → `emulator_v2_checks.log` (7/7 checks, incl. v1 still reproducing exactly). Details and the
+evidence: notebook 10142026. The rest of this README describes v1.
 
 | file | what it is |
 |---|---|

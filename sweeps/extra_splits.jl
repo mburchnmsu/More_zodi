@@ -30,6 +30,9 @@ lc_split(f) = f == 1.0 ? "30 day split" : "30 day split frac $f"
 let te = sort(sample(Xoshiro(2026), 1:N, round(Int, 0.1N), replace=false))
     splits["random 90/10"] = (setdiff(1:N, te), te)
 end
+# Round 13 (multi-wavelength, ZODI_DATA = "z115multi"): every 4th channel (2, 6, …, 62: 16 of 64, never the end channels)
+# is held out entirely → can the network predict wavelengths it never saw? (For the 5-μm data CHANNEL ≡ 0 → empty test.)
+splits["held-out channels"] = (findall(CHANNEL .% 4 .!= 2), findall(CHANNEL .% 4 .== 2))
 # Round 12 (multi-year synthetic survey, ZODI_DATA = "z115year"): train on the first year, test on everything after.
 let t0 = minimum(times)
     splits["year 1 → later"] = (findall(times .< t0 + 365.25), findall(times .>= t0 + 365.25))

@@ -16,6 +16,7 @@ const ROLE = Dict(
     "zodipy115_5um_boresight.h5"                                      => ("z115", "zodipy_gen/generate.py"),
     "zodipy115_5um_healpix_components.h5"                             => ("z115, z115year", "zodipy_gen/generate.py"),
     "zodipy115_future.h5"                                             => ("z115 (extrapolation test)", "zodipy_gen/generate_future.py"),
+    "zodipy115_multi_boresight.h5"                                    => ("z115multi", "zodipy_gen/generate_multi.py"),
     "z115year_pointing.h5"                                            => ("z115year", "zodipy_gen/generate_year.py"),
     "z115year_vectors.h5"                                             => ("z115year", "zodipy_gen/generate_year.py"),
     "z115year_boresight.h5"                                           => ("z115year", "zodipy_gen/generate_year.py"),

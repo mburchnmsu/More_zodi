@@ -43,13 +43,16 @@ ZODI_DATA = get(ENV, "ZODI_DATA", "original")
 if ZODI_DATA == "z115"
     allsky_file   = joinpath(DATA_DIR, "zodipy115_5um_healpix_components.h5")
     emission_file = joinpath(DATA_DIR, "zodipy115_5um_boresight.h5")
+elseif ZODI_DATA == "z115multi"     # same exposures, each at one of 64 wavelengths 1.25–5.0 μm (zodipy_gen/generate_multi.py)
+    allsky_file   = joinpath(DATA_DIR, "zodipy115_5um_healpix_components.h5")
+    emission_file = joinpath(DATA_DIR, "zodipy115_multi_boresight.h5")
 elseif ZODI_DATA == "z115year"
     pointing_file = joinpath(DATA_DIR, "z115year_pointing.h5")
     vectors_file  = joinpath(DATA_DIR, "z115year_vectors.h5")
     allsky_file   = joinpath(DATA_DIR, "zodipy115_5um_healpix_components.h5")
     emission_file = joinpath(DATA_DIR, "z115year_boresight.h5")
 else
-    @assert ZODI_DATA == "original" "unknown ZODI_DATA = $ZODI_DATA (use \"original\", \"z115\" or \"z115year\")"
+    @assert ZODI_DATA == "original" "unknown ZODI_DATA = $ZODI_DATA (use \"original\", \"z115\", \"z115multi\" or \"z115year\")"
 end
 RESULTS_DIR = joinpath(PROJECT_DIR, "sweeps", ZODI_DATA == "original" ? "results" : "results_$ZODI_DATA")
 println("target data: $ZODI_DATA  ($(basename(emission_file)));  results dir: $(relpath(RESULTS_DIR, PROJECT_DIR))")
@@ -87,6 +90,10 @@ y = h5open(emission_file) do f
 end
 N = length(y)
 @assert size(nvec_unit_cartesian, 2) == size(spherex_positions, 2) == length(times) == N
+# wavelength of each exposure (μm) and its channel: 5 μm everywhere except the multi-wavelength data
+WAVE, CHANNEL = h5open(emission_file) do f
+    haskey(f, "wavelength_um") ? (read(f["wavelength_um"]), read(f["channel"])) : (fill(5.0, N), fill(0, N))
+end
 println("N = $N exposures;  emission range = ", extrema(y))
 
 # --- Feature helpers ---------------------------------------------------------

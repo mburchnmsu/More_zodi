@@ -1,0 +1,11 @@
+﻿  channel  0  1.250 um  6556 exposures  median 0.1411 MJy/sr  (1s)
+  channel  8  1.491 um  6488 exposures  median 0.1308 MJy/sr  (7s)
+  channel 16  1.778 um  6732 exposures  median 0.1168 MJy/sr  (13s)
+  channel 24  2.120 um  6547 exposures  median 0.0968 MJy/sr  (19s)
+  channel 32  2.528 um  6721 exposures  median 0.0765 MJy/sr  (25s)
+  channel 40  3.014 um  6625 exposures  median 0.0594 MJy/sr  (32s)
+  channel 48  3.594 um  6545 exposures  median 0.0636 MJy/sr  (38s)
+  channel 56  4.286 um  6776 exposures  median 0.1652 MJy/sr  (44s)
+  channel 63  5.000 um  6579 exposures  median 0.4512 MJy/sr  (50s)
+check: 5.0 um channel vs zodipy115_5um_boresight.h5 on 6579 exposures: max rel diff 3.4e-15
+DONE in 50s; emission range 0.0389..1.0478 MJy/sr

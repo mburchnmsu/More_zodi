@@ -1,4 +1,4 @@
-# data/MANIFEST.tsv — written 2026-10-13 23:02 by data_manifest.jl. Check: julia --project=. data_manifest.jl
+# data/MANIFEST.tsv — written 2026-10-14 01:15 by data_manifest.jl. Check: julia --project=. data_manifest.jl
 file	bytes	sha256	created	used_by_ZODI_DATA	made_by
 boresight_pointing.h5	26861925	312003bbe645e49a9176892004dec0b01610e390355dc8ef771548cb5c7e0c14	2025-10-30T07:54:26.106701	all	original (mentor pipeline, 2025-10-30)
 spherex_vectors_bore_interpolated.h5	73036620	4216b5b5e2be8f0e19ac93c7414b9d0916511f81fe3810145707a4c7e0d4c40a	2025-11-24T12:58:28.660347	original, z115	original (mentor pipeline, 2025-11-24)
@@ -10,3 +10,4 @@ z115year_vectors.h5	115212288	d2bfc7a4ca0c99dd6d1b909c6acc5592f4ad9baa40c7a1b842
 zodipy115_5um_boresight.h5	37291752	5959ea05239b1cfcac64efab94ad261244f56b1d44ad647c1f717b9eead755b0	2026-10-13T20:21:42	z115	zodipy_gen/generate.py
 zodipy115_5um_healpix_components.h5	62926848	a92e492eefb012d3c9579f4f0b02f3d7ad329367910871f8dfc95b537676e2be	2026-10-13T20:24:19	z115, z115year	zodipy_gen/generate.py
 zodipy115_future.h5	26802432	c29debc33c560b59763d4c528e2b0159d9b5284d62e67c1b02dd8e0bf79feaea	2026-10-13T20:32:16	z115 (extrapolation test)	zodipy_gen/generate_future.py
+zodipy115_multi_boresight.h5	44069976	de4d9d7538dc368d0fdacd589c5e7cee01fe0df9464db6292c4b2b9d68e4e6b2	2026-10-14T01:13:26	z115multi	zodipy_gen/generate_multi.py

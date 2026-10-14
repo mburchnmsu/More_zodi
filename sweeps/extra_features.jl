@@ -78,8 +78,19 @@ function sunframe_columns(nvec, idx)
          vec(CLOUD_N' * nvec), vec(CLOUD_N' * Sx), vec(sqrt.(sum(abs2, Sx, dims=1))))
 end
 
+# Round 13 (multi-wavelength): log10 of the exposure's wavelength in μm (WAVE from zodi_setup.jl; 5 μm for the 5-μm data)
+# Round 14: ZodiPy takes the Kelsall phase-function coefficients C1–C3 from the NEAREST DIRBE band (zodipy/unpack_model.py,
+# use_nearest=True) → steps in the spectrum at 1.725, 2.85 and 4.2 μm. phC1–3 hand the network those coefficients.
+const DIRBE_BANDS = [1.25, 2.2, 3.5, 4.9]
+const PHASE_C = [-0.94209999 0.1214 -0.1648; -0.52670002 0.18719999 -0.59829998; -0.4312 0.1715 -0.63330001; 0.0 0.0 0.0]
+phase_coeffs(λ) = PHASE_C[argmin(abs.(DIRBE_BANDS .- λ)), :]          # nearest band, as ZodiPy (valid for λ ≤ 8.45 μm)
+# Round 15: the thermal part rises like a blackbody's Wien tail toward 5 μm. logB250/logB300 = log10 of the Planck
+# function B_λ(T) at T = 250 / 300 K (typical dust temperatures near 1 AU), relative to its value at 5 μm.
+logplanck(λ, T) = (c2 = 14387.77; -5log10(λ) - log10(expm1(c2 / (λ * T))))             # λ in μm; c2 = hc/k in μm·K
+logB_rel(λ, T) = logplanck(λ, T) - logplanck(5.0, T)
 const EXTRA_NAMES = ["n·δ̂", "n·Ĵfix", "n·Ĵ", "n·Ĵ⊥fix", "n·δ", "n·Jrot45", "n·Jrot90", "n·Jrot180", "n·Jscr",
-                     "sinλE", "cosλE", BAND_SHARP_NAMES..., BAND_PLX_NAMES..., SUNFRAME_NAMES...]
+                     "sinλE", "cosλE", BAND_SHARP_NAMES..., BAND_PLX_NAMES..., SUNFRAME_NAMES..., "logλ", "phC1", "phC2", "phC3",
+                     "logB250", "logB300"]
 extra_columns(nvec, idx) = hcat(dot_prod_matrix(nvec, δ_unit[:, idx]),
                                 vec(J_fix' * nvec),
                                 dot_prod_matrix(nvec, J_unit[:, idx]),
@@ -91,7 +102,10 @@ extra_columns(nvec, idx) = hcat(dot_prod_matrix(nvec, δ_unit[:, idx]),
                                 dot_prod_matrix(nvec, J_scr[:, idx]),
                                 sind.(λE_deg[idx]), cosd.(λE_deg[idx]),
                                 band_columns(nvec, idx),
-                                sunframe_columns(nvec, idx))
+                                sunframe_columns(nvec, idx),
+                                log10.(WAVE[idx]),
+                                permutedims(reduce(hcat, phase_coeffs.(WAVE[idx]))),
+                                logB_rel.(WAVE[idx], 250.0), logB_rel.(WAVE[idx], 300.0))
 if !("n·δ̂" in dot_names_all)
     global Fd_raw = hcat(Fd_raw, extra_columns(nvec_unit_cartesian, 1:N))
     append!(dot_names_all, EXTRA_NAMES)
@@ -128,4 +142,12 @@ const FEATURE_SETS = Dict(
     :sunframe_cloud   => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "n·ĉ", "Zc", "Rc"],
     # Rc leaves the mission's range for ~half the year (the mission never got near perihelion); Zc only for ~20%
     :sunframe_cloudZ  => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "n·ĉ", "Zc"],
+    # round 13 (multi-wavelength): the recommended inputs (and the old season model) + log10 wavelength
+    :sunseason_lambda => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE", "logλ"],
+    :season_lambda    => vcat(LOOK_DIR, "sinλE", "cosλE", "logλ"),
+    # round 14: + ZodiPy's (nearest-band) phase-function coefficients
+    :sunseason_lambda_phase => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE", "logλ", "phC1", "phC2", "phC3"],
+    # round 15: + blackbody shape
+    :sunseason_lambda_phase_bb => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE", "logλ", "phC1", "phC2", "phC3",
+                                   "logB250", "logB300"],
 )
