@@ -178,11 +178,18 @@ function band_parallax_ζ(n, O, nb, R)
     (vec(nb' * O) .+ s .* vec(nb' * n)) ./ R
 end
 
+# Sun-frame features (round 11) — same definitions as sweeps/extra_features.jl
+const CLOUD_I, CLOUD_Ω = 2.0335188072390769, 77.657955554097114
+const CLOUD_N  = [sind(CLOUD_I) * sind(CLOUD_Ω), -sind(CLOUD_I) * cosd(CLOUD_Ω), cosd(CLOUD_I)]
+const CLOUD_X0 = [0.011887800744346281, 0.0054765064662263777, -0.0021530908020710744]
+const SUNFRAME_NAMES = ["n·x⊕", "n·y⊕", "n·ĉ", "Zc", "Rc"]
+
 """
     build_features(nvec, geom; bands=true) -> (F::Matrix (M × K), names)
 
 `geom` = (; S, E, vS, vE, J), each 3×M (from `ephemeris_at`). Columns: $(join(FEATURE_NAMES, ", ")), then
-(if `bands`) the 3 sharp and 9 parallax dust-band profiles. Identical definitions to the training code.
+(if `bands`) the 3 sharp and 9 parallax dust-band profiles, then the Sun-frame features $(join(SUNFRAME_NAMES, ", ")).
+Identical definitions to the training code.
 """
 function build_features(nvec, geom; bands=true)
     n = Float64.(nvec); λE = mod.(atand.(geom.E[2, :], geom.E[1, :]), 360)
@@ -198,6 +205,10 @@ function build_features(nvec, geom; bands=true)
         end
         append!(names, BAND_SHARP_NAMES, BAND_PLX_NAMES)
     end
+    Sx = geom.S .- CLOUD_X0
+    append!(cols, [cosd.(λE) .* n[1, :] .+ sind.(λE) .* n[2, :], -sind.(λE) .* n[1, :] .+ cosd.(λE) .* n[2, :],
+                   vec(CLOUD_N' * n), vec(CLOUD_N' * Sx), vec(sqrt.(sum(abs2, Sx, dims=1)))])
+    append!(names, SUNFRAME_NAMES)
     reduce(hcat, cols), names
 end
 

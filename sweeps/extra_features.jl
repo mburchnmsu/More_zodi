@@ -58,8 +58,28 @@ band_columns(nvec, idx) = hcat([band_profile.(Ref(b), asin.(clamp.(vec(band_norm
                                [band_profile.(Ref(b), band_parallax_ζ(nvec, spherex_positions[:, idx], band_normal(b), R))
                                 for b in BANDS for R in BAND_RADII]...)
 
+# Round 11 (Sun-frame features, for extrapolation in time). Zodi brightness depends on the geometry RELATIVE TO THE SUN
+# (which turns with Earth over the year) plus the cloud's small inertial tilt/offset. n·x, n·y (and n·J) are inertial, so a
+# new time of year means new values. Instead:
+#   n·x⊕, n·y⊕ : pointing in the frame rotated by Earth's longitude λ⊕ (x⊕ = Sun→Earth direction in the ecliptic, y⊕ ahead)
+#   n·ĉ        : pointing · the smooth cloud's symmetry-plane normal (Kelsall: i = 2.03°, Ω = 77.7°) — a fixed inertial axis
+#   Zc, Rc     : SPHEREx's height above the cloud's symmetry plane and its distance from the cloud centre (AU; Kelsall
+#                offset X0 = (0.0119, 0.00548, −0.00215) AU from the Sun ≈ barycentre to < 0.01 AU)
+# Zc/Rc/n·ĉ carry the season information through quantities whose values recur every year and that the mission mostly
+# covers (Zc: Earth crosses the cloud plane twice a year), unlike sin/cos λ⊕ which the mission sees for only ~38% of the circle.
+const CLOUD_I, CLOUD_Ω = 2.0335188072390769, 77.657955554097114     # = zodipy/component_params.py (DIRBE cloud)
+const CLOUD_N  = [sind(CLOUD_I) * sind(CLOUD_Ω), -sind(CLOUD_I) * cosd(CLOUD_Ω), cosd(CLOUD_I)]
+const CLOUD_X0 = [0.011887800744346281, 0.0054765064662263777, -0.0021530908020710744]
+const SUNFRAME_NAMES = ["n·x⊕", "n·y⊕", "n·ĉ", "Zc", "Rc"]
+function sunframe_columns(nvec, idx)
+    λ = λE_deg[idx]; Sx = spherex_positions[:, idx] .- CLOUD_X0
+    hcat(cosd.(λ) .* nvec[1, :] .+ sind.(λ) .* nvec[2, :],          # n · (cos λ, sin λ, 0)
+         -sind.(λ) .* nvec[1, :] .+ cosd.(λ) .* nvec[2, :],         # n · (−sin λ, cos λ, 0)
+         vec(CLOUD_N' * nvec), vec(CLOUD_N' * Sx), vec(sqrt.(sum(abs2, Sx, dims=1))))
+end
+
 const EXTRA_NAMES = ["n·δ̂", "n·Ĵfix", "n·Ĵ", "n·Ĵ⊥fix", "n·δ", "n·Jrot45", "n·Jrot90", "n·Jrot180", "n·Jscr",
-                     "sinλE", "cosλE", BAND_SHARP_NAMES..., BAND_PLX_NAMES...]
+                     "sinλE", "cosλE", BAND_SHARP_NAMES..., BAND_PLX_NAMES..., SUNFRAME_NAMES...]
 extra_columns(nvec, idx) = hcat(dot_prod_matrix(nvec, δ_unit[:, idx]),
                                 vec(J_fix' * nvec),
                                 dot_prod_matrix(nvec, J_unit[:, idx]),
@@ -70,7 +90,8 @@ extra_columns(nvec, idx) = hcat(dot_prod_matrix(nvec, δ_unit[:, idx]),
                                 dot_prod_matrix(nvec, J_rot180[:, idx]),
                                 dot_prod_matrix(nvec, J_scr[:, idx]),
                                 sind.(λE_deg[idx]), cosd.(λE_deg[idx]),
-                                band_columns(nvec, idx))
+                                band_columns(nvec, idx),
+                                sunframe_columns(nvec, idx))
 if !("n·δ̂" in dot_names_all)
     global Fd_raw = hcat(Fd_raw, extra_columns(nvec_unit_cartesian, 1:N))
     append!(dot_names_all, EXTRA_NAMES)
@@ -99,4 +120,12 @@ const FEATURE_SETS = Dict(
     # the pipeline test found the season model leans on n·vS (SPHEREx's orbital-velocity direction; Kelsall has no
     # velocity dependence) — control: drop it
     :season_novS      => filter(!=("n·vS"), vcat(LOOK_DIR, "sinλE", "cosλE")),
+    # round 10 (extrapolation in time): Jupiter is a slow clock (10/08) — does dropping it help beyond the mission?
+    :season_noJ       => filter(!=("n·J"), vcat(LOOK_DIR, "sinλE", "cosλE")),
+    # round 11 (Sun frame): Sun-relative inputs only — no inertial n·x, n·y, no Jupiter
+    :sunframe         => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕"],
+    :sunframe_season  => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE"],
+    :sunframe_cloud   => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "n·ĉ", "Zc", "Rc"],
+    # Rc leaves the mission's range for ~half the year (the mission never got near perihelion); Zc only for ~20%
+    :sunframe_cloudZ  => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "n·ĉ", "Zc"],
 )

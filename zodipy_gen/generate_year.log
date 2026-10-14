@@ -1,0 +1,10 @@
+﻿ephemeris check earth   : |Δpos| 8.5e-07 AU, |Δvel| 3.4e-09 AU/day
+ephemeris check jupiter : |Δpos| 2.0e-06 AU, |Δvel| 1.3e-06 AU/day
+ephemeris check moon    : |Δpos| 8.5e-07 AU, |Δvel| 3.4e-09 AU/day
+shift   0: real mission rows (corrected target)
+shift 140: dates  140.0.. 279.7 mission days, turn φ median  136.6°, ZodiPy 14s
+shift 280: dates  280.0.. 419.7 mission days, turn φ median  277.8°, ZodiPy 14s
+shift 420: dates  420.0.. 559.7 mission days, turn φ median   52.5°, ZodiPy 14s
+shift 560: dates  560.0.. 699.7 mission days, turn φ median  192.3°, ZodiPy 14s
+shift 700: dates  700.0.. 839.7 mission days, turn φ median  330.7°, ZodiPy 14s
+wrote 600000 exposures; dates span 839.7 days. DONE

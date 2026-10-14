@@ -1,0 +1,5 @@
+﻿ephemeris check vs vectors file: |ΔE| 8.5e-07 AU, |ΔvE| 3.4e-09 AU/day (|vE| ≈ 0.0170), |ΔJ| 2.0e-06 AU
+108000 future exposures (Δ = 30..540 d); max |Δlatitude| 0.0e+00°, solar elongation change median 0.001°, max 0.007°
+turning angle φ per Δ (median): 30d→28.8°, 120d→116.4°, 210d→207.7°, 300d→297.3°, 390d→383.7°, 480d→471.2°
+ZodiPy: 108000 exposures in 15s; emission range 0.322..1.182 MJy/sr
+DONE

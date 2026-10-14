@@ -13,7 +13,7 @@ include(abspath(ARGS[1]))                                   # defines CONFIGS
 using Serialization
 task   = parse(Int, get(ENV, "SLURM_ARRAY_TASK_ID", "1"))
 ntasks = parse(Int, get(ENV, "SLURM_ARRAY_TASK_COUNT", "1"))
-resdir = joinpath(ROOT, "sweeps", "results")
+resdir = RESULTS_DIR                                       # sweeps/results, or sweeps/results_z115 (zodi_setup.jl)
 todo = filter(n -> !isfile(joinpath(resdir, "$n.jls")), collect(keys(CONFIGS)))
 mine = slurm_lane(todo, task, ntasks)
 println("task $task/$ntasks: $(length(mine)) of $(length(todo)) pending runs ($(length(CONFIGS)) in config): ", join(mine, " "))

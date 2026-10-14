@@ -1,0 +1,16 @@
+﻿Earth: vectors file vs de432s: max |diff| 7.39e-07 AU
+vectorised chunks vs one-by-one (40 exposures across the mission): max rel diff 1.31e-14
+     2000/423607       0s  (eta    85s)
+    42000/423607       9s  (eta    79s)
+    82000/423607      17s  (eta    70s)
+   122000/423607      25s  (eta    61s)
+   162000/423607      33s  (eta    53s)
+   202000/423607      41s  (eta    45s)
+   242000/423607      49s  (eta    37s)
+   282000/423607      58s  (eta    29s)
+   322000/423607      66s  (eta    21s)
+   362000/423607      74s  (eta    13s)
+   402000/423607      83s  (eta     4s)
+boresight done in 87s; new/old median 1.01939, range 0.9398..1.0457
+all-sky map (786432 pixels) at exposure index 13169 (jd 2460790.2514) in 157s
+DONE

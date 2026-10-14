@@ -5,7 +5,7 @@
 # ==============================================================================
 using Serialization, DataFrames, Healpix
 
-const RES = joinpath(@__DIR__, "results")
+const RES = isdefined(Main, :RESULTS_DIR) ? RESULTS_DIR : joinpath(@__DIR__, "results")   # results_z115 for ZODI_DATA="z115"
 load_run(name) = deserialize(joinpath(RES, name * ".jls"))
 load_prefix(prefix) = [deserialize(joinpath(RES, f)) for f in sort(readdir(RES))
                        if startswith(f, prefix) && endswith(f, ".jls")]

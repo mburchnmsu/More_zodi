@@ -9,7 +9,7 @@ include(joinpath(@__DIR__, "extra_features.jl"))
 include(abspath(ARGS[1]))
 using Serialization
 for name in ARGS[2:end]
-    out = joinpath(@__DIR__, "results", "$name.jls")
+    out = joinpath(RESULTS_DIR, "$name.jls")          # sweeps/results, or sweeps/results_z115 (zodi_setup.jl)
     isfile(out) && (println("skip $name (exists)"); continue)
     kw    = CONFIGS[name]
     feats = FEATURE_SETS[get(kw, :features, :look_dir)]

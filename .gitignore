@@ -1,5 +1,6 @@
 # Sweep outputs: ~2.4 GB of saved runs, logs and test renders. They stay on the machine that made them.
 sweeps/results/
+sweeps/results_*/
 
 # Input data (HDF5, ~150 MB). Copy separately to a machine that needs it.
 data/*.h5

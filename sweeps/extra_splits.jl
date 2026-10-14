@@ -24,3 +24,13 @@ let (tr, te) = splits["30 day split"]
     end
 end
 lc_split(f) = f == 1.0 ? "30 day split" : "30 day split frac $f"
+
+# Round 10 (2026-10-13, extrapolation in time): train on the WHOLE mission except a random 10% (the in-mission
+# reference); the real test is the synthetic "future" set (zodipy_gen/generate_future.py), outside the mission.
+let te = sort(sample(Xoshiro(2026), 1:N, round(Int, 0.1N), replace=false))
+    splits["random 90/10"] = (setdiff(1:N, te), te)
+end
+# Round 12 (multi-year synthetic survey, ZODI_DATA = "z115year"): train on the first year, test on everything after.
+let t0 = minimum(times)
+    splits["year 1 → later"] = (findall(times .< t0 + 365.25), findall(times .>= t0 + 365.25))
+end

@@ -35,6 +35,24 @@ pointing_file = joinpath(DATA_DIR, "boresight_pointing.h5")
 vectors_file  = joinpath(DATA_DIR, "spherex_vectors_bore_interpolated.h5")
 allsky_file   = joinpath(DATA_DIR, "spherex_zodipy_5um_boresight_healpix_components_interpolated.h5")
 emission_file = joinpath(DATA_DIR, "spherex_zodipy_5um_boresight_interpolated.h5")
+# Which target to use. Default "original" = the files above (what every notebook up to 10132026 uses).
+# "z115" = the same exposures regenerated with ZodiPy 1.1.5 (zodipy_gen/generate.py). Set ENV["ZODI_DATA"] = "z115"
+# BEFORE including this file. Results then live in sweeps/results_z115/ so they can never mix with the originals.
+ZODI_DATA = get(ENV, "ZODI_DATA", "original")
+# "z115year" = a synthetic ~2.3-year survey (real mission + 5 rotated copies, 600k exposures; zodipy_gen/generate_year.py).
+if ZODI_DATA == "z115"
+    allsky_file   = joinpath(DATA_DIR, "zodipy115_5um_healpix_components.h5")
+    emission_file = joinpath(DATA_DIR, "zodipy115_5um_boresight.h5")
+elseif ZODI_DATA == "z115year"
+    pointing_file = joinpath(DATA_DIR, "z115year_pointing.h5")
+    vectors_file  = joinpath(DATA_DIR, "z115year_vectors.h5")
+    allsky_file   = joinpath(DATA_DIR, "zodipy115_5um_healpix_components.h5")
+    emission_file = joinpath(DATA_DIR, "z115year_boresight.h5")
+else
+    @assert ZODI_DATA == "original" "unknown ZODI_DATA = $ZODI_DATA (use \"original\", \"z115\" or \"z115year\")"
+end
+RESULTS_DIR = joinpath(PROJECT_DIR, "sweeps", ZODI_DATA == "original" ? "results" : "results_$ZODI_DATA")
+println("target data: $ZODI_DATA  ($(basename(emission_file)));  results dir: $(relpath(RESULTS_DIR, PROJECT_DIR))")
 
 # Where is SPHEREx looking?
 nvec_unit_cartesian, ecliptic_longitude_deg, ecliptic_latitude_deg, times = h5open(pointing_file) do f

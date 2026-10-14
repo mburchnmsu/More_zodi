@@ -1,3 +1,4 @@
+target data: original  (spherex_zodipy_5um_boresight_interpolated.h5);  results dir: sweeps\results
 description: Zodiacal light predictions for SPHEREx pointing directions
 wavelength:  5.0 micron
 units:       MJy/sr
@@ -87,7 +88,12 @@ ExposureTable(423607 exposures, 423607 kept, JD 2460790.251–2460929.999)
   band3@1.25  max |pipeline − training| = 0.0e+00
   band3@1.5   max |pipeline − training| = 0.0e+00
   band3@2.0   max |pipeline − training| = 0.0e+00
-[PASS] all 22 features identical to training (max diff 5.6e-16)
+  n·x⊕        max |pipeline − training| = 0.0e+00
+  n·y⊕        max |pipeline − training| = 0.0e+00
+  n·ĉ         max |pipeline − training| = 0.0e+00
+  Zc          max |pipeline − training| = 0.0e+00
+  Rc          max |pipeline − training| = 0.0e+00
+[PASS] all 27 features identical to training (max diff 5.6e-16)
 
 === 3. Coordinates ===
   ecliptic lon/lat from nvec vs the pointing file: max |Δlon·cosβ| = 5.7e-14°, max |Δlat| = 3.3e-12°
