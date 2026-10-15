@@ -8,3 +8,7 @@ data/*.h5
 # Editor / Jupyter scratch
 .ipynb_checkpoints/
 *.err
+
+poster/.venv/
+poster/*.jld2
+poster/*.npy
