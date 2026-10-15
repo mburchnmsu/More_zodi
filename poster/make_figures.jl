@@ -1,4 +1,4 @@
-# Poster figures, each in a light and a dark version → poster/fig/<name>_{light,dark}.png
+﻿# Poster figures, each in a light and a dark version → poster/fig/<name>_{light,dark}.png
 #   julia --project=. poster/make_figures.jl
 # Inputs: poster/fig_accuracy.jld2 (data_accuracy.jl), poster/fig_spectra.jld2 (data_spectra.jl),
 #         data/zodipy115_5um_healpix_components.h5 (all-sky map), speed numbers from bench_zodipy.py / bench_emulator.jl.
@@ -113,20 +113,32 @@ end
 # ---------------------------------------------------------------- 3. accuracy of the emulator on exposures it never saw
 const ACC = JLD2.load(joinpath(@__DIR__, "fig_accuracy.jld2"))
 function fig_accuracy(t)
-    p = PAL[t]; yt, yp, e = ACC["ytrue"], ACC["ypred"], ACC["err_pct"]
+    p = PAL[t]; e, dte = ACC["err_pct"], ACC["days_test"]; er = ACC["err_pct_random"]
+    dg, st, D = ACC["dgrid"], ACC["test_status"], ACC["mission_days"]
+    # contiguous train / test periods along the mission
+    segs = Tuple{Float64, Float64, Bool}[]; a = dg[1]
+    for i in 2:length(st); st[i] != st[i-1] && (push!(segs, (a, dg[i], st[i-1])); a = dg[i]); end
+    push!(segs, (a, D, st[end]))
+    lim = 0.3
     with_theme(themed(t)) do
-        fig = Figure(size=(1600, 760))
-        ax1 = Axis(fig[1, 1], xlabel="ZodiPy (MJy/sr)", ylabel="neural network (MJy/sr)", title="Prediction vs. truth",
-                   aspect=1)
-        hb = hexbin!(ax1, yt, yp, bins=120, colormap=cgrad([p.grid, p.a1, p.a3]), colorscale=log10)
-        lo, hi = extrema(yt); lines!(ax1, [lo, hi], [lo, hi], color=(p.a2, 0.9), linewidth=2, linestyle=:dash)
-        ax2 = Axis(fig[1, 2], xlabel="error (%)", ylabel="number of pointings", title="How big are the errors?")
-        hist!(ax2, clamp.(e, -0.3, 0.3), bins=range(-0.3, 0.3, length=121), color=p.a1, strokewidth=0)
-        m = median(abs.(e)); vlines!(ax2, [-m, m], color=p.a2, linewidth=3, linestyle=:dash)
-        text!(ax2, 0.98, 0.95, space=:relative, align=(:right, :top), color=p.fg, fontsize=FS - 2,
-              text=@sprintf("%s pointings never\nseen in training\n\nmedian error %.3f%%\n%.0f%% within 0.1%%",
+        fig = Figure(size=(1600, 800))
+        ax1 = Axis(fig[1, 1], xlabel="mission day", ylabel="error (%)", title="Error through the mission",
+                   limits=((0, D), (-lim, lim)), xticks=0:30:150)
+        for (a, b, test) in segs
+            vspan!(ax1, a, b, color=(test ? p.a2 : p.a1, 0.12))
+            text!(ax1, (a + b) / 2, 0.97lim, text=test ? "TESTED\n(never seen)" : "TRAINED", align=(:center, :top),
+                  color=test ? p.a2 : p.a1, font=:bold, fontsize=FS - 6)
+        end
+        scatter!(ax1, dte, clamp.(e, -lim, lim), color=(p.fg, 0.05), markersize=3)
+        hlines!(ax1, [0], color=p.sub, linewidth=1.5)
+        ax2 = Axis(fig[1, 2], xlabel="error (%)", ylabel="number of pointings", title="How big are the errors?",
+                   limits=((-lim, lim), (0, nothing)))
+        hist!(ax2, filter(x -> abs(x) < lim, e), bins=range(-lim, lim, length=121), color=p.a2, strokewidth=0)   # (0.5% of errors lie beyond ±0.3%)
+        m = median(abs.(e))
+        text!(ax2, 0.98, 0.96, space=:relative, align=(:right, :top), color=p.fg, fontsize=FS - 4,
+              text=@sprintf("%s pointings from\nthe 2 withheld months\n\nmedian error %.3f%%\n%.0f%% within 0.1%%",
                             replace(string(length(e)), r"(\d)(?=(\d{3})+$)" => s"\1,"), m, 100mean(abs.(e) .< 0.1)))
-        colsize!(fig.layout, 1, Auto(0.85))
+        colsize!(fig.layout, 1, Auto(1.25))
         fig
     end
 end

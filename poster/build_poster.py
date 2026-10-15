@@ -38,8 +38,8 @@ TITLE = "Teaching a Neural Network the Glow of the Solar System"
 SUBTITLE = "A fast zodiacal-light emulator for NASA's SPHEREx mission"
 AUTHORS = "Mark A. Burch and Dr. Andrew Saydjari"
 AFFIL = "Astronomy Department, New Mexico State University, Las Cruces, NM"
-TAKEAWAY = ("A small neural network reproduces a physics model of the Solar System's dust glow to within 0.015%, "
-            "up to ~2,000× faster per pointing, and can be extended to every wavelength SPHEREx observes.")
+TAKEAWAY = ("A small neural network reproduces a physics model of the Solar System's dust glow to ~0.03% on months "
+            "it never saw, up to ~2,000× faster per pointing, and can be extended to every wavelength SPHEREx observes.")
 
 BG_SPHEREX = [[("SPHEREx", True), (" is a NASA space telescope, launched in March 2025, that maps the ", False),
                ("entire sky in 102 infrared colors", True), (" (0.75–5 μm) every six months. Its maps will help explain "
@@ -65,14 +65,16 @@ METHOD_NOTES = [[("Give the network the right physics. ", True), ("Telling it wh
                  "cut errors about 40–65×.", False)],
                 [("Test honestly. ", True), ("Data were split by time, by sky region and at random, and many network sizes "
                  "and training schedules were compared.", False)]]
-TILES = [("0.015%", "median error on\nunseen pointings"), ("~2,000×", "faster per pointing\nthan ZodiPy"),
+TILES = [("0.026%", "median error on 2 months\nwithheld from training"), ("~2,000×", "faster per pointing\nthan ZodiPy"),
          ("64", "wavelengths in\none network")]
-CAP_ACC = ("Figure 3. The neural network vs. ZodiPy on 42,361 pointings it never saw in training. Left: every point "
-           "lies on the 1:1 line. Right: half of the errors are smaller than 0.015%, and 98% are under 0.1%.")
+CAP_ACC = ("Figure 3. Neural network vs. ZodiPy. The network was trained on mission days 0–30, 60–90 and 120–140, then "
+           "tested on the two 30-day blocks it never saw (days 30–60 and 90–120; 180,166 pointings). Half of the errors "
+           "are below 0.026% and 95% are below 0.1%. (With a random 10% of pointings withheld instead, the median is 0.015%.)")
 CAP_SPEED = ("Figure 4. Time per pointing on a laptop (one CPU core, the same 20,000 pointings). One at a time, the "
              "network is ~2,000× faster; in large batches, where ZodiPy is efficient, it is ~4× faster.")
 FWD_TEXT = [[("Looking forward: every SPHEREx wavelength. ", True), ("Real SPHEREx images cover many wavelengths, so "
-             "wavelength becomes one more input. A first version covering 1.25–5 μm already reaches ~0.1% median error.", False)]]
+             "wavelength becomes one more input. A first version covering 1.25–5 μm already reaches ~0.1% median error on the "
+             "same withheld months.", False)]]
 CAP_SPEC = ("Figure 5. Brightness vs. wavelength for three pointings: ZodiPy (solid) and the network (dashed). Below "
             "3 μm we see scattered sunlight; above, the dust's heat. Bottom: the differences stay under 1%.")
 CAP_SCHEM = "Figure 1. SPHEREx looks out through the Sun's dust cloud (top view, not to scale)."
@@ -95,7 +97,10 @@ NOTES = """[CHECK with mentor]
 - Acknowledgment: exact name of the URS grant/program.
 - Author line: middle initial / 'Dr.' style for the mentor.
 - Speed: measured on this laptop (poster/bench_zodipy.py, poster/bench_emulator.jl): ZodiPy 21.6 ms vs network 11 us per single pointing; 32 vs 7.7 us per pointing in batches of 20,000.
-- Accuracy: emulator v2 (9 inputs, 64-64-32-16, 5-network ensemble) on the random 10% held-out pointings (poster/data_accuracy.jl).
+- Accuracy (poster/data_accuracy.jl, data_blocks.jl): 9 inputs (n.S n.z n.E n.vS n.vE n.x_E n.y_E sin/cos of Earth's longitude), 64-64-32-16 gelu, 5-network ensemble.
+  Main number: trained on days 0-30, 60-90, 120-140; tested on days 30-60, 90-120 (180,166 pointings, 43%): median 0.026%, p95 0.10%, 94.8% within 0.1%.
+  Random 10% withheld (= packaged emulator v2): median 0.015%, p95 0.064%. Harder: last 20% of the mission (days 111-140, older season inputs): median 0.10%, p95 0.67%.
+  Errors are relative to ZodiPy (the Kelsall model), not the real sky.
 - Multi-wavelength: round-15 'ep300' ensemble, 30-day blocks, 1.25-5.0 um (poster/data_spectra.jl).
 """
 
@@ -218,8 +223,8 @@ def build(theme):
         P.text(tx, y + 1.55, tw_, 1.25, lbl.split("\n"), size=24, color=t["text"], align=PP_ALIGN.CENTER, after=0, spacing=1.0)
     y += 2.9 + 0.35
     fh = P.fig("accuracy", X2 + pad, y, iw); y += fh
-    P.caption(X2 + pad, y, iw, CAP_ACC); y += 1.05
-    fw = iw * 0.72; fh = P.fig("speed", X2 + pad + (iw - fw) / 2, y, fw); y += fh
+    P.caption(X2 + pad, y, iw, CAP_ACC, h=1.5); y += 1.5
+    fw = iw * 0.66; fh = P.fig("speed", X2 + pad + (iw - fw) / 2, y, fw); y += fh
     P.caption(X2 + pad, y, iw, CAP_SPEED); y += 1.1
     P.rect(X2 + pad, y, iw, 0.06, fill=t["border"]); y += 0.25
     P.text(X2 + pad, y, iw, 1.8, FWD_TEXT); y += 1.65
