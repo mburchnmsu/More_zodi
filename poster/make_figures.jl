@@ -1,4 +1,4 @@
-﻿# Poster figures, each in a light and a dark version → poster/fig/<name>_{light,dark}.png
+# Poster figures, each in a light and a dark version → poster/fig/<name>_{light,dark}.png
 #   julia --project=. poster/make_figures.jl
 # Inputs: poster/fig_accuracy.jld2 (data_accuracy.jl), poster/fig_spectra.jld2 (data_spectra.jl),
 #         data/zodipy115_5um_healpix_components.h5 (all-sky map), speed numbers from bench_zodipy.py / bench_emulator.jl.
@@ -82,30 +82,71 @@ function fig_sky(t)
     end
 end
 
-# ---------------------------------------------------------------- 2. schematic: Sun, dust cloud, Earth, SPHEREx's line of sight
-function fig_schematic(t)
+# ---------------------------------------------------------------- 2. the geometry the network sees (top view, not to scale)
+# Sun, Earth, SPHEREx, Moon, Jupiter; the look direction n̂ and the vectors it is dotted with.
+arc!(ax, c, r, a1, a2; kw...) = (θ = range(deg2rad(a1), deg2rad(a2), length=60); lines!(ax, c[1] .+ r .* cos.(θ), c[2] .+ r .* sin.(θ); kw...))
+function vec!(ax, a, b, col; shrink=0.0, kw...)
+    d = b .- a; L = hypot(d...); u = d ./ L
+    arrows2d!(ax, [a[1]], [a[2]], [(L - shrink) * u[1]], [(L - shrink) * u[2]]; color=col, shaftwidth=5, tipwidth=24, tiplength=26, kw...)
+end
+function fig_geometry(t)
     p = PAL[t]
+    cS, cE, cv, cJ = p.a1, colorant"#2e9d5b", colorant"#8e5bd1", colorant"#b5651d"
     with_theme(themed(t)) do
-        fig = Figure(size=(1000, 720))
-        ax = Axis(fig[1, 1], aspect=DataAspect(), limits=(-1.75, 1.75, -1.25, 1.25)); hidedecorations!(ax); hidespines!(ax)
-        xs = range(-1.75, 1.75, length=700); ys = range(-1.25, 1.25, length=500)
-        dust = [(r = hypot(x, y); exp(-r / 0.55) / (r + 0.12)) for x in xs, y in ys]       # brighter toward the Sun
-        heatmap!(ax, xs, ys, dust ./ maximum(dust), colormap=cgrad([p.bg, p.a3]), colorrange=(0, 0.25))
-        # a speckle of dust grains
-        rng = 1:600; gx = [1.7 * (2 * ((i * 0.6180339887) % 1) - 1) for i in rng]; gy = [1.2 * (2 * ((i * 0.7548776662) % 1) - 1) for i in rng]
-        scatter!(ax, gx, gy, color=(p.fg, 0.35), markersize=2.5)
-        arc = range(0, 2π, length=400); lines!(ax, cos.(arc), sin.(arc), color=(p.sub, 0.9), linewidth=2, linestyle=:dash)
-        scatter!(ax, [0.0], [0.0], color=colorant"#ffd23f", markersize=70, strokecolor=colorant"#ff9f1c", strokewidth=3)
-        text!(ax, 0.0, -0.17, text="Sun", align=(:center, :top), color=p.fg, fontsize=FS + 2, font=:bold)
-        E = (cosd(35), sind(35))
-        scatter!(ax, [E[1]], [E[2]], color=p.a1, markersize=28, strokecolor=p.fg, strokewidth=2)
-        text!(ax, E[1] + 0.1, E[2] - 0.04, text="Earth +\nSPHEREx", color=p.fg, fontsize=FS, font=:bold, align=(:left, :top))
-        for (ang, lbl) in ((155, "line of sight"),)                                         # an example line of sight
-            d = (cosd(ang), sind(ang)); L = ang == 155 ? 1.15 : 0.55
-            arrows2d!(ax, [E[1]], [E[2]], [L * d[1]], [L * d[2]], color=p.a2, shaftwidth=6, tipwidth=30, tiplength=34)
-            lbl == "" || text!(ax, E[1] + 0.55d[1] + 0.09d[2], E[2] + 0.55d[2] - 0.09d[1], text=lbl, color=p.a2, fontsize=FS, font=:bold, rotation=deg2rad(ang - 180))
-        end
-        text!(ax, cosd(-50) + 0.04, sind(-50) - 0.04, text="Earth's orbit", color=p.sub, fontsize=FS - 4, align=(:left, :top))
+        fig = Figure(size=(1500, 1020), figure_padding=8)
+        X, Y = (-2.15, 2.05), (-1.32, 1.45)
+        ax = Axis(fig[1, 1], aspect=DataAspect(), limits=(X..., Y...)); hidedecorations!(ax); hidespines!(ax)
+        xs = range(X..., length=820); ys = range(Y..., length=560)
+        dust = [(r = hypot(x, y); exp(-r / 0.6) / (r + 0.12)) for x in xs, y in ys]
+        heatmap!(ax, xs, ys, dust ./ maximum(dust), colormap=cgrad([p.bg, p.a3]), colorrange=(0, 0.3))
+        θ = range(0, 2π, length=400)
+        lines!(ax, cos.(θ), sin.(θ), color=(p.sub, 0.9), linewidth=2, linestyle=:dash)                       # Earth's orbit
+        arc!(ax, (0, 0), 1.85, 112, 212, color=(p.sub, 0.9), linewidth=2, linestyle=:dot)                 # Jupiter's orbit (part)
+        # fixed reference direction and Earth's orbital angle λ⊕
+        lines!(ax, [0.0, 1.95], [0.0, 0.0], color=(p.sub, 0.9), linewidth=2, linestyle=:dash)
+        text!(ax, 1.95, -0.04, text="fixed direction x̂", color=p.sub, fontsize=FS - 6, align=(:right, :top))
+        λ = 30.0; E = (cosd(λ), sind(λ))
+        arc!(ax, (0, 0), 0.32, 0, λ, color=p.fg, linewidth=3)
+        text!(ax, 0.36cosd(λ / 2), 0.36sind(λ / 2), text="λ⊕", color=p.fg, fontsize=FS + 2, font=:bold, align=(:left, :center))
+        # bodies
+        Sp = E .+ 0.25 .* (cosd(-35), sind(-35))                         # SPHEREx (distance from Earth exaggerated)
+        Mo = E .+ 0.30 .* (cosd(165), sind(165))
+        Ju = 1.85 .* (cosd(158), sind(158))
+        arc!(ax, E, 0.25, 0, 360, color=(p.sub, 0.7), linewidth=1.5, linestyle=:dot)
+        # vectors from the Sun
+        vec!(ax, (0.0, 0.0), E, cE; shrink=0.06)
+        vec!(ax, (0.0, 0.0), Sp, cS; shrink=0.05)
+        vec!(ax, (0.0, 0.0), Ju, (cJ, 0.8); shrink=0.09)
+        text!(ax, 0.55E[1] - 0.03, 0.55E[2] + 0.06, text="E", color=cE, fontsize=FS + 4, font=:bold, align=(:right, :bottom))
+        text!(ax, 0.6Sp[1] + 0.04, 0.6Sp[2] - 0.06, text="S", color=cS, fontsize=FS + 4, font=:bold, align=(:left, :top))
+        text!(ax, 0.55Ju[1], 0.55Ju[2] + 0.06, text="J", color=cJ, fontsize=FS + 4, font=:bold, align=(:center, :bottom))
+        scatter!(ax, [0.0], [0.0], color=colorant"#ffd23f", markersize=64, strokecolor=colorant"#ff9f1c", strokewidth=3)
+        text!(ax, 0.0, -0.16, text="Sun", align=(:center, :top), color=p.fg, fontsize=FS, font=:bold)
+        scatter!(ax, [E[1]], [E[2]], color=colorant"#2f6fd0", markersize=30, strokecolor=p.fg, strokewidth=2)
+        text!(ax, E[1] + 0.05, E[2] + 0.07, text="Earth", color=p.fg, fontsize=FS, font=:bold, align=(:left, :bottom))
+        scatter!(ax, [Mo[1]], [Mo[2]], color=colorant"#9aa3ad", markersize=16, strokecolor=p.fg, strokewidth=1)
+        text!(ax, Mo[1] - 0.05, Mo[2], text="Moon", color=p.sub, fontsize=FS - 4, align=(:right, :center))
+        scatter!(ax, [Ju[1]], [Ju[2]], color=colorant"#d39a5c", markersize=44, strokecolor=p.fg, strokewidth=1.5)
+        text!(ax, Ju[1], Ju[2] - 0.12, text="Jupiter\n(5.2 AU, not to scale)", color=p.fg, fontsize=FS - 4, font=:bold, align=(:center, :top))
+        scatter!(ax, [Sp[1]], [Sp[2]], color=p.fg, marker=:diamond, markersize=20)
+        text!(ax, Sp[1] + 0.05, Sp[2] - 0.04, text="SPHEREx", color=p.fg, fontsize=FS - 2, font=:bold, align=(:left, :top))
+        # motion and look direction
+        vdir = λ + 90; nd = 62.0; φS = atand(Sp[2], Sp[1])
+        vec!(ax, E, E .+ 0.55 .* (cosd(vdir), sind(vdir)), cv)
+        text!(ax, E[1] + 0.58cosd(vdir), E[2] + 0.58sind(vdir), text="v (orbital motion)", color=cv, fontsize=FS - 4, font=:bold, align=(:right, :bottom))
+        vec!(ax, Sp, Sp .+ 0.95 .* (cosd(nd), sind(nd)), p.a2)
+        text!(ax, Sp[1] + 0.95cosd(nd) - 0.08, Sp[2] + 0.95sind(nd) + 0.02, text="n̂ = where SPHEREx looks", color=p.a2, fontsize=FS - 2, font=:bold, align=(:right, :center))
+        lines!(ax, [Sp[1], Sp[1] + 0.55cosd(φS)], [Sp[2], Sp[2] + 0.55sind(φS)], color=(cS, 0.7), linewidth=2, linestyle=:dash)   # S direction, extended
+        arc!(ax, Sp, 0.30, φS, nd, color=cS, linewidth=3)
+        text!(ax, Sp[1] + 0.40cosd((φS + nd) / 2), Sp[2] + 0.40sind((φS + nd) / 2), text="n·S", color=cS, fontsize=FS, font=:bold, align=(:left, :center))
+        # ẑ out of the page
+        zc = (-1.95, 1.25)
+        scatter!(ax, [zc[1]], [zc[2]], marker=:circle, markersize=34, color=(p.bg, 0.0), strokecolor=p.fg, strokewidth=3)
+        scatter!(ax, [zc[1]], [zc[2]], markersize=9, color=p.fg)
+        text!(ax, zc[1] + 0.1, zc[2], text="ẑ points out of the page (north of the planets' plane): n·z = how high above it n̂ looks",
+              color=p.fg, fontsize=FS - 6, align=(:left, :center))
+        text!(ax, -2.1, -1.28, text="Each input is a dot product n·a:\n+1 = looking along a, 0 = sideways, −1 = opposite",
+              color=p.fg, fontsize=FS - 4, align=(:left, :bottom))
         fig
     end
 end
@@ -190,7 +231,7 @@ function fig_spectra(t)
 end
 
 for t in (:light, :dark)
-    for (name, f) in (("sky", fig_sky), ("schematic", fig_schematic), ("accuracy", fig_accuracy), ("speed", fig_speed), ("spectra", fig_spectra))
+    for (name, f) in (("sky", fig_sky), ("geometry", fig_geometry), ("accuracy", fig_accuracy), ("spectra", fig_spectra))
         save2("$(name)_$(t)", f(t)); println("wrote fig/$(name)_$(t).png")
     end
 end

@@ -3,12 +3,12 @@
     poster\\.venv\\Scripts\\python.exe poster\\build_poster.py
 
 Figures come from poster/make_figures.jl (poster/fig/*_{light,dark}.png); logos from the NMSU template PDF
-(poster/extract_logos.py → poster/src/logo1.png = NMSU, logo2.png = SPHEREx). All text lives in TEXT below.
-Items marked [CHECK] in the speaker notes are wording the mentor should confirm.
+(poster/extract_logos.py → poster/src/logo1.png = NMSU, logo2.png = SPHEREx) and NSF (src/logo_nsf.png, Wikimedia
+Commons "NSF logo.svg"). All text lives in the TEXT block below; [CHECK] items are in the speaker notes.
 """
 import os
 from pptx import Presentation
-from pptx.util import Inches, Pt, Emu
+from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
@@ -33,73 +33,78 @@ THEMES = {
                   nxt="A9B6C6", problem="2A2416", problemborder="FFB000"),
 }
 
-# ----------------------------------------------------------------------------------------------- text
+# ----------------------------------------------------------------------------------------------- TEXT
 TITLE = "Teaching a Neural Network the Glow of the Solar System"
-SUBTITLE = "A fast zodiacal-light emulator for NASA's SPHEREx mission"
+SUBTITLE = "A geometrically constrained model of zodiacal light for NASA's SPHEREx mission"
 AUTHORS = "Mark A. Burch and Dr. Andrew Saydjari"
 AFFIL = "Astronomy Department, New Mexico State University, Las Cruces, NM"
-TAKEAWAY = ("A small neural network reproduces a physics model of the Solar System's dust glow to ~0.03% on months "
-            "it never saw, up to ~2,000× faster per pointing, and can be extended to every wavelength SPHEREx observes.")
+TAKEAWAY = ("A geometrically constrained neural network learns the zodiacal light from viewing geometry alone, "
+            "reaching ~0.03% median error on months it never saw.")
 
 BG_SPHEREX = [[("SPHEREx", True), (" is a NASA space telescope, launched in March 2025, that maps the ", False),
-               ("entire sky in 102 infrared colors", True), (" (0.75–5 μm) every six months. Its maps will help explain "
-               "how the universe began, how galaxies formed, and where water and other ingredients for life are found.", False)]]
-BG_ZODI = [[("Zodiacal light. ", True), ("The Solar System is filled with a thin cloud of dust from comets and asteroids. "
-            "Sunlight scattered by this dust, plus the dust's own heat glow, is the ", False),
-            ("brightest thing in almost every SPHEREx image", True), (" (Fig. 1). It changes with where the telescope looks "
-            "and where Earth is in its orbit, so it must be modeled and removed before faint, distant galaxies can be studied.", False)]]
-BG_KELSALL = [[("The Kelsall model. ", True), ("Kelsall et al. (1998) built the standard model of this dust from NASA's "
-               "COBE satellite: a smooth cloud, three dust bands, a ring of dust around the Sun, and a clump that trails "
-               "Earth. The software ", False), ("ZodiPy", True), (" adds up the glow along each line of sight to predict "
-               "what a telescope sees (Fig. 2).", False)]]
-PROBLEM = [[("The problem: ", True), ("computing the model means adding up dust glow along every line of sight, for "
-            "millions of SPHEREx pointings, at many wavelengths, again and again as the model is compared with real data.", False)],
-           [("Research objective: ", True), ("to build and test a neural-network ", False), ("“emulator”", True),
-            (" that reproduces ZodiPy's zodiacal light accurately (well under 1% error) while running much faster, "
-             "ready for real SPHEREx data.", False)]]
-METHOD_STEPS = [("Simulate", "ZodiPy computes the zodiacal light for 423,607 SPHEREx pointings (140 days, 5 μm)"),
-                ("Describe", "9 numbers per pointing: where the telescope looks relative to the Sun and Earth, plus the time of year"),
-                ("Train", "A neural network (Flux.jl in Julia) learns brightness from geometry; 5 networks are averaged"),
-                ("Test", "Compare with ZodiPy on pointings the network never saw: random, unseen months, unseen sky")]
-METHOD_NOTES = [[("Give the network the right physics. ", True), ("Telling it where Earth is in its orbit (the “season”) "
-                 "cut errors about 40–65×.", False)],
-                [("Test honestly. ", True), ("Data were split by time, by sky region and at random, and many network sizes "
-                 "and training schedules were compared.", False)]]
-TILES = [("0.026%", "median error on 2 months\nwithheld from training"), ("~2,000×", "faster per pointing\nthan ZodiPy"),
+               ("entire sky across a range of infrared wavelengths", True), (" (0.75–5 μm). Its maps will help explain how "
+               "the universe began, how galaxies formed, and where water and other ingredients for life are found.", False)]]
+BG_TEXT = [[("Zodiacal light. ", True), ("The Solar System is filled with a thin cloud of dust from comets and asteroids. "
+            "Sunlight scattered by this dust, plus the dust's own heat glow, adds a smooth glow across every SPHEREx image "
+            "(Fig. 1). It is bright enough to be confused with the faint background light from distant galaxies, and it "
+            "changes with where the telescope looks and where Earth is in its orbit, so it must be carefully modeled and removed.", False)],
+           [("The Kelsall model. ", True), ("Kelsall et al. (1998) built the standard model of this dust from NASA's COBE "
+            "satellite: a smooth cloud, three dust bands, a ring around the Sun and a clump trailing Earth. The software ", False),
+            ("ZodiPy", True), (" computes what a telescope would see from it; we use it to simulate SPHEREx data.", False)]]
+PROBLEM = [[("The problem: ", True), ("zodiacal light must be removed from every SPHEREx image, but physics models such as "
+            "Kelsall's were fit to older data and leave errors behind.", False)],
+           [("Research objective: ", True), ("build a ", False), ("geometrically constrained", True), (" neural network that "
+            "learns the zodiacal light directly from SPHEREx data and ", False), ("outperforms the Kelsall model", True),
+            (". First step (this poster): show that it can learn ZodiPy's simulated sky from geometry alone.", False)]]
+METHOD_GEOM = [[("A geometrically constrained model. ", True), ("The network never sees a date or a position on a sky map. "
+                "Its only inputs are 9 numbers describing the viewing geometry (Fig. 2): dot products of SPHEREx's look "
+                "direction n with the directions that shape the zodiacal light, plus Earth's place in its orbit. It must learn "
+                "how the brightness depends on geometry, just as the physics does, instead of memorizing when and where "
+                "SPHEREx looked.", False)]]
+INPUTS = [("n·S, n·E", "toward or away from the Sun (seen from SPHEREx and from Earth)"),
+          ("n·z", "how far above or below the plane of the planets"),
+          ("n·vS, n·vE", "ahead of or behind the orbital motion (SPHEREx, Earth)"),
+          ("n·x⊕, n·y⊕", "look direction in a frame that turns with Earth (x⊕ = Sun → Earth)"),
+          ("sin λ⊕, cos λ⊕", "Earth's position in its orbit: the time of year")]
+METHOD_TRAIN = [[("Training and testing. ", True), ("ZodiPy simulates 423,607 SPHEREx pointings (140 days, 5 μm). Five small "
+                 "networks (4 hidden layers, 64 → 16 neurons; Flux.jl in Julia) learn brightness from the 9 inputs and are "
+                 "averaged, then tested on whole months and sky regions they never saw.", False)],
+                [("Lesson: ", True), ("adding the time of year (sin λ⊕, cos λ⊕) cut the errors about 40–65×.", False)]]
+TILES = [("0.026%", "median error on months\nwithheld from training"), ("95%", "of pointings within\n0.1% of ZodiPy"),
          ("64", "wavelengths in\none network")]
+CAP_SKY = ("Figure 1. The whole sky at 5 μm as seen from SPHEREx (ZodiPy). The glow is brightest toward the Sun and along "
+           "the plane of the planets. Grey: too close to the Sun to observe.")
+CAP_GEOM = ("Figure 2. The geometry the network sees (top view, not to scale). n is where SPHEREx looks; S and E point from "
+            "the Sun to SPHEREx and Earth; v is the orbital motion; λ⊕ is Earth's angle around its orbit. Jupiter and the Moon "
+            "are shown for context: the final model uses only the Sun–Earth–SPHEREx geometry and the time of year.")
 CAP_ACC = ("Figure 3. Neural network vs. ZodiPy. The network was trained on mission days 0–30, 60–90 and 120–140, then "
            "tested on the two 30-day blocks it never saw (days 30–60 and 90–120; 180,166 pointings). Half of the errors "
            "are below 0.026% and 95% are below 0.1%. (With a random 10% of pointings withheld instead, the median is 0.015%.)")
-CAP_SPEED = ("Figure 4. Time per pointing on a laptop (one CPU core, the same 20,000 pointings). One at a time, the "
-             "network is ~2,000× faster; in large batches, where ZodiPy is efficient, it is ~4× faster.")
 FWD_TEXT = [[("Looking forward: every SPHEREx wavelength. ", True), ("Real SPHEREx images cover many wavelengths, so "
              "wavelength becomes one more input. A first version covering 1.25–5 μm already reaches ~0.1% median error on the "
              "same withheld months.", False)]]
-CAP_SPEC = ("Figure 5. Brightness vs. wavelength for three pointings: ZodiPy (solid) and the network (dashed). Below "
+CAP_SPEC = ("Figure 4. Brightness vs. wavelength for three pointings: ZodiPy (solid) and the network (dashed). Below "
             "3 μm we see scattered sunlight; above, the dust's heat. Bottom: the differences stay under 1%.")
-CAP_SCHEM = "Figure 1. SPHEREx looks out through the Sun's dust cloud (top view, not to scale)."
-CAP_SKY = ("Figure 2. The whole sky at 5 μm as seen from SPHEREx (ZodiPy). The glow is brightest toward the Sun "
-           "and along the plane of the planets. Grey: too close to the Sun to observe.")
-STEPS = [("done", "Validate", "Accuracy, speed, unseen months and sky regions, all on simulated data"),
+STEPS = [("done", "Validate", "Learn ZodiPy's simulated sky from geometry alone; test on unseen months and sky regions"),
          ("now", "Refine", "Longer training; all SPHEREx wavelengths (0.75–5 μm)"),
          ("next", "Scale up", "Move training to a computing cluster"),
-         ("next", "Real data", "Apply the emulator to real SPHEREx images")]
+         ("next", "Real data", "Train on real SPHEREx images and compare with the Kelsall model")]
 STEP_LABEL = {"done": "✓ DONE", "now": "IN PROGRESS", "next": "NEXT"}
-NEXT_NOTE = "All results so far are preliminary and use simulated data. Next, the model is fully validated and then applied to real SPHEREx data."
-ACK = ("This research is supported by a URS grant at New Mexico State University. Thank you to Dr. Andrew Saydjari "
-       "for mentorship, and to the developers of ZodiPy and Flux.jl.")
-REFS = ["Kelsall, T., et al. 1998, ApJ, 508, 44 (COBE/DIRBE zodiacal-light model)",
-        "San, M., et al. 2022, JOSS, 7, 4602 (ZodiPy)",
-        "Doré, O., et al. 2014, arXiv:1412.4872 (SPHEREx)",
-        "Innes, M. 2018, JOSS, 3, 602 (Flux.jl)"]
+NEXT_NOTE = "All results so far are preliminary and use simulated data."
+ACK = ("This research is supported by a URS grant at New Mexico State University, funded by the National Science "
+       "Foundation (NSF). Thank you to Dr. Andrew Saydjari for mentorship, and to the developers of ZodiPy and Flux.jl.")
+REFS = [["Kelsall, T., et al. 1998, ApJ, 508, 44 (COBE/DIRBE zodiacal-light model)",
+         "San, M., et al. 2022, JOSS, 7, 4602 (ZodiPy)"],
+        ["Doré, O., et al. 2014, arXiv:1412.4872 (SPHEREx)",
+         "Innes, M. 2018, JOSS, 3, 602 (Flux.jl)"]]
 NOTES = """[CHECK with mentor]
-- The problem statement: is 'compared with real data / fitting' the right reason the emulator is needed?
-- Acknowledgment: exact name of the URS grant/program.
+- Problem statement: 'physics models such as Kelsall's were fit to older data and leave errors behind' -- right framing?
+- Acknowledgment: exact name of the URS grant/program and the NSF award number (if one should be listed).
 - Author line: middle initial / 'Dr.' style for the mentor.
-- Speed: measured on this laptop (poster/bench_zodipy.py, poster/bench_emulator.jl): ZodiPy 21.6 ms vs network 11 us per single pointing; 32 vs 7.7 us per pointing in batches of 20,000.
-- Accuracy (poster/data_accuracy.jl, data_blocks.jl): 9 inputs (n.S n.z n.E n.vS n.vE n.x_E n.y_E sin/cos of Earth's longitude), 64-64-32-16 gelu, 5-network ensemble.
-  Main number: trained on days 0-30, 60-90, 120-140; tested on days 30-60, 90-120 (180,166 pointings, 43%): median 0.026%, p95 0.10%, 94.8% within 0.1%.
-  Random 10% withheld (= packaged emulator v2): median 0.015%, p95 0.064%. Harder: last 20% of the mission (days 111-140, older season inputs): median 0.10%, p95 0.67%.
+- Fig. 2: Jupiter and the Moon are drawn for context; the poster's model inputs are n.S n.z n.E n.vS n.vE n.x_E n.y_E sin/cos(lambda_E) (no Jupiter, no Moon).
+Numbers (poster/data_accuracy.jl, data_blocks.jl): 5-network ensemble, 64-64-32-16 gelu.
+  Trained on days 0-30, 60-90, 120-140; tested on days 30-60, 90-120 (180,166 pointings, 43%): median 0.026%, p95 0.10%, 94.8% within 0.1%, RMS 0.058%.
+  Random 10% withheld: median 0.015%. Last 20% of the mission (days 111-140, older season inputs): median 0.10%, p95 0.67%.
   Errors are relative to ZodiPy (the Kelsall model), not the real sky.
 - Multi-wavelength: round-15 'ep300' ensemble, 30-day blocks, 1.25-5.0 um (poster/data_spectra.jl).
 """
@@ -162,59 +167,55 @@ class Poster:
 
 # ----------------------------------------------------------------------------------------------- layout
 def build(theme):
-    P = Poster(theme); t = P.t; pad = 0.45
+    P = Poster(theme); t = P.t; pad = 0.45; iw = CW - 2 * pad
 
     # header
     P.rect(0, 0, W, 5.6, fill=t["head"])
     P.picture(os.path.join(HERE, "src", "logo1.png"), 0.9, 0.55, h=4.5)
     P.picture(os.path.join(HERE, "src", "logo2.png"), W - 0.9 - 4.6, 0.5, h=4.6)
     P.text(6.0, 0.2, W - 12.0, 2.6, [TITLE], size=80, bold=True, color="FFFFFF", align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, spacing=0.92, after=0)
-    P.text(6.0, 2.8, W - 12.0, 0.8, [SUBTITLE], size=44, color="FFD27A", align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, after=0)
+    P.text(6.0, 2.8, W - 12.0, 0.8, [SUBTITLE], size=40, color="FFD27A", align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, after=0)
     P.text(6.0, 3.65, W - 12.0, 1.75, [AUTHORS, AFFIL], size=34, color="FFFFFF", align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, after=2)
 
     # take-away banner
-    P.rect(M, 6.0, W - 2 * M, 1.75, fill=t["banner"], shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.25)
-    P.text(M + 0.6, 6.0, W - 2 * M - 1.2, 1.75, [TAKEAWAY], size=40, bold=True, color=t["bannertxt"], align=PP_ALIGN.CENTER,
-           anchor=MSO_ANCHOR.MIDDLE, spacing=1.0)
+    P.rect(M, 6.0, W - 2 * M, 1.5, fill=t["banner"], shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.25)
+    P.text(M + 0.6, 6.0, W - 2 * M - 1.2, 1.5, [TAKEAWAY], size=40, bold=True, color=t["bannertxt"], align=PP_ALIGN.CENTER,
+           anchor=MSO_ANCHOR.MIDDLE, spacing=1.0, after=0)
 
-    top, colbot = 8.2, 39.1
-    iw = CW - 2 * pad                                            # inner width
+    top, colbot = 7.9, 44.0
 
-    # ---------------- left column: Background
-    bg_bot = 26.6
+    # ================= left column
+    # Background
+    bg_bot = 19.45
     y = P.section(X1, top, CW, bg_bot - top, "Background")
-    P.text(X1 + pad, y, iw, 2.6, BG_SPHEREX); y += 2.5
-    # two rows: text left, figure right
-    tw = iw * 0.45; fx = X1 + pad + tw + 0.35; fw = iw - tw - 0.35
-    P.text(X1 + pad, y, tw, 6.6, BG_ZODI, size=27)
-    fh = P.fig("schematic", fx, y, fw)
-    P.caption(fx, y + fh + 0.05, fw, CAP_SCHEM, h=0.9)
-    y += fh + 1.05
-    P.text(X1 + pad, y, tw, 5.4, BG_KELSALL, size=27)
-    fh = P.fig("sky", fx, y + 0.1, fw)
-    P.caption(fx, y + 0.1 + fh + 0.05, fw, CAP_SKY, h=1.4)
+    P.text(X1 + pad, y, iw, 2.2, BG_SPHEREX); y += 2.25
+    tw = iw * 0.47; fx = X1 + pad + tw + 0.35; fw = iw - tw - 0.35
+    P.text(X1 + pad, y, tw, bg_bot - y - 0.2, BG_TEXT, size=25, after=8, spacing=1.08)
+    fh = P.fig("sky", fx, y + 0.2, fw)
+    P.caption(fx, y + 0.2 + fh + 0.1, fw, CAP_SKY, h=1.6)
 
-    # ---------------- left column: The Problem
-    pr_top, pr_bot = bg_bot + 0.45, 31.2
+    # Problem / research objective
+    pr_top, pr_bot = bg_bot + 0.45, 23.25
     P.rect(X1, pr_top, CW, pr_bot - pr_top, fill=t["problem"], line=t["problemborder"], lw=6)
-    P.text(X1 + pad, pr_top + 0.3, iw, pr_bot - pr_top - 0.5, PROBLEM, size=29, after=14)
+    P.text(X1 + pad, pr_top + 0.25, iw, pr_bot - pr_top - 0.4, PROBLEM, size=28, after=12)
 
-    # ---------------- left column: Methods
+    # Methods
     me_top = pr_bot + 0.45
     y = P.section(X1, me_top, CW, colbot - me_top, "Methods")
-    n = len(METHOD_STEPS); aw = 0.55; bw = (iw - (n - 1) * aw) / n; bh = 3.55
-    for i, (head, body) in enumerate(METHOD_STEPS):
-        bx = X1 + pad + i * (bw + aw)
-        P.rect(bx, y, bw, bh, fill=t["box"], line=t["boxborder"], lw=3, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.08)
-        P.text(bx + 0.1, y + 0.12, bw - 0.2, 0.6, [f"{i + 1}. {head}"], size=30, bold=True, color=t["accent2"], align=PP_ALIGN.CENTER)
-        P.text(bx + 0.15, y + 0.8, bw - 0.3, bh - 0.9, [body], size=21, align=PP_ALIGN.CENTER, spacing=1.02)
-        if i < n - 1:
-            P.rect(bx + bw + 0.08, y + bh / 2 - 0.3, aw - 0.16, 0.6, fill=t["accent"], shape=MSO_SHAPE.RIGHT_ARROW)
-    y += bh + 0.35
-    P.text(X1 + pad, y, iw, colbot - y - 0.2, METHOD_NOTES, size=26, after=8)
+    P.text(X1 + pad, y, iw, 2.6, METHOD_GEOM, size=27); y += 2.65
+    fw = iw * 0.80; fh = P.fig("geometry", X1 + pad + (iw - fw) / 2, y, fw); y += fh
+    P.caption(X1 + pad, y + 0.05, iw, CAP_GEOM, h=1.3); y += 1.45
+    P.text(X1 + pad, y, iw, 0.6, [[("The 9 inputs", True)]], size=28, color=t["accent2"], after=0); y += 0.6
+    for sym, meaning in INPUTS:
+        P.text(X1 + pad + 0.2, y, 3.6, 0.5, [[(sym, True)]], size=24, color=t["accent2"], after=0)
+        P.text(X1 + pad + 3.8, y, iw - 3.8, 0.5, [meaning], size=24, after=0)
+        y += 0.47
+    y += 0.25
+    P.text(X1 + pad, y, iw, colbot - y - 0.15, METHOD_TRAIN, size=25, after=8, spacing=1.08)
 
-    # ---------------- right column: Results
-    y = P.section(X2, top, CW, colbot - top, "Results")
+    # ================= right column
+    res_bot = 34.7
+    y = P.section(X2, top, CW, res_bot - top, "Results")
     tw_ = (iw - 2 * 0.35) / 3
     for i, (num, lbl) in enumerate(TILES):
         tx = X2 + pad + i * (tw_ + 0.35)
@@ -223,34 +224,39 @@ def build(theme):
         P.text(tx, y + 1.55, tw_, 1.25, lbl.split("\n"), size=24, color=t["text"], align=PP_ALIGN.CENTER, after=0, spacing=1.0)
     y += 2.9 + 0.35
     fh = P.fig("accuracy", X2 + pad, y, iw); y += fh
-    P.caption(X2 + pad, y, iw, CAP_ACC, h=1.5); y += 1.5
-    fw = iw * 0.66; fh = P.fig("speed", X2 + pad + (iw - fw) / 2, y, fw); y += fh
-    P.caption(X2 + pad, y, iw, CAP_SPEED); y += 1.1
+    P.caption(X2 + pad, y, iw, CAP_ACC, h=1.5); y += 1.55
     P.rect(X2 + pad, y, iw, 0.06, fill=t["border"]); y += 0.25
-    P.text(X2 + pad, y, iw, 1.8, FWD_TEXT); y += 1.65
-    fw = colbot - 1.15 - y; fw = min(iw * 0.9, fw * 1.5)              # spectra figure is 3:2; fill the space left
+    P.text(X2 + pad, y, iw, 1.8, FWD_TEXT); y += 1.7
+    fw = min(iw * 0.9, (res_bot - 1.25 - y) * 1.5)              # spectra figure is 3:2; fill the space left
     fh = P.fig("spectra", X2 + pad + (iw - fw) / 2, y, fw); y += fh
     P.caption(X2 + pad, y, iw, CAP_SPEC)
 
-    # ---------------- full width: Next Steps
-    ns_top, ns_bot = colbot + 0.45, 44.3
-    y = P.section(M, ns_top, W - 2 * M, ns_bot - ns_top, "Next Steps")
-    n = len(STEPS); aw = 0.7; sw = (W - 2 * M - 2 * pad - (n - 1) * aw) / n; sh_ = 2.2
+    # Next Steps (vertical roadmap)
+    ns_top = res_bot + 0.45
+    y = P.section(X2, ns_top, CW, colbot - ns_top, "Next Steps")
+    sh_, gap = 1.35, 0.32
     for i, (state, head, body) in enumerate(STEPS):
-        sx = M + pad + i * (sw + aw); col = t["nxt" if state == "next" else state]
-        P.rect(sx, y, sw, sh_, fill=t["box"], line=col, lw=5, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.1)
-        P.text(sx + 0.2, y + 0.12, sw - 0.4, 0.6, [[(STEP_LABEL[state] + "   ", True), (head, True)]], size=28, color=col)
-        P.text(sx + 0.2, y + 0.8, sw - 0.4, sh_ - 0.9, [body], size=24, spacing=1.02)
-        if i < n - 1:
-            P.rect(sx + sw + 0.1, y + sh_ / 2 - 0.35, aw - 0.2, 0.7, fill=t["accent"], shape=MSO_SHAPE.RIGHT_ARROW)
-    P.text(M + pad, y + sh_ + 0.15, W - 2 * M - 2 * pad, 0.6, [NEXT_NOTE], size=23, color=t["sub"], align=PP_ALIGN.CENTER)
+        col = t["nxt" if state == "next" else state]
+        P.rect(X2 + pad, y, iw, sh_, fill=t["box"], line=col, lw=5, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.15)
+        P.text(X2 + pad + 0.25, y, 4.3, sh_, [STEP_LABEL[state], head], size=24, bold=True, color=col, anchor=MSO_ANCHOR.MIDDLE,
+               after=0, spacing=1.0)
+        P.text(X2 + pad + 4.6, y, iw - 4.85, sh_, [body], size=25, anchor=MSO_ANCHOR.MIDDLE, after=0, spacing=1.02)
+        y += sh_
+        if i < len(STEPS) - 1:
+            P.rect(X2 + pad + iw / 2 - 0.3, y + 0.03, 0.6, gap - 0.06, fill=t["accent"], shape=MSO_SHAPE.DOWN_ARROW)
+            y += gap
+    P.text(X2 + pad, y + 0.15, iw, 0.6, [NEXT_NOTE], size=23, color=t["sub"], align=PP_ALIGN.CENTER)
 
-    # ---------------- bottom: Acknowledgements | References
-    b_top, b_bot = ns_bot + 0.4, H - 0.5
+    # ================= bottom: Acknowledgements | References
+    b_top, b_bot = colbot + 0.4, H - 0.5
     y = P.section(X1, b_top, CW, b_bot - b_top, "Acknowledgements", hh=0.85)
-    P.text(X1 + pad, y - 0.2, iw, b_bot - y, [ACK], size=22, spacing=1.05)
+    lh = b_bot - y - 0.1
+    P.picture(os.path.join(HERE, "src", "logo_nsf.png"), X1 + CW - pad - lh, y - 0.15, h=lh)
+    P.text(X1 + pad, y - 0.2, iw - lh - 0.3, lh + 0.2, [ACK], size=22, spacing=1.05)
     y = P.section(X2, b_top, CW, b_bot - b_top, "References", hh=0.85)
-    P.text(X2 + pad, y - 0.25, iw, b_bot - y + 0.2, REFS, size=19, spacing=1.0, after=0)
+    cw2 = (iw - 0.4) / 2
+    for j, col in enumerate(REFS):
+        P.text(X2 + pad + j * (cw2 + 0.4), y - 0.2, cw2, b_bot - y, col, size=21, spacing=1.0, after=6)
 
     P.s.notes_slide.notes_text_frame.text = NOTES
     out = os.path.join(HERE, f"poster_{theme}.pptx"); P.prs.save(out); print("wrote", out)
