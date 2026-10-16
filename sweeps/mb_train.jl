@@ -73,7 +73,12 @@ predict_y(r, X) = to_y(get(r, :target, :linear), predict_batched(r.model, X))
 function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, blocks=3,
                   schedule=:onecycle, lr_max=3e-3, epochs=60, batchsize=1024, seed=42,
                   split_name="80/20 Chronological", sched_kw=(;), label="", verbose=true,
-                  val_days=nothing, weight_decay=0.0, target=:linear, mix_alpha=0.25, eval_every=1)
+                  val_days=nothing, weight_decay=0.0, target=:linear, mix_alpha=0.25, eval_every=1,
+                  evals_per_epoch=0, eval_sub=50_000)
+    # evals_per_epoch = K > 0: also record train/test MSE K times per epoch on a FIXED random subsample of `eval_sub`
+    # rows of each set (tr_fine, te_fine at fractional epochs fine_epoch), and keep the weight vector at each of those
+    # points (snaps; rebuild with Optimisers.restructure) so an ensemble's curve can be computed afterwards.
+    # Off by default; it never touches the training RNGs, so the trained network is identical either way.
     tr_idx, te_idx = splits[split_name]
     # optional validation period: training exposures with t_rel ≥ val_days are held out
     # (fit on the rest); everything — normalization, baselines — then uses fit rows only
@@ -123,13 +128,26 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
     push!(va_hist, eval_va())
     verbose && println("[$label] $arch $(arch === :mlp ? hidden : (width, blocks)) | $n_params params | $schedule lr_max=$lr_max | bs=$batchsize × $steps_per_epoch steps × $epochs epochs")
 
+    tr_fine, te_fine, fine_epoch, snaps = Float64[], Float64[], Float64[], Vector{Float32}[]
+    fine_at = Set(round(Int, k * steps_per_epoch / max(evals_per_epoch, 1)) for k in 1:evals_per_epoch)
+    sub_rng = Random.Xoshiro(seed + 7)                                   # separate stream: training RNGs untouched
+    sub_tr = evals_per_epoch > 0 ? sort(randperm(sub_rng, length(tr_idx))[1:min(eval_sub, length(tr_idx))]) : Int[]
+    sub_te = evals_per_epoch > 0 ? sort(randperm(sub_rng, length(te_idx))[1:min(eval_sub, length(te_idx))]) : Int[]
+    Xtr_s, ytr_s, Xte_s, yte_s = Xtr[:, sub_tr], ytr[sub_tr], Xte[:, sub_te], yte[sub_te]
+    function record_fine!(x_epoch)
+        push!(tr_fine, mse(pred(Xtr_s), ytr_s)); push!(te_fine, mse(pred(Xte_s), yte_s))
+        push!(fine_epoch, x_epoch); push!(snaps, copy(Optimisers.destructure(model)[1]))
+    end
+    evals_per_epoch > 0 && record_fine!(0.0)
+
     t0 = time(); step = 0
     for epoch in 1:epochs
-        for (xb, yb) in loader
+        for (i, (xb, yb)) in enumerate(loader)
             step += 1
             Flux.adjust!(opt, lr_at(schedule, (step - 1) / max(S - 1, 1); lr_max, sched_kw...))
             g = Flux.gradient(m -> lossfn(m, xb, yb), model)
             Flux.update!(opt, model, g[1])
+            i in fine_at && record_fine!(epoch - 1 + i / steps_per_epoch)
         end
         # evaluate every `eval_every` epochs (and always at the last) — lets small-data runs use many short epochs
         (epoch % eval_every == 0 || epoch == epochs) || continue
@@ -147,5 +165,6 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
     return (; label, feature_names, arch, hidden, width, blocks, schedule, lr_max, sched_kw, epochs,
               batchsize, seed, n_params, split_name, tr_idx, te_idx, val_idx, val_days, weight_decay, target, mix_alpha,
               μ, σ, model, tr_hist, te_hist, va_hist, lr_epoch, t_epoch, ypred, mse_null, mse_lin,
-              lr_curve = [lr_at(schedule, t; lr_max, sched_kw...) for t in range(0, 1, length=500)])
+              lr_curve = [lr_at(schedule, t; lr_max, sched_kw...) for t in range(0, 1, length=500)],
+              evals_per_epoch, tr_fine, te_fine, fine_epoch, snaps, sub_tr, sub_te)
 end
