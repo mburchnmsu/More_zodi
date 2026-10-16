@@ -271,9 +271,62 @@ function fig_skyerror(t)
     end
 end
 
+# ---------------------------------------------------------------- 7. train and test MSE during training (5 seeds; thick = mean)
+const TRN = JLD2.load(joinpath(@__DIR__, "fig_training.jld2"))
+function fig_training(t)
+    p = PAL[t]
+    with_theme(themed(t)) do
+        fig = Figure(size=(900, 720), figure_padding=(10, 45, 10, 10))
+        panels = (("Whole months withheld", TRN["blk_tr"], TRN["blk_te"]),)
+        lo = minimum(minimum.((TRN["blk_tr"], TRN["rnd_tr"], TRN["rnd_te"]))) / 1.5; hi = 3e-4
+        axs = Axis[]
+        for (c, (ttl, tr, te)) in enumerate(panels)
+            ax = Axis(fig[1, c], yscale=log10, title=ttl, xlabel="training pass (epoch)", ylabel=c == 1 ? "error (MSE, log scale)" : "",
+                      limits=((0, size(tr, 1) - 1), (lo, hi)), xticks=0:25:100,
+                      yticks=([1e-7, 1e-6, 1e-5, 1e-4], ["10⁻⁷", "10⁻⁶", "10⁻⁵", "10⁻⁴"]))
+            push!(axs, ax); ep = 0:size(tr, 1)-1
+            for s in 1:size(tr, 2)
+                lines!(ax, ep, tr[:, s], color=(p.a1, 0.3), linewidth=1.5); lines!(ax, ep, te[:, s], color=(p.a2, 0.3), linewidth=1.5)
+            end
+            lines!(ax, ep, vec(mean(tr, dims=2)), color=p.a1, linewidth=5, label="training data")
+            lines!(ax, ep, vec(mean(te, dims=2)), color=p.a2, linewidth=5, label="withheld data")
+            c == 1 && axislegend(ax, position=:rt, labelsize=FS - 2)
+        end
+        fig
+    end
+end
+
+# ---------------------------------------------------------------- 8. the six shifted versions of the 30-day split
+function fig_shifts(t)
+    p = PAL[t]; st, g, sh = TRN["status"], TRN["grid"], TRN["shifts"]; D = TRN["span"]
+    cols = (p.a1, p.a2, p.a3); n = length(sh)
+    with_theme(themed(t)) do
+        fig = Figure(size=(1600, 720))
+        ax = Axis(fig[1, 1], xlabel="mission day", yticks=(1:n, ["+$(Δ) days" for Δ in sh]), yreversed=true,
+                  limits=((0, D + 52), (0.4, n + 0.6)), xticks=0:30:120, ygridvisible=false, xgridvisible=false)
+        for row in 1:n
+            a = 1
+            for i in 2:length(g)
+                (i == length(g) || st[row, i] != st[row, a]) || continue
+                b = i == length(g) ? i : i
+                poly!(ax, Rect(g[a], row - 0.36, g[b] - g[a], 0.72), color=(cols[st[row, a] + 1], st[row, a] == 0 ? 0.55 : 0.9))
+                a = i
+            end
+            text!(ax, D + 3, row - 0.08, text=@sprintf("%.3f%%", TRN["med_in"][row]), align=(:left, :center), color=p.a2, font=:bold, fontsize=FS)
+            isnan(TRN["med_edge"][row]) ||
+                text!(ax, D + 3, row + 0.28, text=@sprintf("ends: %.2f%%", TRN["med_edge"][row]), align=(:left, :center), color=p.a3, fontsize=FS - 8)
+        end
+        text!(ax, D + 3, 0.45, text="median\nerror", align=(:left, :bottom), color=p.fg, fontsize=FS - 6, font=:bold)
+        Legend(fig[0, 1], [PolyElement(color=(c, a)) for (c, a) in zip(cols, (0.55, 0.9, 0.9))],
+               ["trained on", "tested: between training months", "tested: start/end of mission"], orientation=:horizontal,
+               labelsize=FS - 4, framevisible=false)
+        fig
+    end
+end
+
 for t in (:light, :dark)
     for (name, f) in (("sky", fig_sky), ("geometry", fig_geometry), ("accuracy", fig_accuracy), ("spectra", fig_spectra),
-                      ("skyerror", fig_skyerror))
+                      ("skyerror", fig_skyerror), ("training", fig_training), ("shifts", fig_shifts))
         save2("$(name)_$(t)", f(t)); println("wrote fig/$(name)_$(t).png")
     end
 end
