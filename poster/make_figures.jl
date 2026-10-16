@@ -1,6 +1,7 @@
 # Poster figures, each in a light and a dark version → poster/fig/<name>_{light,dark}.png
 #   julia --project=. poster/make_figures.jl
 # Inputs: poster/fig_accuracy.jld2 (data_accuracy.jl), poster/fig_spectra.jld2 (data_spectra.jl),
+#         poster/fig_skyerror.jld2 (data_skyerror.jl),
 #         data/zodipy115_5um_healpix_components.h5 (all-sky map), speed numbers from bench_zodipy.py / bench_emulator.jl.
 using CairoMakie, JLD2, HDF5, Healpix, Statistics, Printf
 const OUT = joinpath(@__DIR__, "fig"); mkpath(OUT)
@@ -230,8 +231,49 @@ function fig_spectra(t)
     end
 end
 
+# ---------------------------------------------------------------- 6. where on the sky the errors are (out-of-sample, round 16)
+const SKE = JLD2.load(joinpath(@__DIR__, "fig_skyerror.jld2"))
+function fig_skyerror(t)
+    p = PAL[t]; G = SKE["G"]; res = SKE["res"]
+    with_theme(themed(t)) do
+        fig = Figure(size=(1500, 760), figure_padding=10)
+        ax = Axis(fig[1, 1], aspect=DataAspect()); hidedecorations!(ax); hidespines!(ax)
+        nx = 2400; ny = nx ÷ 2; img = fill(NaN, nx, ny); out = fill(false, nx, ny)
+        for ix in 1:nx, iy in 1:ny
+            x = (ix - 0.5) / nx * 4√2 - 2√2; yy = (iy - 0.5) / ny * 2√2 - √2
+            (x / (2√2))^2 + (yy / √2)^2 > 1 && (out[ix, iy] = true; continue)
+            θ = asin(yy / √2); lat = asind(clamp((2θ + sin(2θ)) / π, -1, 1))
+            lon = mod(-rad2deg(π * x / (2√2 * cos(θ))), 360)       # longitude 0 in the centre, increasing to the LEFT
+            img[ix, iy] = G[clamp(floor(Int, lon / res) + 1, 1, size(G, 1)), clamp(floor(Int, (lat + 90) / res) + 1, 1, size(G, 2))]
+        end
+        unobs = t == :light ? colorant"#c9ced6" : colorant"#33465f"
+        img2 = ifelse.(out, NaN, ifelse.(isnan.(img), -1.0, img))     # −1 → "not tested" colour; outside the ellipse transparent
+        xs = range(-2√2, 2√2, length=nx); ys = range(-√2, √2, length=ny)
+        heatmap!(ax, xs, ys, ifelse.(img2 .== -1, 1.0, NaN), colormap=[unobs, unobs], colorrange=(0, 2), nan_color=(:white, 0.0))
+        hm = heatmap!(ax, xs, ys, ifelse.(img2 .== -1, NaN, img2), colormap=:viridis, colorrange=(0.0, 0.08),
+                      highclip=Makie.to_colormap(:viridis)[end], nan_color=(:white, 0.0))
+        g = p.fg
+        for lat in (-60, -30, 30, 60)
+            xy = [moll_xy(l, lat) for l in -179.9:1:179.9]; lines!(ax, first.(xy), last.(xy), color=(g, 0.25), linewidth=1)
+        end
+        for lon in -150:30:180
+            xy = [moll_xy(lon, b) for b in -89.9:1:89.9]; lines!(ax, first.(xy), last.(xy), color=(g, 0.25), linewidth=1)
+        end
+        xy = [moll_xy(l, 0) for l in -179.9:1:179.9]; lines!(ax, first.(xy), last.(xy), color=(g, 0.7), linewidth=2, linestyle=:dash)
+        xy = [moll_xy(l, b) for (l, b) in vcat([(179.99, b) for b in -90:1:90], [(-179.99, b) for b in 90:-1:-90])]
+        lines!(ax, first.(xy), last.(xy), color=p.sub, linewidth=2)
+        text!(ax, -1.78, 0.06, text="plane of the\nplanets", color=g, fontsize=FS - 4, align=(:center, :bottom))
+        text!(ax, -1.78, -0.08, text="(grey: not tested)", color=p.sub, fontsize=FS - 8, align=(:center, :top))
+        Colorbar(fig[1, 2], hm, label="size of the error (%)", height=Relative(0.8), ticks=0:0.02:0.08,
+                 tickformat=v -> [@sprintf("%.2f", x) for x in v])
+        resize_to_layout!(fig)
+        fig
+    end
+end
+
 for t in (:light, :dark)
-    for (name, f) in (("sky", fig_sky), ("geometry", fig_geometry), ("accuracy", fig_accuracy), ("spectra", fig_spectra))
+    for (name, f) in (("sky", fig_sky), ("geometry", fig_geometry), ("accuracy", fig_accuracy), ("spectra", fig_spectra),
+                      ("skyerror", fig_skyerror))
         save2("$(name)_$(t)", f(t)); println("wrote fig/$(name)_$(t).png")
     end
 end

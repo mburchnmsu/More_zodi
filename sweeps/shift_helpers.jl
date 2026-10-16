@@ -118,19 +118,20 @@ end
 
 # --- Mollweide maps on a regular ecliptic lon/lat grid (cells of GRID_DEG × GRID_DEG) --------------------------
 const GRID_DEG = 3.0
-grid_cell(lon, lat) = (clamp(floor(Int, mod(lon, 360) / GRID_DEG) + 1, 1, round(Int, 360 / GRID_DEG)),
-                       clamp(floor(Int, (lat + 90) / GRID_DEG) + 1, 1, round(Int, 180 / GRID_DEG)))
+grid_cell(lon, lat; res=GRID_DEG) = (clamp(floor(Int, mod(lon, 360) / res) + 1, 1, round(Int, 360 / res)),
+                                     clamp(floor(Int, (lat + 90) / res) + 1, 1, round(Int, 180 / res)))
 function moll_fwd(lon, lat)                 # ecliptic lon 0° at the centre, increasing to the LEFT
     λ = deg2rad(mod(lon + 180, 360) - 180); φ = deg2rad(lat); θ = φ
     for _ in 1:50; abs(φ) > π/2 - 1e-9 && break; Δ = (2θ + sin(2θ) - π * sin(φ)) / (2 + 2cos(2θ)); θ -= Δ; abs(Δ) < 1e-12 && break; end
     (-2√2 / π * λ * cos(θ), √2 * sin(θ))
 end
-function moll_raster(G; nx=1400)            # G: (360/GRID_DEG) × (180/GRID_DEG) cell values → image on the Mollweide plane
+function moll_raster(G; nx=1400)            # G: (360/res) × (180/res) cell values → image on the Mollweide plane
+    res = 360 / size(G, 1)
     ny = nx ÷ 2; img = fill(NaN, nx, ny); xs = range(-2√2, 2√2, length=nx); ys = range(-√2, √2, length=ny)
     for (j, yv) in enumerate(ys), (i, xv) in enumerate(xs)
         (xv / (2√2))^2 + (yv / √2)^2 > 1 && continue
         θ = asin(yv / √2); lat = asind(clamp((2θ + sin(2θ)) / π, -1, 1)); lon = -rad2deg(π * xv / (2√2 * cos(θ)))
-        img[i, j] = G[grid_cell(lon, lat)...]
+        img[i, j] = G[grid_cell(lon, lat; res)...]
     end
     xs, ys, img
 end
@@ -154,6 +155,45 @@ function grid_stat(v, f; minn=5)
         push!(buckets[grid_cell(ecliptic_longitude_deg[i], ecliptic_latitude_deg[i])...], v[i])
     end
     [length(b) >= minn ? f(b) : NaN for b in buckets]
+end
+
+"""Like `grid_stat`, but each exposure counts in every `res`° × `res`° cell whose centre lies within `radius`° of its
+boresight. radius = 1.75° ≈ half the width of a SPHEREx field (3.5°), so the narrow gaps between the scan circles
+(the boresights lie on great circles a few degrees apart) fill in the way the real images would cover them. Each
+cell's value is still the error AT the boresights; this only changes how the map is drawn."""
+function footprint_stat(v, f; radius=1.75, res=1.0, minn=5)
+    nlon, nlat = round(Int, 360 / res), round(Int, 180 / res)
+    buckets = [Float64[] for _ in 1:nlon, _ in 1:nlat]
+    clat = [(j - 0.5) * res - 90 for j in 1:nlat]; cr = cosd(radius)
+    for i in eachindex(v)
+        isnan(v[i]) && continue
+        l, b = mod(ecliptic_longitude_deg[i], 360), ecliptic_latitude_deg[i]
+        for j in max(1, floor(Int, (b - radius + 90) / res) + 1):min(nlat, floor(Int, (b + radius + 90) / res) + 1)
+            den = cosd(b) * cosd(clat[j]); c = (cr - sind(b) * sind(clat[j])) / max(den, 1e-12)
+            c > 1 && continue
+            Δl = c <= -1 ? 180.0 : acosd(c)                       # cells at this latitude within `radius` of (l, b)
+            for k in floor(Int, (l - Δl) / res - 0.5):ceil(Int, (l + Δl) / res - 0.5)
+                cl = (k + 0.5) * res
+                abs(mod(cl - l + 180, 360) - 180) <= Δl && push!(buckets[mod(k, nlon) + 1, j], v[i])
+            end
+        end
+    end
+    [length(bk) >= minn ? f(bk) : NaN for bk in buckets]
+end
+
+"""The interior-window |error| map with each exposure spread over ~SPHEREx's field (see `footprint_stat`)."""
+function sky_footprint_fig()
+    oi = oos_prediction(which=:interior)
+    G = footprint_stat(oi.err_pct, x -> median(abs.(x)))
+    fig = Figure(size=(1100, 560), fontsize=14)
+    ax = Axis(fig[1, 1], title="Interior windows: median |error|, each exposure drawn as a 3.5°-wide patch",
+              aspect=DataAspect()); hidedecorations!(ax); hidespines!(ax)
+    xs, ys, img = moll_raster(G)
+    hm = heatmap!(ax, xs, ys, img, colormap=:viridis, colorrange=(0.0, 0.08), nan_color=(:grey80, 1.0),
+                  highclip=Makie.to_colormap(:viridis)[end])
+    graticule!(ax)
+    Colorbar(fig[1, 2], hm, label="|error| (%)", height=Relative(0.8))
+    fig
 end
 
 """All-sky maps of the out-of-sample error (every exposure predicted by models that never saw its 30-day window)."""

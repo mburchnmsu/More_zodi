@@ -71,7 +71,7 @@ METHOD_TRAIN = [[("Training and testing. ", True), ("ZodiPy simulates 423,607 SP
                  "averaged, then tested on whole months and sky regions they never saw.", False)],
                 [("Lesson: ", True), ("adding the time of year (sin λ⊕, cos λ⊕) cut the errors about 40–65×.", False)]]
 TILES = [("0.026%", "median error on months\nwithheld from training"), ("95%", "of pointings within\n0.1% of ZodiPy"),
-         ("64", "wavelengths in\none network")]
+         ("≤0.04%", "median error for every\nchoice of withheld months")]
 CAP_SKY = ("Figure 1. The whole sky at 5 μm as seen from SPHEREx (ZodiPy). The glow is brightest toward the Sun and along "
            "the plane of the planets. Grey: too close to the Sun to observe.")
 CAP_GEOM = ("Figure 2. The geometry the network sees (top view, not to scale). n is where SPHEREx looks; S and E point from "
@@ -80,13 +80,15 @@ CAP_GEOM = ("Figure 2. The geometry the network sees (top view, not to scale). n
 CAP_ACC = ("Figure 3. Neural network vs. ZodiPy. The network was trained on mission days 0–30, 60–90 and 120–140, then "
            "tested on the two 30-day blocks it never saw (days 30–60 and 90–120; 180,166 pointings). Half of the errors "
            "are below 0.026% and 95% are below 0.1%. (With a random 10% of pointings withheld instead, the median is 0.015%.)")
-FWD_TEXT = [[("Looking forward: every SPHEREx wavelength. ", True), ("Real SPHEREx images cover many wavelengths, so "
-             "wavelength becomes one more input. A first version covering 1.25–5 μm already reaches ~0.1% median error on the "
-             "same withheld months.", False)]]
-CAP_SPEC = ("Figure 4. Brightness vs. wavelength for three pointings: ZodiPy (solid) and the network (dashed). Below "
-            "3 μm we see scattered sunlight; above, the dust's heat. Bottom: the differences stay under 1%.")
+SKYERR_TEXT = [[("Where on the sky are the errors? ", True), ("We repeated the test six times, sliding which months were "
+                "withheld, so almost every pointing was tested by networks that never saw it. Every version reached "
+                "0.023–0.037% median error. The errors are largest along the plane of the planets, where the dust bands "
+                "are (0.09%), and smallest toward the poles (0.016%).", False)]]
+CAP_SKYERR = ("Figure 4. The network's error on pointings it never saw, across the whole sky (plane of the planets across "
+              "the middle). Each pointing is drawn as a 3.5°-wide patch, about the width of SPHEREx's view. Grey: not observed "
+              "in the 140 days, or only at the very start or end of the mission.")
 STEPS = [("done", "Validate", "Learn ZodiPy's simulated sky from geometry alone; test on unseen months and sky regions"),
-         ("now", "Refine", "Longer training; all SPHEREx wavelengths (0.75–5 μm)"),
+         ("now", "Refine", "Longer training; all SPHEREx wavelengths (a first 1.25–5 μm version: ~0.1% error)"),
          ("next", "Scale up", "Move training to a computing cluster"),
          ("next", "Real data", "Train on real SPHEREx images and compare with the Kelsall model")]
 STEP_LABEL = {"done": "✓ DONE", "now": "IN PROGRESS", "next": "NEXT"}
@@ -106,7 +108,12 @@ Numbers (poster/data_accuracy.jl, data_blocks.jl): 5-network ensemble, 64-64-32-
   Trained on days 0-30, 60-90, 120-140; tested on days 30-60, 90-120 (180,166 pointings, 43%): median 0.026%, p95 0.10%, 94.8% within 0.1%, RMS 0.058%.
   Random 10% withheld: median 0.015%. Last 20% of the mission (days 111-140, older season inputs): median 0.10%, p95 0.67%.
   Errors are relative to ZodiPy (the Kelsall model), not the real sky.
-- Multi-wavelength: round-15 'ep300' ensemble, 30-day blocks, 1.25-5.0 um (poster/data_spectra.jl).
+- Multi-wavelength (Refine step): round-15 'ep300' ensemble, 30-day blocks, 1.25-5.0 um, ~0.1% median (poster/data_spectra.jl).
+- Fig. 4 / sky text (poster/data_skyerror.jl, round 16, 10152026 notebook): 30-day split slid by 0,10,...,50 days, 5 seeds each;
+  interior withheld windows only (training data before and after; 364,797 pointings = 86%), each pointing averaged over the
+  versions that withheld it. Per-version interior medians 0.023-0.037%. Within 2 deg of the ecliptic 0.094%, above 60 deg 0.016%.
+  Map: each boresight spread over a 1.75-deg-radius disc on a 1-deg grid (the boresights lie on scan circles a few degrees
+  apart; without spreading, thin pole-to-pole gaps appear). Windows at the mission's start/end (extrapolation) are excluded.
 """
 
 # ----------------------------------------------------------------------------------------------- helpers
@@ -226,10 +233,11 @@ def build(theme):
     fh = P.fig("accuracy", X2 + pad, y, iw); y += fh
     P.caption(X2 + pad, y, iw, CAP_ACC, h=1.5); y += 1.55
     P.rect(X2 + pad, y, iw, 0.06, fill=t["border"]); y += 0.25
-    P.text(X2 + pad, y, iw, 1.8, FWD_TEXT); y += 1.7
-    fw = min(iw * 0.9, (res_bot - 1.25 - y) * 1.5)              # spectra figure is 3:2; fill the space left
-    fh = P.fig("spectra", X2 + pad + (iw - fw) / 2, y, fw); y += fh
-    P.caption(X2 + pad, y, iw, CAP_SPEC)
+    P.text(X2 + pad, y, iw, 2.4, SKYERR_TEXT, size=27); y += 2.4
+    im = Image.open(os.path.join(FIG, f"skyerror_{theme}.png")); ar = im.height / im.width
+    fw = min(iw, (res_bot - 1.45 - y) / ar)                     # fill the space left above the caption
+    fh = P.fig("skyerror", X2 + pad + (iw - fw) / 2, y, fw); y += fh
+    P.caption(X2 + pad, y, iw, CAP_SKYERR, h=1.3)
 
     # Next Steps (vertical roadmap)
     ns_top = res_bot + 0.45

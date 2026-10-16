@@ -101,6 +101,20 @@ versions that held out its 30-day window (3 of the 6), averaged.
 sky_error_fig()
 """,
 
+"markdown" => raw"""
+**The thin pole-to-pole grey stripes are gaps between scan circles, not missing days.** There are no gaps in time (one
+exposure every ~2 min for 140 days; one half-day gap on day 3), and the same columns are empty in the whole-mission
+data, not only in the held-out months. SPHEREx scans great circles through the ecliptic poles, roughly along lines of
+longitude, and our file stores only each exposure's **boresight**: those lie on circles a few degrees apart, so a 3°
+cell that falls between two circles gets fewer than 5 exposures (e.g. nothing at all at longitude 357°–3°). The real
+images are ~3.5° wide and cover these gaps. Below, each exposure is drawn as a disc of radius 1.75° on a 1° grid (the
+values are still the errors at the boresights; this is the map on the poster, `poster/data_skyerror.jl`).
+""",
+
+"code" => raw"""
+sky_footprint_fig()
+""",
+
 "code" => raw"""
 for w in (:interior, :edge)          # error vs ecliptic latitude, interpolation and extrapolation separately
     o = oos_prediction(which=w); ok = .!isnan.(o.err_pct); a = abs.(o.err_pct[ok]); b = abs.(ecliptic_latitude_deg[ok])
