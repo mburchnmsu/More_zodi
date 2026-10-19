@@ -4,7 +4,7 @@ using LinearAlgebra; BLAS.set_num_threads(2)
 include(joinpath(@__DIR__, "..", "zodi_setup.jl"))
 include(joinpath(@__DIR__, "nbedit.jl"))
 using Serialization
-nbpath = joinpath(@__DIR__, "..", "10062026.ipynb")
+nbpath = joinpath(@__DIR__, "..", "notebooks", "10062026.ipynb")
 nb = load_nb(nbpath)
 start = cell_index(nb, "8ffbb5d6")
 out = joinpath(@__DIR__, "results", "_test_10062026"); mkpath(out)

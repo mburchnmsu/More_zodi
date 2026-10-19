@@ -43,9 +43,9 @@ pixel pointing — and star masking then).
 
 "code" => raw"""
 ENV["ZODI_DATA"] = "z115"
-include(joinpath(@__DIR__, "zodi_setup.jl"))
+include(joinpath(@__DIR__, "..", "zodi_setup.jl"))
 for f in ("mb_train.jl", "extra_features.jl", "summary_helpers.jl", "configs_v16.jl", "shift_helpers.jl")
-    include(joinpath(@__DIR__, "sweeps", f))
+    include(joinpath(@__DIR__, "..", "sweeps", f))
 end
 """,
 

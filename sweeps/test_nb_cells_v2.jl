@@ -5,7 +5,7 @@ using LinearAlgebra; BLAS.set_num_threads(2)
 include(joinpath(@__DIR__, "..", "zodi_setup.jl"))
 using JSON, Serialization
 cells = Dict(c["id"] => join(c["source"]) for c in
-             JSON.parse(read(joinpath(@__DIR__, "..", "10062026.ipynb"), String))["cells"])
+             JSON.parse(read(joinpath(@__DIR__, "..", "notebooks", "10062026.ipynb"), String))["cells"])
 run_cell(id) = (println("\n######## cell $id"); include_string(Main, cells[id], "cell_$id"))
 
 which = isempty(ARGS) ? "base" : ARGS[1]

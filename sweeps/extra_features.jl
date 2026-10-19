@@ -139,6 +139,8 @@ const FEATURE_SETS = Dict(
     # round 11 (Sun frame): Sun-relative inputs only — no inertial n·x, n·y, no Jupiter
     :sunframe         => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕"],
     :sunframe_season  => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE"],
+    # round 22: the poster model + the round-9 sharp dust-band profiles (target: the ecliptic stripe)
+    :sunseason_bandsharp => vcat(["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE"], BAND_SHARP_NAMES),
     :sunframe_cloud   => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "n·ĉ", "Zc", "Rc"],
     # Rc leaves the mission's range for ~half the year (the mission never got near perihelion); Zc only for ~20%
     :sunframe_cloudZ  => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "n·ĉ", "Zc"],

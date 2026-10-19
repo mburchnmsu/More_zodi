@@ -32,11 +32,11 @@ files and every earlier result and notebook are unchanged.
 
 "code" => raw"""
 ENV["ZODI_DATA"] = "z115"          # corrected target; remove this line to get the original data back
-include(joinpath(@__DIR__, "zodi_setup.jl"))
+include(joinpath(@__DIR__, "..", "zodi_setup.jl"))
 for f in ("mb_train.jl", "extra_features.jl", "extra_splits.jl", "nb_verify_fns.jl", "summary_helpers.jl", "z115_helpers.jl")
-    include(joinpath(@__DIR__, "sweeps", f))
+    include(joinpath(@__DIR__, "..", "sweeps", f))
 end
-include(joinpath(@__DIR__, "pipeline", "ZodiPipeline.jl")); using .ZodiPipeline
+include(joinpath(@__DIR__, "..", "pipeline", "ZodiPipeline.jl")); using .ZodiPipeline
 """,
 
 "markdown" => raw"""
@@ -64,7 +64,7 @@ file's `days_since_start`, which is mission day − 6.23.)
 
 "code" => raw"""
 for f in ("reproduce_original.log", "generate.log")
-    println("── zodipy_gen/$f"); foreach(println, readlines(joinpath(@__DIR__, "zodipy_gen", f)))
+    println("── zodipy_gen/$f"); foreach(println, readlines(joinpath(@__DIR__, "..", "zodipy_gen", f)))
 end
 """,
 

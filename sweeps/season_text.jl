@@ -35,9 +35,9 @@ about 20× below the 0.5–0.6% of the current model — and the remaining resid
 """,
 
 "code" => raw"""
-include(joinpath(@__DIR__, "zodi_setup.jl"))
+include(joinpath(@__DIR__, "..", "zodi_setup.jl"))
 for f in ("mb_train.jl", "extra_features.jl", "nb_verify_fns.jl", "summary_helpers.jl", "checks_helpers.jl", "season_helpers.jl")
-    include(joinpath(@__DIR__, "sweeps", f))
+    include(joinpath(@__DIR__, "..", "sweeps", f))
 end
 """,
 

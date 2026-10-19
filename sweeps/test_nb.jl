@@ -4,7 +4,9 @@ using LinearAlgebra; BLAS.set_num_threads(4)
 include(joinpath(@__DIR__, "nbedit.jl"))
 using Printf
 nbname = ARGS[1]; tag = splitext(basename(nbname))[1]
-nbpath = joinpath(@__DIR__, "..", nbname)
+nbpath = let p = joinpath(@__DIR__, "..", nbname)              # a bare name is looked up in notebooks/
+    isfile(p) ? p : joinpath(@__DIR__, "..", "notebooks", nbname)
+end
 nb  = load_nb(nbpath)
 out = joinpath(@__DIR__, "results", "_test_$tag"); rm(out, recursive=true, force=true); mkpath(out)
 t0 = time(); n = 0

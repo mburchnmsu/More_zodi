@@ -3,7 +3,7 @@
 using LinearAlgebra; BLAS.set_num_threads(4)
 include(joinpath(@__DIR__, "nbedit.jl"))
 using Printf
-nbpath = joinpath(@__DIR__, "..", "10102026.ipynb")
+nbpath = joinpath(@__DIR__, "..", "notebooks", "10102026.ipynb")
 nb  = load_nb(nbpath)
 out = joinpath(@__DIR__, "results", "_test_10102026"); rm(out, recursive=true, force=true); mkpath(out)
 t0 = time(); n = 0

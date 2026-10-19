@@ -31,9 +31,9 @@ Jupiter component. A fake planet moving the same way helps just as much; Jupiter
 """,
 
 "code" => raw"""
-include(joinpath(@__DIR__, "zodi_setup.jl"))
+include(joinpath(@__DIR__, "..", "zodi_setup.jl"))
 for f in ("mb_train.jl", "extra_features.jl", "nb_verify_fns.jl", "summary_helpers.jl", "checks_helpers.jl")
-    include(joinpath(@__DIR__, "sweeps", f))
+    include(joinpath(@__DIR__, "..", "sweeps", f))
 end
 println("\nfeature sets used today:")
 for k in (:look_dir, :earth_centric, :look_dir_Jrot45, :look_dir_Jrot90, :look_dir_Jscr, :look_dir_noJ)

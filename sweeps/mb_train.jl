@@ -74,7 +74,7 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
                   schedule=:onecycle, lr_max=3e-3, epochs=60, batchsize=1024, seed=42,
                   split_name="80/20 Chronological", sched_kw=(;), label="", verbose=true,
                   val_days=nothing, weight_decay=0.0, target=:linear, mix_alpha=0.25, eval_every=1,
-                  evals_per_epoch=0, eval_sub=50_000)
+                  evals_per_epoch=0, eval_sub=50_000, keep_snaps=true)
     # evals_per_epoch = K > 0: also record train/test MSE K times per epoch on a FIXED random subsample of `eval_sub`
     # rows of each set (tr_fine, te_fine at fractional epochs fine_epoch), and keep the weight vector at each of those
     # points (snaps; rebuild with Optimisers.restructure) so an ensemble's curve can be computed afterwards.
@@ -136,7 +136,7 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
     Xtr_s, ytr_s, Xte_s, yte_s = Xtr[:, sub_tr], ytr[sub_tr], Xte[:, sub_te], yte[sub_te]
     function record_fine!(x_epoch)
         push!(tr_fine, mse(pred(Xtr_s), ytr_s)); push!(te_fine, mse(pred(Xte_s), yte_s))
-        push!(fine_epoch, x_epoch); push!(snaps, copy(Optimisers.destructure(model)[1]))
+        push!(fine_epoch, x_epoch); keep_snaps && push!(snaps, copy(Optimisers.destructure(model)[1]))
     end
     evals_per_epoch > 0 && record_fine!(0.0)
 

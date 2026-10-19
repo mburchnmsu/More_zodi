@@ -19,7 +19,9 @@ te = deserialize(joinpath(RESULTS_DIR, "z115_sunseason_r90_s42.jls")).te_idx
 o = predict_zodi(em, nvec_unit_cartesian[:, te]; S=spherex_positions[:, te], E=earth_positions[:, te], vS=v_spherex[:, te], vE=v_earth[:, te])
 fr = 100 .* (o.mean .- y[te]) ./ y[te]
 # whole 30-day blocks withheld
-rs = [deserialize(joinpath(RESULTS_DIR, "z115_sunseason_blk_s$s.jls")) for s in 42:46]
+# poster v6 (Oct 18): the 750-epoch runs of the same split (round 21); v1–v5 used z115_sunseason_blk (100 epochs)
+const BLK = get(ENV, "POSTER_BLK", "z115_m750_shift0")
+rs = [deserialize(joinpath(RESULTS_DIR, "$(BLK)_s$s.jls")) for s in 42:46]
 @assert all(r.feature_names == em.features for r in rs)
 tb = rs[1].te_idx; eb = ensemble_pred(rs)
 fb = 100 .* (eb[tb] .- y[tb]) ./ y[tb]

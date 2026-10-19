@@ -46,12 +46,12 @@ SPHEREx's *orbital velocity direction* (n·vS), so a **season − n·vS** contro
 """,
 
 "code" => raw"""
-include(joinpath(@__DIR__, "zodi_setup.jl"))
+include(joinpath(@__DIR__, "..", "zodi_setup.jl"))
 for f in ("mb_train.jl", "extra_features.jl", "extra_splits.jl", "nb_verify_fns.jl", "summary_helpers.jl",
           "checks_helpers.jl", "band_helpers.jl")
-    include(joinpath(@__DIR__, "sweeps", f))
+    include(joinpath(@__DIR__, "..", "sweeps", f))
 end
-include(joinpath(@__DIR__, "pipeline", "ZodiPipeline.jl")); using .ZodiPipeline
+include(joinpath(@__DIR__, "..", "pipeline", "ZodiPipeline.jl")); using .ZodiPipeline
 """,
 
 "markdown" => raw"""
@@ -161,7 +161,7 @@ between array tasks. Details and the Horizons request settings: `pipeline/README
 """,
 
 "code" => raw"""
-for l in readlines(joinpath(@__DIR__, "pipeline", "pipeline_checks.log"))
+for l in readlines(joinpath(@__DIR__, "..", "pipeline", "pipeline_checks.log"))
     (occursin(r"^\[(PASS|FAIL)\]", l) || occursin("checks passed", l)) && println(l)
 end
 """,

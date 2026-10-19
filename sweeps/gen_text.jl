@@ -33,10 +33,10 @@ on the sky (12°-radius holes; interiors ≤ 0.08%), and with as little as 1% of
 """,
 
 "code" => raw"""
-include(joinpath(@__DIR__, "zodi_setup.jl"))
+include(joinpath(@__DIR__, "..", "zodi_setup.jl"))
 for f in ("mb_train.jl", "extra_features.jl", "extra_splits.jl", "nb_verify_fns.jl", "summary_helpers.jl",
           "checks_helpers.jl", "season_helpers.jl", "gen_helpers.jl")
-    include(joinpath(@__DIR__, "sweeps", f))
+    include(joinpath(@__DIR__, "..", "sweeps", f))
 end
 """,
 

@@ -44,9 +44,9 @@ has an optional `RETRAIN = true` switch that retrains the recommended model from
 #   extra_features.jl  — n·δ̂ feature + named feature sets
 #   nb_verify_fns.jl   — verification checks (split integrity, metrics, residual plots)
 #   summary_helpers.jl — loads saved results → tables (DataFrames) and figures
-include(joinpath(@__DIR__, "zodi_setup.jl"))
+include(joinpath(@__DIR__, "..", "zodi_setup.jl"))
 for f in ("mb_train.jl", "extra_features.jl", "nb_verify_fns.jl", "summary_helpers.jl")
-    include(joinpath(@__DIR__, "sweeps", f))
+    include(joinpath(@__DIR__, "..", "sweeps", f))
 end
 println("\nloaded; saved results live in ", RES)
 """,
@@ -63,7 +63,7 @@ println("\nloaded; saved results live in ", RES)
 """,
 
 "code" => raw"""
-include(joinpath(@__DIR__, "elongation_map.jl"))   # → Mollweide maps: exposure count, mean elongation, elongation range
+include(joinpath(@__DIR__, "..", "elongation_map.jl"))   # → Mollweide maps: exposure count, mean elongation, elongation range
 """,
 
 "markdown" => raw"""

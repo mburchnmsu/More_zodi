@@ -1,0 +1,94 @@
+target data: z115  (zodipy115_5um_boresight.h5);  results dir: sweeps\results_z115
+description: Zodiacal light for SPHEREx pointing directions, regenerated with ZodiPy
+wavelength:  5.0 micron
+units:       MJy/sr
+N = 423607 exposures;  emission range = (0.32295323811551996, 1.1021098132583944)
+n·n     median  1.000e+00   iqr  0.000e+00
+n·S     median  4.851e-03   iqr  3.475e-01
+n·z     median  9.747e-03   iqr  1.361e+00
+n·E     median  4.805e-03   iqr  3.475e-01
+n·vS    median  1.615e-02   iqr  1.356e+00
+n·vE    median  3.680e-02   iqr  1.383e+00
+n·J     median -5.953e-02   iqr  2.659e+00
+n·x     median  5.145e-02   iqr  8.549e-01
+n·y     median -1.072e-03   iqr  5.523e-01
+S·S     median  1.037e+00   iqr  1.341e-02
+S·z     median  2.050e-04   iqr  6.195e-05
+S·E     median  1.037e+00   iqr  1.341e-02
+S·vS    median -1.048e-02   iqr  5.980e-02
+S·vE    median -5.250e-03   iqr  2.289e-02
+S·J     median -4.519e+00   iqr  1.400e+00
+S·x     median  2.056e-01   iqr  1.095e+00
+S·y     median -8.518e-01   iqr  3.210e-01
+z·z     median  1.000e+00   iqr  0.000e+00
+z·E     median  2.096e-04   iqr  2.321e-05
+z·vS    median  4.858e-03   iqr  3.580e-01
+z·vE    median -2.169e-05   iqr  6.366e-05
+z·J     median -1.353e-02   iqr  1.195e-02
+z·x     median  0.000e+00   iqr  0.000e+00
+z·y     median  0.000e+00   iqr  0.000e+00
+E·E     median  1.037e+00   iqr  1.341e-02
+E·vS    median -1.049e-02   iqr  5.984e-02
+E·vE    median -5.259e-03   iqr  2.289e-02
+E·J     median -4.519e+00   iqr  1.400e+00
+E·x     median  2.056e-01   iqr  1.095e+00
+E·y     median -8.518e-01   iqr  3.210e-01
+vS·vS   median  1.000e+00   iqr  1.110e-16
+vS·vE   median  9.832e-01   iqr  2.444e-02
+vS·J    median  7.208e-01   iqr  5.168e+00
+vS·x    median  8.157e-01   iqr  3.163e-01
+vS·y    median  2.061e-01   iqr  1.078e+00
+vE·vE   median  1.000e+00   iqr  3.331e-16
+vE·J    median  7.200e-01   iqr  5.245e+00
+vE·x    median  8.301e-01   iqr  3.206e-01
+vE·y    median  2.064e-01   iqr  1.094e+00
+J·J     median  2.643e+01   iqr  2.613e-01
+J·x     median -3.462e-01   iqr  5.323e-01
+J·y     median  5.124e+00   iqr  1.338e-02
+x·x     median  1.000e+00   iqr  0.000e+00
+x·y     median  0.000e+00   iqr  0.000e+00
+y·y     median  1.000e+00   iqr  0.000e+00
+
+Mission span: 139.7 days
+25/75 Chronological  train  105901   test  317706   (25% train)
+30 day split         train  243441   test  180166   (57% train)
+50/50 Chronological  train  211803   test  211804   (50% train)
+50/50 mid-mission    train  211803   test  211804   (50% train)
+7-day alternating    train  212510   test  211097   (50% train)
+75/25 Chronological  train  317705   test  105902   (75% train)
+80/20 Chronological  train  338885   test   84722   (80% train)
+85/15 Chronological  train  360065   test   63542   (85% train)
+random split         train  211803   test  211804   (50% train)
+All splits initialized.
+30 of 30 runs pending; 5 trainings at a time, 1 BLAS thread(s) each → C:\JuliaProjects\More_zodi\sweeps\results_z115
+14:22:40  DONE z115_m750_shift0_s44         test 1.1251e-07  train 2.5974e-08  5961s  (worker 3)
+14:23:06  DONE z115_m750_shift0_s43         test 7.6544e-08  train 2.5133e-08  5989s  (worker 1)
+14:23:41  DONE z115_m750_shift0_s46         test 1.7561e-07  train 2.3406e-08  6024s  (worker 4)
+14:25:52  DONE z115_m750_shift0_s42         test 1.3508e-07  train 2.4116e-08  6155s  (worker 2)
+14:25:59  DONE z115_m750_shift0_s45         test 8.1575e-08  train 2.5275e-08  6162s  (worker 5)
+15:55:17  DONE z115_m750_shift10_s42        test 1.0561e-07  train 2.5135e-08  5557s  (worker 3)
+15:56:31  DONE z115_m750_shift10_s43        test 1.3833e-07  train 2.9424e-08  5605s  (worker 1)
+15:56:59  DONE z115_m750_shift10_s44        test 2.0573e-07  train 2.6645e-08  5598s  (worker 4)
+16:01:46  DONE z115_m750_shift10_s46        test 1.0561e-07  train 2.7475e-08  5747s  (worker 5)
+16:01:47  DONE z115_m750_shift10_s45        test 9.2815e-08  train 2.1748e-08  5755s  (worker 2)
+17:46:55  DONE z115_m750_shift20_s42        test 4.9580e-06  train 3.0134e-08  6698s  (worker 3)
+17:47:59  DONE z115_m750_shift20_s43        test 1.6862e-06  train 3.0723e-08  6689s  (worker 1)
+17:48:57  DONE z115_m750_shift20_s44        test 3.2129e-06  train 2.6987e-08  6718s  (worker 4)
+17:55:45  DONE z115_m750_shift20_s46        test 4.6166e-06  train 2.9880e-08  6838s  (worker 2)
+17:55:46  DONE z115_m750_shift20_s45        test 1.3360e-05  train 3.0831e-08  6840s  (worker 5)
+19:13:09  DONE z115_m750_shift30_s42        test 1.4365e-06  train 2.8454e-08  5174s  (worker 3)
+19:14:29  DONE z115_m750_shift30_s43        test 7.0868e-07  train 3.2494e-08  5190s  (worker 1)
+19:15:37  DONE z115_m750_shift30_s44        test 1.5301e-06  train 3.3931e-08  5200s  (worker 4)
+19:24:55  DONE z115_m750_shift30_s45        test 7.1033e-07  train 3.0993e-08  5351s  (worker 2)
+19:24:59  DONE z115_m750_shift30_s46        test 7.3358e-07  train 3.1378e-08  5353s  (worker 5)
+21:21:35  DONE z115_m750_shift40_s42        test 5.7471e-08  train 2.9193e-08  7706s  (worker 3)
+21:24:01  DONE z115_m750_shift40_s43        test 5.7279e-08  train 3.0642e-08  7772s  (worker 1)
+21:44:35  DONE z115_m750_shift40_s44        test 7.1723e-08  train 3.2029e-08  8938s  (worker 4)
+22:00:42  DONE z115_m750_shift40_s45        test 6.2777e-08  train 2.0984e-08  9347s  (worker 2)
+22:00:56  DONE z115_m750_shift40_s46        test 6.1292e-08  train 2.4671e-08  9358s  (worker 5)
+23:22:03  DONE z115_m750_shift50_s42        test 7.0042e-08  train 1.5202e-08  7228s  (worker 3)
+23:23:21  DONE z115_m750_shift50_s43        test 8.2773e-08  train 2.7146e-08  7160s  (worker 1)
+23:35:34  DONE z115_m750_shift50_s44        test 1.5009e-07  train 2.5211e-08  6658s  (worker 4)
+23:44:12  DONE z115_m750_shift50_s46        test 2.1310e-07  train 1.9327e-08  6196s  (worker 5)
+23:44:14  DONE z115_m750_shift50_s45        test 1.8270e-07  train 1.6672e-08  6212s  (worker 2)
+23:44:14  all workers finished

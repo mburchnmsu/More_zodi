@@ -1,7 +1,8 @@
 # Poster figures, each in a light and a dark version → poster/fig/<name>_{light,dark}.png
 #   julia --project=. poster/make_figures.jl
 # Inputs: poster/fig_accuracy.jld2 (data_accuracy.jl), poster/fig_spectra.jld2 (data_spectra.jl),
-#         poster/fig_skyerror.jld2 (data_skyerror.jl),
+#         poster/fig_skyerror.jld2 (data_skyerror.jl), poster/fig_training.jld2 (data_training.jl),
+#         poster/fig_components.jld2 (data_components.jl),
 #         data/zodipy115_5um_healpix_components.h5 (all-sky map), speed numbers from bench_zodipy.py / bench_emulator.jl.
 using CairoMakie, JLD2, HDF5, Healpix, Statistics, Printf
 const OUT = joinpath(@__DIR__, "fig"); mkpath(OUT)
@@ -185,6 +186,75 @@ function fig_accuracy(t)
     end
 end
 
+# ---------------------------------------------------------------- 3b. accuracy: error through the mission + network vs ZodiPy 1:1
+function fig_accuracy2(t)
+    p = PAL[t]; e, dte = ACC["err_pct"], ACC["days_test"]; yt, yp = ACC["ytrue"], ACC["ypred"]
+    dg, st, D = ACC["dgrid"], ACC["test_status"], ACC["mission_days"]
+    segs = Tuple{Float64, Float64, Bool}[]; a = dg[1]
+    for i in 2:length(st); st[i] != st[i-1] && (push!(segs, (a, dg[i], st[i-1])); a = dg[i]); end
+    push!(segs, (a, D, st[end]))
+    lim = 0.3
+    with_theme(themed(t)) do
+        fig = Figure(size=(1600, 800))
+        ax1 = Axis(fig[1, 1], xlabel="mission day", ylabel="error (%)", title="Error through the mission",
+                   limits=((0, D), (-lim, lim)), xticks=0:30:150)
+        for (a, b, test) in segs
+            vspan!(ax1, a, b, color=(test ? p.a2 : p.a1, 0.12))
+            text!(ax1, (a + b) / 2, 0.97lim, text=test ? "TESTED\n(never seen)" : "TRAINED", align=(:center, :top),
+                  color=test ? p.a2 : p.a1, font=:bold, fontsize=FS - 6)
+        end
+        scatter!(ax1, dte, clamp.(e, -lim, lim), color=(p.fg, 0.05), markersize=3)
+        hlines!(ax1, [0], color=p.sub, linewidth=1.5)
+        lo, hi = 0.3, 1.15
+        ax2 = Axis(fig[1, 2], xlabel="ZodiPy brightness (MJy/sr)", ylabel="network brightness (MJy/sr)",
+                   title="Network vs. ZodiPy", aspect=1, limits=((lo, hi), (lo, hi)))
+        lines!(ax2, [lo, hi], [lo, hi], color=p.sub, linewidth=2, linestyle=:dash)
+        scatter!(ax2, yt, yp, color=(p.a2, 0.08), markersize=4)
+        text!(ax2, 0.04, 0.96, space=:relative, align=(:left, :top), color=p.fg, fontsize=FS - 4,
+              text=@sprintf("%s pointings never\nseen in training\nmedian error %.3f%%",
+                            replace(string(length(e)), r"(\d)(?=(\d{3})+$)" => s"\1,"), median(abs.(e))))
+        # zoomed inset: a 0.01 MJy/sr window (~100× magnified) around 0.7 MJy/sr
+        z0, z1 = 0.700, 0.706
+        k = (z0 .<= yt .<= z1)
+        ax3 = Axis(fig[1, 2], width=Relative(0.40), height=Relative(0.40), halign=0.97, valign=0.10,
+                   limits=((z0, z1), (z0, z1)), xticksvisible=false, yticksvisible=false, xticklabelsvisible=false,
+                   yticklabelsvisible=false, backgroundcolor=p.bg, title="zoomed ~100×", titlesize=FS - 8,
+                   leftspinecolor=p.fg, bottomspinecolor=p.fg, rightspinevisible=true, topspinevisible=true,
+                   rightspinecolor=p.fg, topspinecolor=p.fg)
+        lines!(ax3, [z0, z1], [z0, z1], color=p.sub, linewidth=2, linestyle=:dash)
+        scatter!(ax3, yt[k], yp[k], color=(p.a2, 0.35), markersize=4)
+        colsize!(fig.layout, 1, Auto(1.35))
+        fig
+    end
+end
+
+# ---------------------------------------------------------------- 9. what makes up the zodiacal light (Kelsall components)
+const CMP = JLD2.load(joinpath(@__DIR__, "fig_components.jld2"))
+function fig_components(t)
+    p = PAL[t]; keep = [1, 4, 5, 6]                                   # plane, poles, ahead of Earth, behind Earth
+    S = CMP["share"][keep, :]; rl = CMP["row_labels"][keep]; pl = CMP["part_labels"]; sm = CMP["smooth_share"][keep]
+    cols = [p.a3, p.a1, p.a2]; n = length(rl)
+    ypos = [1, 2, 3.5, 4.5]                                           # gap before the ahead/behind rows
+    with_theme(themed(t)) do
+        fig = Figure(size=(1500, 600))
+        ax = Axis(fig[1, 1], yticks=(ypos, rl), yreversed=true, xlabel="share of the total brightness (%)",
+                  title="The other 5–12%: everything except the smooth cloud", limits=((0, 16.5), (0.4, ypos[end] + 0.6)),
+                  xticks=0:2:12, ygridvisible=false, yticklabelsize=FS - 4)
+        for i in 1:n
+            x0 = 0.0
+            for j in 1:length(pl)
+                barplot!(ax, [ypos[i]], [S[i, j]], fillto=x0, offset=x0, direction=:x, width=0.7, color=cols[j],
+                         label=i == 1 ? pl[j] : nothing)
+                x0 += S[i, j]
+            end
+            text!(ax, x0 + 0.25, ypos[i], text=@sprintf("+ smooth cloud %.0f%%", sm[i]), align=(:left, :center),
+                  color=p.sub, fontsize=FS - 6)
+        end
+        Legend(fig[0, 1], [PolyElement(color=c) for c in cols], pl, orientation=:horizontal, labelsize=FS - 4, framevisible=false)
+        fig
+    end
+end
+
 # ---------------------------------------------------------------- 4. speed (poster/bench_*: same 20,000 pointings, 1 CPU core)
 const SPEED = (zp_single=21.6e-3, em_single=11.1e-6, zp_batch=32.0e-6, em_batch=7.7e-6)   # seconds per pointing
 function fig_speed(t)
@@ -233,8 +303,8 @@ end
 
 # ---------------------------------------------------------------- 6. where on the sky the errors are (out-of-sample, round 16)
 const SKE = JLD2.load(joinpath(@__DIR__, "fig_skyerror.jld2"))
-function fig_skyerror(t)
-    p = PAL[t]; G = SKE["G"]; res = SKE["res"]
+function fig_skyerror(t; key="G")             # key = "G" (3.5° patches) or "G7" (7° blend)
+    p = PAL[t]; G = SKE[key]; res = SKE["res"]
     with_theme(themed(t)) do
         fig = Figure(size=(1500, 760), figure_padding=10)
         ax = Axis(fig[1, 1], aspect=DataAspect()); hidedecorations!(ax); hidespines!(ax)
@@ -276,15 +346,15 @@ const TRN = JLD2.load(joinpath(@__DIR__, "fig_training.jld2"))
 function fig_training(t)
     p = PAL[t]
     with_theme(themed(t)) do
-        fig = Figure(size=(900, 720), figure_padding=(10, 45, 10, 10))
+        fig = Figure(size=(1500, 620), figure_padding=(10, 45, 10, 10))
         panels = (("Whole months withheld", TRN["blk_tr"], TRN["blk_te"]),)
-        lo = minimum(minimum.((TRN["blk_tr"], TRN["rnd_tr"], TRN["rnd_te"]))) / 1.5; hi = 3e-4
+        lo = minimum(TRN["blk_tr"]) / 1.5; hi = 3e-4
         axs = Axis[]
-        for (c, (ttl, tr, te)) in enumerate(panels)
+        for (c, (ttl, tr, te)) in enumerate(panels)    # epoch-averaged curves: row e = epoch e (1-based)
             ax = Axis(fig[1, c], yscale=log10, title=ttl, xlabel="training pass (epoch)", ylabel=c == 1 ? "error (MSE, log scale)" : "",
-                      limits=((0, size(tr, 1) - 1), (lo, hi)), xticks=0:25:100,
-                      yticks=([1e-7, 1e-6, 1e-5, 1e-4], ["10⁻⁷", "10⁻⁶", "10⁻⁵", "10⁻⁴"]))
-            push!(axs, ax); ep = 0:size(tr, 1)-1
+                      limits=((0, size(tr, 1)), (lo, hi)),
+                      yticks=([1e-8, 1e-7, 1e-6, 1e-5, 1e-4], ["10⁻⁸", "10⁻⁷", "10⁻⁶", "10⁻⁵", "10⁻⁴"]))
+            push!(axs, ax); ep = 1:size(tr, 1)
             for s in 1:size(tr, 2)
                 lines!(ax, ep, tr[:, s], color=(p.a1, 0.3), linewidth=1.5); lines!(ax, ep, te[:, s], color=(p.a2, 0.3), linewidth=1.5)
             end
@@ -326,7 +396,9 @@ end
 
 for t in (:light, :dark)
     for (name, f) in (("sky", fig_sky), ("geometry", fig_geometry), ("accuracy", fig_accuracy), ("spectra", fig_spectra),
-                      ("skyerror", fig_skyerror), ("training", fig_training), ("shifts", fig_shifts))
+                      ("skyerror", fig_skyerror), ("training", fig_training), ("shifts", fig_shifts),
+                      ("accuracy2", fig_accuracy2), ("components", fig_components),
+                      ("skyerror7", t -> fig_skyerror(t; key="G7")))
         save2("$(name)_$(t)", f(t)); println("wrote fig/$(name)_$(t).png")
     end
 end

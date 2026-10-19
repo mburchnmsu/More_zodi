@@ -45,11 +45,11 @@ Trained with the new threaded runner (`sweeps/run_threaded.jl`, 4 trainings in o
 
 "code" => raw"""
 ENV["ZODI_DATA"] = "z115multi"
-include(joinpath(@__DIR__, "zodi_setup.jl"))
+include(joinpath(@__DIR__, "..", "zodi_setup.jl"))
 for f in ("mb_train.jl", "extra_features.jl", "extra_splits.jl", "nb_verify_fns.jl", "summary_helpers.jl", "multi_helpers.jl")
-    include(joinpath(@__DIR__, "sweeps", f))
+    include(joinpath(@__DIR__, "..", "sweeps", f))
 end
-foreach(println, readlines(joinpath(@__DIR__, "zodipy_gen", "generate_multi.log")))
+foreach(println, readlines(joinpath(@__DIR__, "..", "zodipy_gen", "generate_multi.log")))
 """,
 
 "markdown" => raw"""

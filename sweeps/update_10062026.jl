@@ -1,7 +1,7 @@
 # Apply round-3/4 updates to 10062026.ipynb (preserves all other cells, incl. the user's markdown).
 include(joinpath(@__DIR__, "nbedit.jl"))
-path = joinpath(@__DIR__, "..", "10062026.ipynb")
-cp(path, joinpath(@__DIR__, "..", "10062026.before_round34.ipynb"), force=true)      # safety copy
+path = joinpath(@__DIR__, "..", "notebooks", "10062026.ipynb")
+cp(path, joinpath(@__DIR__, "..", "notebooks", "10062026.before_round34.ipynb"), force=true)      # safety copy
 nb = load_nb(path)
 src(id) = join(nb["cells"][cell_index(nb, id)]["source"])
 

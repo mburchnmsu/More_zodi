@@ -47,32 +47,30 @@ SUBTITLE = "A geometrically constrained model of zodiacal light for NASA's SPHER
 AUTHORS = "Mark Burch and Andrew Saydjari"
 AFFIL = "Astronomy Department, New Mexico State University, Las Cruces, NM"
 TAKEAWAY = ("A geometrically constrained neural network learns the zodiacal light from viewing geometry alone, "
-            "reaching ~0.03% median error on months it never saw.")
+            "reaching ~0.02% median error on months it never saw.")
 
-BG_SPHEREX = [B([("SPHEREx: ", True), ("NASA space telescope, launched in March 2025", False)]),
-              B([("Maps the ", False), ("entire sky across a range of infrared wavelengths", True), (" (0.75–5 μm)", False)]),
-              B([("Science: ", True), ("how the universe began, how galaxies formed, and where water and other "
+BG_SPHEREX = [B([("SPHEREx: ", True), ("NASA space telescope (launched March 2025) mapping the ", False),
+                 ("entire sky in infrared", True), (" (0.75–5 μm)", False)]),
+              B([("Science: ", True), ("how the universe began, how galaxies formed, where water and other "
                  "ingredients for life are found", False)])]
 BG_TEXT = [H("Zodiacal light"),
            B([("Sunlight scattered by dust from comets and asteroids, plus the dust's heat glow (Fig. 1)", False)]),
            B([("Bright enough to be confused with faint light from distant galaxies", False)]),
            B([("Changes with look direction and Earth's place in orbit → ", False), ("must be modeled and removed", True)]),
            H("The Kelsall model"),
-           B([("Standard dust model (Kelsall et al. 1998, NASA's COBE): smooth cloud, three dust bands, a ring "
-              "around the Sun, a clump trailing Earth", False)]),
-           B([("ZodiPy", True), (" computes what a telescope sees; we use it to simulate SPHEREx data", False)])]
+           B([("Standard dust model from NASA's COBE (Fig. 2); ", False), ("ZodiPy", True),
+              (" computes what SPHEREx would see from it", False)])]
 PROBLEM_L = [H("The problem"),
-             B([("Zodiacal light must be removed from every SPHEREx image", False)]),
-             B([("Physics models such as Kelsall's were fit to older data and leave errors behind", False)])]
+             B([("Zodiacal light must be removed from every SPHEREx image, but models like Kelsall's were fit to older "
+                "data and leave errors behind", False)])]
 PROBLEM_R = [H("Research objective"),
-             B([("Build a ", False), ("geometrically constrained", True), (" neural network that learns zodiacal light from "
-                "SPHEREx data and ", False), ("outperforms the Kelsall model", True)]),
-             B([("First step (this poster): learn ZodiPy's simulated sky from geometry alone", False)])]
+             B([("A ", False), ("geometrically constrained", True), (" neural network that learns zodiacal light from "
+                "SPHEREx data and ", False), ("outperforms the Kelsall model", True),
+                (". First step: ZodiPy's simulated sky", False)])]
 METHOD_GEOM = [H("A geometrically constrained model"),
-               B([("No dates and no sky-map positions as inputs", False)]),
-               B([("Only ", False), ("9 numbers describing the viewing geometry", True), (" (Fig. 2): dot products of the look "
-                  "direction n, plus Earth's place in its orbit", False)]),
-               B([("Must learn how brightness depends on geometry, as the physics does, not memorize when and where "
+               B([("No dates or sky-map positions: only ", False), ("9 numbers describing the viewing geometry", True),
+                  (" (Fig. 3)", False)]),
+               B([("It must learn how brightness depends on geometry, as the physics does, not memorize when and where "
                   "SPHEREx looked", False)])]
 INPUTS = [("n·S, n·E", "toward or away from the Sun (seen from SPHEREx and from Earth)"),
           ("n·z", "how far above or below the plane of the planets"),
@@ -80,30 +78,32 @@ INPUTS = [("n·S, n·E", "toward or away from the Sun (seen from SPHEREx and fro
           ("n·x⊕, n·y⊕", "look direction in a frame that turns with Earth (x⊕ = Sun → Earth)"),
           ("sin λ⊕, cos λ⊕", "Earth's position in its orbit: the time of year")]
 METHOD_TRAIN = [H("Training and testing"),
-                B([("423,607 simulated SPHEREx pointings from ZodiPy (140 days, 5 μm)", False)]),
-                B([("Five small networks (4 hidden layers, 64 → 16 neurons; Flux.jl in Julia), averaged", False)]),
+                B([("423,607 simulated pointings (140 days, 5 μm); five small networks (Flux.jl), averaged", False)]),
                 B([("Tested on whole months and sky regions they never saw", False)]),
-                B([("Lesson: ", True), ("adding the time of year (sin λ⊕, cos λ⊕) cut the errors ~40–65×", False)]),
-                B([("No overfitting: ", True), ("error on withheld data levels off and never rises (Fig. 3)", False)])]
+                B([("Lesson: ", True), ("adding the time of year (sin λ⊕, cos λ⊕) cut the errors ~40–65×", False)])]
 CAP_SKY = ("Figure 1. The whole sky at 5 μm from SPHEREx (ZodiPy): brightest toward the Sun and along the plane of the "
            "planets. Grey: too close to the Sun to observe.")
-CAP_GEOM = ("Figure 2. The geometry the network sees (top view, not to scale): n = where SPHEREx looks; S, E = Sun → "
+CAP_COMP = ("Figure 2. What makes up the zodiacal light SPHEREx sees (Kelsall model): a smooth cloud (88–95%) plus "
+            "dust bands, a ring around the Sun, and a cloud trailing Earth, strongest when looking behind Earth.")
+CAP_GEOM = ("Figure 3. The geometry the network sees (top view, not to scale): n = where SPHEREx looks; S, E = Sun → "
             "SPHEREx, Earth; v = orbital motion; λ⊕ = Earth's angle around its orbit. Jupiter and the Moon: context only.")
-CAP_TRAIN = ("Figure 3. Error during training on the training data and the withheld months: 5 networks (thin) and their "
-             "average (thick). Test error ends ~2× the training error; with a random 10% withheld, the curves overlap.")
-TILES = [("0.026%", "median error on months\nwithheld from training"), ("95%", "of pointings within\n0.1% of ZodiPy"),
-         ("≤0.04%", "median error for every\nchoice of withheld months")]
-CAP_ACC = ("Figure 4. Network vs. ZodiPy on the two 30-day blocks never used in training (days 30–60 and 90–120; "
-           "180,166 pointings). Half of the errors are below 0.026%, 95% below 0.1%.")
-RES_SHIFT = [B([("Robust: ", True), ("six versions with different withheld months all reach 0.023–0.037% (Fig. 5)", False)]),
-             B([("Harder: ", True), ("predicting past the start or end of the data (orange): fine for ~10 days, then "
-                "errors grow", False)])]
-CAP_SHIFT = ("Figure 5. Six versions of the test, sliding the withheld months 10 days at a time. Right: median error on "
-             "the red days (orange: start/end of the mission).")
-RES_SKY = [B([("Largest errors: ", True), ("along the plane of the planets, where the dust bands are (0.09%; Fig. 6)", False)]),
-           B([("Smallest: ", True), ("toward the poles (0.016%)", False)])]
-CAP_SKYERR = ("Figure 6. Error on pointings the network never saw, across the whole sky. Each pointing is drawn 3.5° "
-              "wide, about SPHEREx's view. Grey: not tested.")
+CAP_TRAIN = ("Figure 5. Error during training: 5 networks (thin), average (thick). The error on withheld months levels off "
+             "and never rises: no overfitting.")
+TILES = [("0.018%", "median error on months\nwithheld from training"), ("97.5%", "of pointings within\n0.1% of ZodiPy"),
+         ("≤0.03%", "median error for every\nchoice of withheld months")]
+CAP_ACC = ("Figure 4. Network vs. ZodiPy on the two 30-day blocks never used in training (days 30–60, 90–120; 180,166 "
+           "pointings). Left: error through the mission; right: every pointing falls on the 1:1 line.")
+CAP_SHIFT = ("Figure 6. Six versions of the test, sliding the withheld months 10 days at a time: all reach 0.015–0.03% "
+             "(red). Predicting past the start/end of the data (orange) is harder: fine for ~10 days, then errors grow.")
+RES_SKY = [B([("Largest errors ", True), ("along the plane of the planets, where the dust bands are (0.08%); ", False),
+              ("smallest ", True), ("toward the poles (0.013%; Fig. 7)", False)])]
+# Fig. 7 variant (env POSTER_FIG7): "skyerror" = 3.5° patches (≈ SPHEREx's view), "skyerror7" = the 7° blend;
+# POSTER_SUFFIX is appended to the output names (e.g. "_35" for the alternative version)
+FIG7 = os.environ.get("POSTER_FIG7", "skyerror7")
+SUFFIX = os.environ.get("POSTER_SUFFIX", "")
+CAP_SKYERR = ("Figure 7. Error on pointings the network never saw, across the whole sky. " +
+              ("Each pointing is drawn 3.5° wide, about SPHEREx's view. " if FIG7 == "skyerror" else
+               "Each pointing is blended over a 7° patch to show the large-scale pattern. ") + "Grey: not tested.")
 STEPS = [("done", "Validate", "Learn ZodiPy's simulated sky from geometry alone; test on unseen months and sky regions"),
          ("now", "Refine", "Longer training; all SPHEREx wavelengths (a first 1.25–5 μm version: ~0.1% error)"),
          ("next", "Scale up", "Move training to a computing cluster"),
@@ -119,19 +119,24 @@ REFS = [["Kelsall, T., et al. 1998, ApJ, 508, 44 (COBE/DIRBE zodiacal-light mode
 NOTES = """[CHECK with mentor]
 - Problem statement: 'physics models such as Kelsall's were fit to older data and leave errors behind' -- right framing?
 - Acknowledgment: exact name of the URS grant/program and the NSF award number (if one should be listed).
-- Fig. 2: Jupiter and the Moon are drawn for context; the poster's model inputs are n.S n.z n.E n.vS n.vE n.x_E n.y_E sin/cos(lambda_E) (no Jupiter, no Moon).
-Numbers (poster/data_accuracy.jl, data_blocks.jl): 5-network ensemble, 64-64-32-16 gelu.
-  Trained on days 0-30, 60-90, 120-140; tested on days 30-60, 90-120 (180,166 pointings, 43%): median 0.026%, p95 0.10%, 94.8% within 0.1%, RMS 0.058%.
-  Random 10% withheld: median 0.015%. Errors are relative to ZodiPy (the Kelsall model), not the real sky.
-- Fig. 3 (poster/data_training.jl): per-epoch MSE of each network on its training data and on the withheld data; final mean
-  train/test MSE 1.2e-7 / 2.3e-7 (MJy/sr)^2 for the 30-day split, 6.2e-8 / 5.9e-8 for the random 10%.
-- Fig. 5 (round 16, 10152026 notebook): the 30-day split slid by 0, 10, ..., 50 days, 5 seeds each. Red = withheld windows
-  with training data before and after (interpolation): 0.023-0.037%. Orange = withheld windows at the mission's start/end
-  (extrapolation in time): 10 days 0.03-0.04%, 20-30 days 0.11-0.22% median.
-- Fig. 6 (poster/data_skyerror.jl): red (interior) windows only, 364,797 pointings (86%), each averaged over the versions
-  that withheld it. Within 2 deg of the ecliptic 0.094%, above 60 deg 0.016%. Map: each boresight spread over a
-  1.75-deg-radius disc on a 1-deg grid (boresights lie on scan circles a few degrees apart; without spreading, thin
-  pole-to-pole gaps appear).
+- Fig. 3: Jupiter and the Moon are drawn for context; the poster's model inputs are n.S n.z n.E n.vS n.vE n.x_E n.y_E sin/cos(lambda_E) (no Jupiter, no Moon).
+Numbers (poster v6): 5-network ensemble, 64-64-32-16 gelu (4 hidden layers), 750 epochs (round 21, z115_m750_shift*).
+- Fig. 2 (poster/data_components.jl): ZodiPy components per pointing as % of the total. Smooth cloud 90.1% (|b|<5) to
+  94.8% (>60 deg); behind Earth (n.vE<-0.5, |b|<15) the trailing cloud is 7.0% vs 1.1% ahead.
+- Fig. 4 (poster/data_accuracy.jl): trained on days 0-30, 60-90, 120-140; tested on days 30-60, 90-120 (180,166 pointings,
+  43%): median 0.018%, p95 0.069%, 97.5% within 0.1%. (100 epochs: 0.026%, 0.10%, 94.8%.)
+  Errors are relative to ZodiPy (the Kelsall model), not the real sky.
+- Fig. 5 (poster/data_training.jl): epoch-averaged MSE (mean of 10 in-epoch evaluations) on the training data and the
+  withheld months; final mean train/test MSE 2.5e-8 / 1.2e-7 (MJy/sr)^2.
+- Fig. 6: the 30-day split slid by 0, 10, ..., 50 days, 5 seeds each, 750 epochs. Red = withheld windows with training
+  data before and after (interpolation): 0.015-0.030%. Orange = windows at the mission's start/end (extrapolation in
+  time): 10 days 0.016-0.023%, 20-30 days 0.07-0.09% median.
+- Fig. 7 (poster/data_skyerror.jl): red (interior) windows only, 364,797 pointings (86%), each averaged over the versions
+  that withheld it: median 0.016%, p95 0.063%; within 2 deg of the ecliptic 0.083%, above 60 deg 0.0125%. Map: each
+  boresight spread over a disc on a 1-deg grid (radius 1.75 deg = 3.5-deg patches, or 3.5 deg = the 7-deg blend);
+  boresights lie on scan circles a few degrees apart, so without spreading thin pole-to-pole gaps appear.
+- Earth-trailing cloud (mentor's test, 10182026 notebook): stacking residuals along the ahead/behind-Earth angle and the
+  angle to the cloud's centre shows no leftover cloud signal; fitted missing fraction 0.06 +/- 0.09% (|b|<15, 750 ep).
 - Multi-wavelength (Refine step): round-15 'ep300' ensemble, 30-day blocks, 1.25-5.0 um, ~0.1% median (poster/data_spectra.jl).
 """
 
@@ -281,12 +286,16 @@ def build(theme):
     fh = fw * P.aspect("sky")
     bg_h = max(est_height(BG_TEXT, tw, 24, 1.08, 6) * 1.06,
                0.3 + fh + 0.1 + est_height([[(CAP_SKY, False)]], fw, 22, 1.05, 0))
-    bg_bot = y + bg_h + 0.25
+    cw_ = iw * 0.86; ch_ = cw_ * P.aspect("components")                 # Fig. 2 (components) across the section
+    comp_y = y + bg_h + 0.15
+    bg_bot = comp_y + ch_ + 0.1 + est_height([[(CAP_COMP, False)]], iw, 22, 1.05, 0) + 0.3
     P.section(X1, top, CW, bg_bot - top, "Background")
     P.block(X1 + pad, y0, iw, BG_SPHEREX, size=26)
     P.block(X1 + pad, y, tw, BG_TEXT, size=24)
     P.fig("sky", fx, y + 0.3, fw)
     P.caption(fx, y + 0.3 + fh + 0.1, fw, CAP_SKY)
+    P.fig("components", X1 + pad + (iw - cw_) / 2, comp_y, cw_)
+    P.caption(X1 + pad, comp_y + ch_ + 0.1, iw, CAP_COMP)
 
     # Problem / research objective: two halves of one box
     pr_top = bg_bot + 0.45
@@ -306,25 +315,27 @@ def build(theme):
             P.text(x + 0.2, y, 3.6, 0.5, [[(sym, True)]], size=24, color=t["accent2"], after=0)
             P.text(x + 3.8, y, iw - 3.8, 0.5, [meaning], size=24, after=0)
             y += 0.47
-    tfw = iw * 0.44; tfh = tfw * P.aspect("training"); tbw = iw - tfw - 0.3
-    def train(x, y):                 # training bullets on the left, Fig. 3 beside them, caption below both
-        bh = est_height(METHOD_TRAIN, tbw, 25, 1.08, 6)
-        P.text(x, y + max(0.0, (tfh - bh) / 2), tbw, bh, METHOD_TRAIN, size=25, spacing=1.08, after=6)
-        P.fig("training", x + tbw + 0.3, y, tfw)
-        P.caption(x, y + max(tfh, bh) + 0.1, iw, CAP_TRAIN)
-    train_h = max(tfh, est_height(METHOD_TRAIN, tbw, 25, 1.08, 6)) + 0.1 + est_height([[(CAP_TRAIN, False)]], iw, 22, 1.05, 0)
-    gw = iw * 0.55; gh = gw * P.aspect("geometry"); gbw = iw - gw - 0.3
-    def geom(x, y):                  # geometry bullets on the left, Fig. 2 beside them, caption below both
-        bh = est_height(METHOD_GEOM, gbw, 25, 1.08, 6)
-        P.text(x, y + max(0.0, (gh - bh) / 2), gbw, bh, METHOD_GEOM, size=25, spacing=1.08, after=6)
-        P.fig("geometry", x + gbw + 0.3, y, gw)
-        P.caption(x, y + max(gh, bh) + 0.1, iw, CAP_GEOM)
-    geom_h = max(gh, est_height(METHOD_GEOM, gbw, 25, 1.08, 6)) + 0.1 + est_height([[(CAP_GEOM, False)]], iw, 22, 1.05, 0)
+    def beside(paras, name, frac, cap):
+        """Bullets on the left, a figure (frac of the width) on the right, caption below both → (height, draw)."""
+        fw_ = iw * frac; fh_ = fw_ * P.aspect(name); bw_ = iw - fw_ - 0.3
+        bh = est_height(paras, bw_, 25, 1.08, 6)
+        def draw(x, y):
+            P.text(x, y + max(0.0, (fh_ - bh) / 2), bw_, bh, paras, size=25, spacing=1.08, after=6)
+            P.fig(name, x + bw_ + 0.3, y, fw_)
+            P.caption(x, y + max(fh_, bh) + 0.1, iw, cap)
+        return max(fh_, bh) + 0.1 + est_height([[(cap, False)]], iw, 22, 1.05, 0), draw
+    inputs_h = 0.6 + 0.47 * len(INPUTS)
+    avail = (colbot - 0.2) - (y - 0.2) - 0.3 * 4                       # leave ~0.3 in between items
+    train_h = est_height(METHOD_TRAIN, iw, 26, 1.08, 6)
+    for s in [1 - 0.02 * k for k in range(25)]:                        # shrink the geometry figure until it fits
+        geom_h, geom = beside(METHOD_GEOM, "geometry", 0.58 * s, CAP_GEOM)
+        if geom_h + inputs_h + train_h <= avail: break
+    if s < 0.999: print(f"  methods figure scaled to {s:.2f}")
     P.flow(X1 + pad, y - 0.2, colbot - 0.2, iw,
-           [("custom", geom_h, geom), ("custom", 0.6 + 0.47 * len(INPUTS), inputs), ("custom", train_h, train)])
+           [("custom", geom_h, geom), ("custom", inputs_h, inputs), ("text", METHOD_TRAIN)])
 
     # ================= right column
-    res_bot = 36.3
+    res_bot = 36.9
     y = P.section(X2, top, CW, res_bot - top, "Results")
     tw_ = (iw - 2 * 0.35) / 3
     for i, (num, lbl) in enumerate(TILES):
@@ -334,13 +345,13 @@ def build(theme):
         P.text(tx, y + 1.45, tw_, 1.2, lbl.split("\n"), size=23, color=t["text"], align=PP_ALIGN.CENTER, after=0, spacing=1.0)
     y += 2.7
     P.flow(X2 + pad, y, res_bot - 0.15, iw,
-           [("fig", "accuracy", 1.0, CAP_ACC), ("text", RES_SHIFT), ("fig", "shifts", 1.0, CAP_SHIFT),
-            ("text", RES_SKY), ("fig", "skyerror", 1.0, CAP_SKYERR)])
+           [("fig", "accuracy2", 1.0, CAP_ACC), ("fig", "training", 0.9, CAP_TRAIN), ("fig", "shifts", 1.0, CAP_SHIFT),
+            ("text", RES_SKY), ("fig", FIG7, 1.0, CAP_SKYERR)])
 
     # Next Steps (vertical roadmap)
     ns_top = res_bot + 0.45
     y = P.section(X2, ns_top, CW, colbot - ns_top, "Next Steps", hh=1.0)
-    sh_, gap = 1.12, 0.26
+    sh_, gap = 1.0, 0.24
     for i, (state, head, body) in enumerate(STEPS):
         col = t["nxt" if state == "next" else state]
         P.rect(X2 + pad, y, iw, sh_, fill=t["box"], line=col, lw=5, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.15)
@@ -365,7 +376,7 @@ def build(theme):
         P.text(X2 + pad + j * (cw2 + 0.4), y - 0.2, cw2, b_bot - y, col, size=21, spacing=1.0, after=6)
 
     P.s.notes_slide.notes_text_frame.text = NOTES
-    out = os.path.join(HERE, f"poster_{theme}.pptx"); P.prs.save(out); print("wrote", out)
+    out = os.path.join(HERE, f"poster_{theme}{SUFFIX}.pptx"); P.prs.save(out); print("wrote", out)
 
 for th in ("light", "dark"):
     build(th)
