@@ -98,8 +98,9 @@ CAP_SHIFT = ("Figure 6. Six versions of the test, sliding the withheld months 10
 RES_SKY = [B([("Largest errors ", True), ("along the plane of the planets, where the dust bands are (0.08%); ", False),
               ("smallest ", True), ("toward the poles (0.013%; Fig. 7)", False)])]
 # Fig. 7 variant (env POSTER_FIG7): "skyerror" = 3.5° patches (≈ SPHEREx's view), "skyerror7" = the 7° blend;
-# POSTER_SUFFIX is appended to the output names (e.g. "_35" for the alternative version)
-FIG7 = os.environ.get("POSTER_FIG7", "skyerror7")
+# POSTER_SUFFIX is appended to the output names. Main poster (Oct 19, user's choice): 3.5° patches; the 7° blend is
+# kept as poster_{light,dark}_7deg (POSTER_FIG7=skyerror7 POSTER_SUFFIX=_7deg).
+FIG7 = os.environ.get("POSTER_FIG7", "skyerror")
 SUFFIX = os.environ.get("POSTER_SUFFIX", "")
 CAP_SKYERR = ("Figure 7. Error on pointings the network never saw, across the whole sky. " +
               ("Each pointing is drawn 3.5° wide, about SPHEREx's view. " if FIG7 == "skyerror" else

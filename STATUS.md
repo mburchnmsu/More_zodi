@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-19 08:00, DESKTOP-BBASC81
+Updated: 2026-10-19 08:30, DESKTOP-BBASC81
 
 ## Headline
 The emulator reaches ~0.016–0.018% median error on months it never saw; the mentor's Earth-trailing-cloud test passes;
@@ -27,7 +27,8 @@ Earth-trailing cloud (5–9% of the light behind Earth): leftover fraction in th
 nothing
 
 ## Waiting on user
-- Poster Fig. 7 style: 7° blend (poster_{light,dark}.pptx) or 3.5° patches (poster_{light,dark}_35.pptx).
+- Mentor's feedback on poster v6 (meeting Oct 19). Fig. 7 uses 3.5° patches (user's choice, Oct 19); the 7° blend is
+  kept as poster_{light,dark}_7deg.
 
 Decided 2026-10-19: no fixed Kelsall dust-band inputs for now (they import Kelsall's band shapes/parameters, i.e. part
 of the simulator's answer); the poster stays on the 750-epoch model without bands. Future: learn the band parameters
