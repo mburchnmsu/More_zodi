@@ -348,12 +348,12 @@ function fig_training(t)
     with_theme(themed(t)) do
         fig = Figure(size=(1500, 620), figure_padding=(10, 45, 10, 10))
         panels = (("Whole months withheld", TRN["blk_tr"], TRN["blk_te"]),)
-        lo = minimum(TRN["blk_tr"]) / 1.5; hi = 3e-4
+        lo, hi = 1e-8, 1.0                              # wide log range (user's choice, Oct 19): the jitter reads as a thin band
         axs = Axis[]
         for (c, (ttl, tr, te)) in enumerate(panels)    # epoch-averaged curves: row e = epoch e (1-based)
             ax = Axis(fig[1, c], yscale=log10, title=ttl, xlabel="training pass (epoch)", ylabel=c == 1 ? "error (MSE, log scale)" : "",
                       limits=((0, size(tr, 1)), (lo, hi)),
-                      yticks=([1e-8, 1e-7, 1e-6, 1e-5, 1e-4], ["10⁻⁸", "10⁻⁷", "10⁻⁶", "10⁻⁵", "10⁻⁴"]))
+                      yticks=([1e-8, 1e-6, 1e-4, 1e-2, 1.0], ["10⁻⁸", "10⁻⁶", "10⁻⁴", "10⁻²", "1"]))
             push!(axs, ax); ep = 1:size(tr, 1)
             for s in 1:size(tr, 2)
                 lines!(ax, ep, tr[:, s], color=(p.a1, 0.3), linewidth=1.5); lines!(ax, ep, te[:, s], color=(p.a2, 0.3), linewidth=1.5)
