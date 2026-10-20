@@ -29,11 +29,11 @@ THEMES = {
     "light": dict(page="F2F4F7", panel="FFFFFF", border="1E3557", head="1E3557", headtxt="FFFFFF", text="1B1F24",
                   sub="4A5563", accent="8C0B42", accent2="1E5AA8", banner="8C0B42", bannertxt="FFFFFF",
                   tile="EAF1FA", tilenum="1E5AA8", box="EAF1FA", boxborder="1E5AA8", done="2E7D32", now="E08A00",
-                  nxt="5A6472", problem="FFF4E0", problemborder="E08A00"),
+                  nxt="5A6472", problem="FFF4E0", problemborder="E08A00", hl="B8460B"),
     "dark":  dict(page="0A1524", panel="0F2036", border="2D5A94", head="1E3557", headtxt="FFFFFF", text="EEF3F8",
                   sub="A9B6C6", accent="FF6F91", accent2="5FB0FF", banner="8C0B42", bannertxt="FFFFFF",
                   tile="16304F", tilenum="5FB0FF", box="16304F", boxborder="5FB0FF", done="66BB6A", now="FFB000",
-                  nxt="A9B6C6", problem="2A2416", problemborder="FFB000"),
+                  nxt="A9B6C6", problem="2A2416", problemborder="FFB000", hl="FFC861"),
 }
 
 class H(str):
@@ -195,7 +195,9 @@ class Poster:
                 etree.SubElement(pPr, qn("a:buChar")).set("char", "•")
             for txt, b in runs:
                 r = p.add_run(); r.text = txt; f = r.font
-                f.size = Pt(sz); f.bold = b; f.name = font; f.color.rgb = rgb(col)
+                # key phrases (bold runs inside bullets) are highlighted in colour, as in the mentor's example posters
+                f.size = Pt(sz); f.bold = b; f.name = font
+                f.color.rgb = rgb(self.t["hl"] if (b and isinstance(para, B)) else col)
         return tb
 
     def block(self, x, y, w, paras, size=BODY, spacing=1.08, after=6):
