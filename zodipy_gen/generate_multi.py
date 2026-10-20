@@ -23,9 +23,9 @@ ROOT = sys.argv[1]; D = f"{ROOT}/data"; EPHEM = "de432s"; CHUNK = 2000
 WAVES = np.geomspace(1.25, 5.0, 64)
 COMPS = ["smooth_cloud", "dust_band_1", "dust_band_2", "dust_band_3", "circum_solar_ring", "earth_trailing_feature"]
 
-with h5py.File(f"{D}/boresight_pointing.h5") as f:
+with h5py.File(f"{D}/d140/boresight_pointing.h5") as f:
     lon = f["pointing/ecliptic_longitude_deg"][:]; lat = f["pointing/ecliptic_latitude_deg"][:]; jd = f["times/julian_date"][:]
-with h5py.File(f"{D}/spherex_vectors_bore_interpolated.h5") as f:
+with h5py.File(f"{D}/d140/spherex_vectors_bore_interpolated.h5") as f:
     S_bary = f["spherex/positions"][:]
 with h5py.File(f"{D}/zodipy115_5um_boresight.h5") as f:
     y5 = f["emission"][:]; days = f["times/days_since_start"][:]

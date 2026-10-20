@@ -26,13 +26,13 @@ ROOT = sys.argv[1]; D = f"{ROOT}/data"
 X = 5 * u.um; EPHEM = "de432s"; CHUNK = 2000
 COMPS = ["smooth_cloud", "dust_band_1", "dust_band_2", "dust_band_3", "circum_solar_ring", "earth_trailing_feature"]
 
-with h5py.File(f"{D}/boresight_pointing.h5") as f:
+with h5py.File(f"{D}/d140/boresight_pointing.h5") as f:
     lon = f["pointing/ecliptic_longitude_deg"][:]; lat = f["pointing/ecliptic_latitude_deg"][:]
     jd = f["times/julian_date"][:]
-with h5py.File(f"{D}/spherex_zodipy_5um_boresight_interpolated.h5") as f:
+with h5py.File(f"{D}/d140/spherex_zodipy_5um_boresight_interpolated.h5") as f:
     days = f["times/days_since_start"][:]
     assert np.array_equal(f["times/julian_date"][:], jd)
-with h5py.File(f"{D}/spherex_vectors_bore_interpolated.h5") as f:
+with h5py.File(f"{D}/d140/spherex_vectors_bore_interpolated.h5") as f:
     S_bary = f["spherex/positions"][:]; E_bary = f["earth/positions"][:]   # (N, 3) AU, barycentric ecliptic
 N = len(jd)
 
@@ -83,7 +83,7 @@ for j in range(0, N, CHUNK):
         el = time.time() - t0; print(f"  {j + len(ii):7d}/{N}  {el:6.0f}s  (eta {el / (j + len(ii)) * (N - j - len(ii)):5.0f}s)", flush=True)
 tot = out.sum(0)
 assert np.all(np.isfinite(out)) and np.all(tot > 0)
-with h5py.File(f"{D}/spherex_zodipy_5um_boresight_interpolated.h5") as f0:
+with h5py.File(f"{D}/d140/spherex_zodipy_5um_boresight_interpolated.h5") as f0:
     old = f0["emission"][:]
 print(f"boresight done in {time.time() - t0:.0f}s; new/old median {np.median(tot / old):.5f}, range {np.min(tot / old):.4f}..{np.max(tot / old):.4f}", flush=True)
 
@@ -104,7 +104,7 @@ with h5py.File(f"{D}/zodipy115_5um_boresight.h5", "w") as f:
     f["times/julian_date"] = jd; f["times/days_since_start"] = days
 
 # --- all-sky map at the earliest exposure ---------------------------------------------------------------
-with h5py.File(f"{D}/spherex_zodipy_5um_boresight_healpix_components_interpolated.h5") as f0:
+with h5py.File(f"{D}/d140/spherex_zodipy_5um_boresight_healpix_components_interpolated.h5") as f0:
     plat = f0["ecliptic_latitude_deg"][:]; plon = f0["ecliptic_longitude_deg"][:]; pix = f0["pixels"][:]
 k0 = order[0]; t = Time(jd[k0], format="jd", scale="tdb")
 c = SkyCoord(plon * u.deg, plat * u.deg, frame="barycentricmeanecliptic", obstime=t)

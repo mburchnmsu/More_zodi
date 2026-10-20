@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-19 21:50, DESKTOP-BBASC81
+Updated: 2026-10-19 22:40, DESKTOP-BBASC81
 
 ## Headline
 The emulator reaches ~0.016–0.018% median error on months it never saw; the mentor's Earth-trailing-cloud test passes;
@@ -27,8 +27,10 @@ Earth-trailing cloud (5–9% of the light behind Earth): leftover fraction in th
 nothing.
 
 ## Waiting on user
-- New data: 500.3 days (was 140). Need its location and contents (pointings only, or with ZodiPy targets?) before
-  tonight's work can start; it is not on this PC yet.
+- 500-day data (1,520,194 pointings) arrived 2026-10-19 and is checked; corrected ZodiPy targets generated
+  (ZODI_DATA="z500": data/zodipy115_500d_*.h5; the delivered emission is ~2% off, observer error #1). No training yet.
+  The user needs to copy the backup of the 4 old 140-day files into data/d140/ for the old notebooks to run again.
+- Mentor's poster notes (wording, Jupiter/Moon in Fig. 3, n·x⊕): being discussed with the user before any edits.
 - Mentor's feedback on poster v6 (meeting Oct 19). Fig. 7 uses 3.5° patches (user's choice, Oct 19); the 7° blend is
   kept as poster_{light,dark}_7deg.
 

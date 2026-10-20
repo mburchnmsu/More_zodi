@@ -8,11 +8,18 @@ using SHA, HDF5, Printf, Dates
 const DDIR = joinpath(@__DIR__, "data")
 const MAN  = joinpath(DDIR, "MANIFEST.tsv")
 # which ZODI_DATA mode reads which file, and how to recreate it (the original files came from the mentor's pipeline)
+# data/d140/ = the first (140-day) delivery; data/ top level = the 500-day delivery of 2026-10-19 (same file names)
 const ROLE = Dict(
-    "boresight_pointing.h5"                                           => ("all", "original (mentor pipeline, 2025-10-30)"),
-    "spherex_vectors_bore_interpolated.h5"                            => ("original, z115", "original (mentor pipeline, 2025-11-24)"),
-    "spherex_zodipy_5um_boresight_interpolated.h5"                    => ("original", "original (mentor pipeline, 2025-11-24) — has 2 generation errors, see zodipy_gen/reproduce_original.py"),
-    "spherex_zodipy_5um_boresight_healpix_components_interpolated.h5" => ("original", "original (mentor pipeline)"),
+    "d140/boresight_pointing.h5"                                      => ("original, z115, z115multi", "original (mentor pipeline, 2025-10-30)"),
+    "d140/spherex_vectors_bore_interpolated.h5"                       => ("original, z115, z115multi", "original (mentor pipeline, 2025-11-24)"),
+    "d140/spherex_zodipy_5um_boresight_interpolated.h5"               => ("original", "original (mentor pipeline, 2025-11-24) — has 2 generation errors, see zodipy_gen/reproduce_original.py"),
+    "d140/spherex_zodipy_5um_boresight_healpix_components_interpolated.h5" => ("original", "original (mentor pipeline)"),
+    "boresight_pointing.h5"                                           => ("d500, z500", "500-day delivery (data/regen_pipeline.py, IRSA obscore, 2026-10-19)"),
+    "spherex_vectors_bore_interpolated.h5"                            => ("d500, z500", "500-day delivery (data/regen_pipeline.py, Horizons, 2026-10-19)"),
+    "spherex_zodipy_5um_boresight_interpolated.h5"                    => ("d500", "500-day delivery (data/regen_pipeline.py) — barycentric observer, error #1"),
+    "spherex_zodipy_5um_boresight_healpix_components_interpolated.h5" => ("d500", "500-day delivery (data/regen_pipeline.py)"),
+    "zodipy115_500d_boresight.h5"                                     => ("z500", "zodipy_gen/generate_500.py"),
+    "zodipy115_500d_healpix_components.h5"                            => ("z500", "zodipy_gen/generate_500.py"),
     "zodipy115_5um_boresight.h5"                                      => ("z115", "zodipy_gen/generate.py"),
     "zodipy115_5um_healpix_components.h5"                             => ("z115, z115year", "zodipy_gen/generate.py"),
     "zodipy115_future.h5"                                             => ("z115 (extrapolation test)", "zodipy_gen/generate_future.py"),
@@ -29,8 +36,10 @@ created(p) = try
     end
 catch; "" end
 
+h5files() = sort(vcat(filter(f -> endswith(f, ".h5"), readdir(DDIR)),
+                      isdir(joinpath(DDIR, "d140")) ? ["d140/" * f for f in readdir(joinpath(DDIR, "d140")) if endswith(f, ".h5")] : String[]))
 function write_manifest()
-    files = sort(filter(f -> endswith(f, ".h5"), readdir(DDIR)))
+    files = h5files()
     open(MAN, "w") do io
         println(io, "# data/MANIFEST.tsv — written $(Dates.format(now(), "yyyy-mm-dd HH:MM")) by data_manifest.jl. Check: julia --project=. data_manifest.jl")
         println(io, join(("file", "bytes", "sha256", "created", "used_by_ZODI_DATA", "made_by"), '\t'))
@@ -53,7 +62,7 @@ function check_manifest()
         status == "ok" || (bad += 1)
         @printf("  %-16s %s\n", status, f)
     end
-    extra = setdiff(filter(f -> endswith(f, ".h5"), readdir(DDIR)), first.(rows))
+    extra = setdiff(h5files(), first.(rows))
     foreach(f -> @printf("  %-16s %s\n", "NOT IN MANIFEST", f), extra)
     println(bad == 0 ? "all $(length(rows)) manifest files present and identical" : "$bad file(s) missing or different")
     bad == 0

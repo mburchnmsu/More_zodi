@@ -30,29 +30,52 @@ CairoMakie.disable_mime!("svg", "pdf", "text/html")
 
 # --- Data files --------------------------------------------------------------
 DATA_DIR = joinpath(PROJECT_DIR, "data")
+# Two deliveries of the mentor's pipeline files (same file names):
+#   data/d140/  the first 140 days (423,607 exposures, Oct 2025 / Nov 2025) — everything up to Oct 19, 2026 uses these
+#   data/       the 500-day delivery of Oct 19, 2026 (1,520,194 exposures; data/regen_pipeline.py: pointings from
+#               IRSA spherex.obscore, so directions are image centres ≈ 3.85° from the old boresights, times 57.6 s later)
+D140_DIR = joinpath(DATA_DIR, "d140")
 
-pointing_file = joinpath(DATA_DIR, "boresight_pointing.h5")
-vectors_file  = joinpath(DATA_DIR, "spherex_vectors_bore_interpolated.h5")
-allsky_file   = joinpath(DATA_DIR, "spherex_zodipy_5um_boresight_healpix_components_interpolated.h5")
-emission_file = joinpath(DATA_DIR, "spherex_zodipy_5um_boresight_interpolated.h5")
-# Which target to use. Default "original" = the files above (what every notebook up to 10132026 uses).
-# "z115" = the same exposures regenerated with ZodiPy 1.1.5 (zodipy_gen/generate.py). Set ENV["ZODI_DATA"] = "z115"
-# BEFORE including this file. Results then live in sweeps/results_z115/ so they can never mix with the originals.
+# Which target to use (set ENV["ZODI_DATA"] BEFORE including this file; results live in sweeps/results_<name>/):
+#   140-day data (data/d140/ pointings and vectors):
+#     "original"  — the mentor's ZodiPy emission (has 2 generation errors, see zodipy_gen/reproduce_original.py)
+#     "z115"      — the same exposures regenerated with ZodiPy 1.1.5 (zodipy_gen/generate.py)
+#     "z115multi" — same exposures, each at one of 64 wavelengths 1.25–5.0 μm (zodipy_gen/generate_multi.py)
+#   "z115year"    — a synthetic ~2.3-year survey (real mission + 5 rotated copies; zodipy_gen/generate_year.py)
+#   500-day data (data/ pointings and vectors):
+#     "d500"      — the mentor's ZodiPy emission for the 500 days (barycentric observer: ~2–3% too faint, error #1)
+#     "z500"      — the 500 days regenerated with ZodiPy 1.1.5 (zodipy_gen/generate_500.py)
 ZODI_DATA = get(ENV, "ZODI_DATA", "original")
-# "z115year" = a synthetic ~2.3-year survey (real mission + 5 rotated copies, 600k exposures; zodipy_gen/generate_year.py).
-if ZODI_DATA == "z115"
-    allsky_file   = joinpath(DATA_DIR, "zodipy115_5um_healpix_components.h5")
-    emission_file = joinpath(DATA_DIR, "zodipy115_5um_boresight.h5")
-elseif ZODI_DATA == "z115multi"     # same exposures, each at one of 64 wavelengths 1.25–5.0 μm (zodipy_gen/generate_multi.py)
-    allsky_file   = joinpath(DATA_DIR, "zodipy115_5um_healpix_components.h5")
-    emission_file = joinpath(DATA_DIR, "zodipy115_multi_boresight.h5")
+if ZODI_DATA in ("original", "z115", "z115multi")
+    isdir(D140_DIR) || error("ZODI_DATA = $ZODI_DATA needs the 140-day files in $D140_DIR (copy the backup of the old " *
+                             "boresight_pointing.h5, spherex_vectors_bore_interpolated.h5 and the two spherex_zodipy_5um_* files there)")
+    pointing_file = joinpath(D140_DIR, "boresight_pointing.h5")
+    vectors_file  = joinpath(D140_DIR, "spherex_vectors_bore_interpolated.h5")
+    allsky_file   = joinpath(D140_DIR, "spherex_zodipy_5um_boresight_healpix_components_interpolated.h5")
+    emission_file = joinpath(D140_DIR, "spherex_zodipy_5um_boresight_interpolated.h5")
+    if ZODI_DATA == "z115"
+        allsky_file   = joinpath(DATA_DIR, "zodipy115_5um_healpix_components.h5")
+        emission_file = joinpath(DATA_DIR, "zodipy115_5um_boresight.h5")
+    elseif ZODI_DATA == "z115multi"
+        allsky_file   = joinpath(DATA_DIR, "zodipy115_5um_healpix_components.h5")
+        emission_file = joinpath(DATA_DIR, "zodipy115_multi_boresight.h5")
+    end
 elseif ZODI_DATA == "z115year"
     pointing_file = joinpath(DATA_DIR, "z115year_pointing.h5")
     vectors_file  = joinpath(DATA_DIR, "z115year_vectors.h5")
     allsky_file   = joinpath(DATA_DIR, "zodipy115_5um_healpix_components.h5")
     emission_file = joinpath(DATA_DIR, "z115year_boresight.h5")
+elseif ZODI_DATA in ("d500", "z500")
+    pointing_file = joinpath(DATA_DIR, "boresight_pointing.h5")
+    vectors_file  = joinpath(DATA_DIR, "spherex_vectors_bore_interpolated.h5")
+    allsky_file   = joinpath(DATA_DIR, "spherex_zodipy_5um_boresight_healpix_components_interpolated.h5")
+    emission_file = joinpath(DATA_DIR, "spherex_zodipy_5um_boresight_interpolated.h5")
+    if ZODI_DATA == "z500"
+        allsky_file   = joinpath(DATA_DIR, "zodipy115_500d_healpix_components.h5")
+        emission_file = joinpath(DATA_DIR, "zodipy115_500d_boresight.h5")
+    end
 else
-    @assert ZODI_DATA == "original" "unknown ZODI_DATA = $ZODI_DATA (use \"original\", \"z115\", \"z115multi\" or \"z115year\")"
+    error("unknown ZODI_DATA = $ZODI_DATA (use \"original\", \"z115\", \"z115multi\", \"z115year\", \"d500\" or \"z500\")")
 end
 RESULTS_DIR = joinpath(PROJECT_DIR, "sweeps", ZODI_DATA == "original" ? "results" : "results_$ZODI_DATA")
 println("target data: $ZODI_DATA  ($(basename(emission_file)));  results dir: $(relpath(RESULTS_DIR, PROJECT_DIR))")

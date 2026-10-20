@@ -7,9 +7,9 @@ from astropy.coordinates import SkyCoord, BarycentricMeanEcliptic, HeliocentricM
 import zodipy
 D = f"{sys.argv[1]}/data"; EPHEM = "de432s"
 WAVES = np.geomspace(1.25, 5.0, 120)
-with h5py.File(f"{D}/boresight_pointing.h5") as f:
+with h5py.File(f"{D}/d140/boresight_pointing.h5") as f:
     lon = f["pointing/ecliptic_longitude_deg"][:]; lat = f["pointing/ecliptic_latitude_deg"][:]; jd = f["times/julian_date"][:]
-with h5py.File(f"{D}/spherex_vectors_bore_interpolated.h5") as f:
+with h5py.File(f"{D}/d140/spherex_vectors_bore_interpolated.h5") as f:
     S = f["spherex/positions"][:]
 rng = np.random.default_rng(7)
 targets = [0, 15, 35, 55, 75, 88]                      # ecliptic latitude (deg) of each chosen exposure

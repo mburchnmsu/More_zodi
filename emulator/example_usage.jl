@@ -7,7 +7,7 @@ em = load_emulator(joinpath(@__DIR__, "zodi_emulator_v1.jld2"))
 println(em)
 
 # 1) Geometry for one epoch, taken from the project's ephemeris file (exposure index 13170)
-eph = load_ephemeris(joinpath(@__DIR__, "..", "data", "spherex_vectors_bore_interpolated.h5"), [13170])
+eph = load_ephemeris(joinpath(@__DIR__, "..", "data", "d140", "spherex_vectors_bore_interpolated.h5"), [13170])
 eph1 = map(v -> vec(v), eph)                                   # 3×1 → 3-vectors (same epoch for every direction)
 
 # 2) A few lines of sight (unit vectors, barycentric ecliptic): north ecliptic pole, and points on the ecliptic

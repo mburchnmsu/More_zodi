@@ -1,0 +1,26 @@
+﻿1520194 exposures, JD 2460790.2508 .. 2461290.5019 (500.25 d), time-sorted: True
+Earth: vectors file vs de432s (50 exposures across the 500 days): max |diff| 1.43e-05 AU
+vectorised chunks vs one-by-one (40 exposures across the 500 days): max rel diff 4.34e-12
+      2000/1520194       0s  (eta    91s)
+    102000/1520194       6s  (eta    84s)
+    202000/1520194      11s  (eta    73s)
+    302000/1520194      17s  (eta    70s)
+    402000/1520194      25s  (eta    71s)
+    502000/1520194      33s  (eta    68s)
+    602000/1520194      40s  (eta    62s)
+    702000/1520194      47s  (eta    55s)
+    802000/1520194      53s  (eta    47s)
+    902000/1520194      58s  (eta    40s)
+   1002000/1520194      63s  (eta    32s)
+   1102000/1520194      68s  (eta    26s)
+   1202000/1520194      75s  (eta    20s)
+   1302000/1520194      81s  (eta    14s)
+   1402000/1520194      86s  (eta     7s)
+   1502000/1520194      91s  (eta     1s)
+boresight done in 92s; new/delivered median 1.00815, range 0.9665..1.0457
+  days   0-140: new/delivered median 1.01924, p1 0.9823, p99 1.0434
+  days 140-300: new/delivered median 0.97718, p1 0.9680, p99 1.0032
+  days 300-501: new/delivered median 1.01770, p1 0.9942, p99 1.0352
+wrote data/zodipy115_500d_boresight.h5
+all-sky map (786432 pixels) at exposure index 0 (jd 2460790.2508) in 38s
+DONE

@@ -1,9 +1,9 @@
 # data/MANIFEST.tsv — written 2026-10-14 04:39 by data_manifest.jl. Check: julia --project=. data_manifest.jl
 file	bytes	sha256	created	used_by_ZODI_DATA	made_by
-boresight_pointing.h5	26861925	312003bbe645e49a9176892004dec0b01610e390355dc8ef771548cb5c7e0c14	2025-10-30T07:54:26.106701	all	original (mentor pipeline, 2025-10-30)
-spherex_vectors_bore_interpolated.h5	73036620	4216b5b5e2be8f0e19ac93c7414b9d0916511f81fe3810145707a4c7e0d4c40a	2025-11-24T12:58:28.660347	original, z115	original (mentor pipeline, 2025-11-24)
-spherex_zodipy_5um_boresight_healpix_components_interpolated.h5	44706610	a70bd490bbdb9d2823e22bb4d6b3b2daf5e03ef5485c1cbdc6b9443982fa0eb5		original	original (mentor pipeline)
-spherex_zodipy_5um_boresight_interpolated.h5	13751958	cf86dfe3fa5d1f7710e43b5d599ef1972a67447356376eaee2a00601d54a91d2	2025-11-24T13:00:09.810598	original	original (mentor pipeline, 2025-11-24) — has 2 generation errors, see zodipy_gen/reproduce_original.py
+d140/boresight_pointing.h5	26861925	312003bbe645e49a9176892004dec0b01610e390355dc8ef771548cb5c7e0c14	2025-10-30T07:54:26.106701	all	original (mentor pipeline, 2025-10-30)
+d140/spherex_vectors_bore_interpolated.h5	73036620	4216b5b5e2be8f0e19ac93c7414b9d0916511f81fe3810145707a4c7e0d4c40a	2025-11-24T12:58:28.660347	original, z115	original (mentor pipeline, 2025-11-24)
+d140/spherex_zodipy_5um_boresight_healpix_components_interpolated.h5	44706610	a70bd490bbdb9d2823e22bb4d6b3b2daf5e03ef5485c1cbdc6b9443982fa0eb5		original	original (mentor pipeline)
+d140/spherex_zodipy_5um_boresight_interpolated.h5	13751958	cf86dfe3fa5d1f7710e43b5d599ef1972a67447356376eaee2a00601d54a91d2	2025-11-24T13:00:09.810598	original	original (mentor pipeline, 2025-11-24) — has 2 generation errors, see zodipy_gen/reproduce_original.py
 z115year_boresight.h5	52814336	ab03a65c702546f402e04fc957443e5d53c1cde5dbb635fc2aad409534e69e19	2026-10-13T22:04:44	z115year	zodipy_gen/generate_year.py
 z115year_pointing.h5	38412288	97620fd11edaa552d3e094e500f3784e3ea1246a9a04b63f745c5d676d739820	2026-10-13T22:04:44	z115year	zodipy_gen/generate_year.py
 z115year_vectors.h5	115212288	d2bfc7a4ca0c99dd6d1b909c6acc5592f4ad9baa40c7a1b842e887bd2517b95b		z115year	zodipy_gen/generate_year.py

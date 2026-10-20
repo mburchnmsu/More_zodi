@@ -17,11 +17,11 @@ from astropy.coordinates import SkyCoord
 import zodipy, zodipy.model as zm
 
 D = f"{sys.argv[1]}/data"
-with h5py.File(f"{D}/boresight_pointing.h5") as f:
+with h5py.File(f"{D}/d140/boresight_pointing.h5") as f:
     lon = f["pointing/ecliptic_longitude_deg"][:]; lat = f["pointing/ecliptic_latitude_deg"][:]; jd = f["times/julian_date"][:]
-with h5py.File(f"{D}/spherex_zodipy_5um_boresight_interpolated.h5") as f:
+with h5py.File(f"{D}/d140/spherex_zodipy_5um_boresight_interpolated.h5") as f:
     old = f["emission"][:]; days = f["times/days_since_start"][:]
-with h5py.File(f"{D}/spherex_vectors_bore_interpolated.h5") as f:
+with h5py.File(f"{D}/d140/spherex_vectors_bore_interpolated.h5") as f:
     S = f["spherex/positions"][:]
 
 tt = Time(jd, format="jd")                                   # as a user would write it (scale UTC by default)

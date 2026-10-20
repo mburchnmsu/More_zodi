@@ -54,6 +54,7 @@ text!(ax2, 640, 4e-7, text="anneal to 10⁻⁷", fontsize=16, color=:white, alig
 
 # --- settings table ---
 rows = [("Inputs", "9 viewing-geometry numbers (dot products of the look direction n)"),
+        ("Frame", "ecliptic coordinates; x⊕ = Sun → Earth, y⊕ = Earth's motion, z = ecliptic north"),
         ("Network", "4 hidden layers 64-64-32-16, GELU; linear output"),
         ("Loss / optimizer", "mean squared error (MJy/sr)²; Adam"),
         ("Batches", @sprintf("mini-batches of %d pointings (%d updates per epoch)", batch, steps_per_epoch)),

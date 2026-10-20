@@ -75,7 +75,7 @@ METHOD_GEOM = [H("A geometrically constrained model"),
 INPUTS = [("n·S, n·E", "toward or away from the Sun (seen from SPHEREx and from Earth)"),
           ("n·z", "how far above or below the plane of the planets"),
           ("n·vS, n·vE", "ahead of or behind the orbital motion (SPHEREx, Earth)"),
-          ("n·x⊕, n·y⊕", "look direction in a frame that turns with Earth (x⊕ = Sun → Earth)"),
+          ("n·x⊕, n·y⊕", "Earth-following frame: x⊕ = Sun → Earth, y⊕ = Earth's motion"),
           ("sin λ⊕, cos λ⊕", "Earth's position in its orbit: the time of year")]
 METHOD_TRAIN = [H("Training and testing"),
                 B([("423,607 simulated pointings (140 days, 5 μm); five small networks (Flux.jl), averaged", False)]),

@@ -17,7 +17,7 @@ const ORIG_NAME = Dict(("base", "blk") => "blk_base", ("base", "ch") => "final_b
                        ("season", "ch") => "b9_season_ch", ("novS", "blk") => "b9_novS_blk", ("novS", "ch") => "b9_novS_ch",
                        ("season", "p1") => "patch1_season")
 const RES_ORIG = joinpath(PROJECT_DIR, "sweeps", "results")
-const y_orig   = h5open(f -> read(f["emission"]), joinpath(DATA_DIR, "spherex_zodipy_5um_boresight_interpolated.h5"))
+const y_orig   = h5open(f -> read(f["emission"]), joinpath(D140_DIR, "spherex_zodipy_5um_boresight_interpolated.h5"))
 const MISSION_JD0 = minimum(times)                           # first exposure
 mission_day(jd) = jd .- MISSION_JD0
 

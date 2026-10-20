@@ -23,9 +23,9 @@ DELTAS = np.arange(30, 541, 30)            # days
 NBASE = 6000                               # exposures per Δ
 COMPS = ["smooth_cloud", "dust_band_1", "dust_band_2", "dust_band_3", "circum_solar_ring", "earth_trailing_feature"]
 
-with h5py.File(f"{D}/boresight_pointing.h5") as f:
+with h5py.File(f"{D}/d140/boresight_pointing.h5") as f:
     nvec = f["pointing/nvec_unit_cartesian"][:]; jd = f["times/julian_date"][:]
-with h5py.File(f"{D}/spherex_vectors_bore_interpolated.h5") as f:
+with h5py.File(f"{D}/d140/spherex_vectors_bore_interpolated.h5") as f:
     S = f["spherex/positions"][:]; vS = f["spherex/velocities"][:]
     E = f["earth/positions"][:]; vE = f["earth/velocities"][:]; J = f["jupiter/positions"][:]
 N = len(jd)

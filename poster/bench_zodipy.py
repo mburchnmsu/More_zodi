@@ -17,10 +17,10 @@ ROOT = sys.argv[1]; D = f"{ROOT}/data"; EPHEM = "de432s"
 NB = 20000          # batch size (block of exposures)
 NSINGLE = 30        # single-exposure calls
 
-with h5py.File(f"{D}/boresight_pointing.h5") as f:
+with h5py.File(f"{D}/d140/boresight_pointing.h5") as f:
     lon = f["pointing/ecliptic_longitude_deg"][:]; lat = f["pointing/ecliptic_latitude_deg"][:]
     jd = f["times/julian_date"][:]
-with h5py.File(f"{D}/spherex_vectors_bore_interpolated.h5") as f:
+with h5py.File(f"{D}/d140/spherex_vectors_bore_interpolated.h5") as f:
     S_bary = f["spherex/positions"][:]
 
 order = np.argsort(jd, kind="stable")

@@ -23,9 +23,9 @@ ROOT = sys.argv[1]; D = f"{ROOT}/data"; EPHEM = "de432s"
 SHIFTS = [0, 140, 280, 420, 560, 700]; NPER = 100_000
 COMPS = ["smooth_cloud", "dust_band_1", "dust_band_2", "dust_band_3", "circum_solar_ring", "earth_trailing_feature"]
 
-with h5py.File(f"{D}/boresight_pointing.h5") as f:
+with h5py.File(f"{D}/d140/boresight_pointing.h5") as f:
     nvec = f["pointing/nvec_unit_cartesian"][:]; jd = f["times/julian_date"][:]
-with h5py.File(f"{D}/spherex_vectors_bore_interpolated.h5") as f:
+with h5py.File(f"{D}/d140/spherex_vectors_bore_interpolated.h5") as f:
     V = {b: (f[f"{b}/positions"][:], f[f"{b}/velocities"][:]) for b in ("spherex", "earth", "jupiter", "moon")}
 with h5py.File(f"{D}/zodipy115_5um_boresight.h5") as f:
     y0 = f["emission"][:]; C0 = np.vstack([f[f"emission_{n}"][:] for n in COMPS])
