@@ -1,7 +1,7 @@
 # Round 16 helpers (10152026 notebook): shifted 30-day train/test windows, train + test MSE curves, all-sky error map.
 # Requires ENV["ZODI_DATA"] = "z115" before zodi_setup.jl, then mb_train.jl, extra_features.jl, summary_helpers.jl,
 # and configs_v16.jl (for SHIFTS16, shifted_30day_split, shift_run).
-@assert ZODI_DATA == "z115" "shift_helpers.jl needs ENV[\"ZODI_DATA\"] = \"z115\""
+@assert ZODI_DATA in ("z115", "z500") "shift_helpers.jl needs ENV[\"ZODI_DATA\"] = \"z115\" (or \"z500\" for the 500-day runs)"
 using Serialization, CairoMakie, Statistics, Printf, DataFrames
 
 const _R16 = Dict{Any, Vector{Any}}()
