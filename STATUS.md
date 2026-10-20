@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-19 14:30, DESKTOP-BBASC81
+Updated: 2026-10-19 21:50, DESKTOP-BBASC81
 
 ## Headline
 The emulator reaches ~0.016–0.018% median error on months it never saw; the mentor's Earth-trailing-cloud test passes;
@@ -24,9 +24,11 @@ Earth-trailing cloud (5–9% of the light behind Earth): leftover fraction in th
 (750 epochs) — learned. Notebook: notebooks/10182026.ipynb.
 
 ## Running now
-nothing. Quiet window today 15:30–17:20 (user's meeting): no heavy jobs will be started before 17:20.
+nothing.
 
 ## Waiting on user
+- New data: 500.3 days (was 140). Need its location and contents (pointings only, or with ZodiPy targets?) before
+  tonight's work can start; it is not on this PC yet.
 - Mentor's feedback on poster v6 (meeting Oct 19). Fig. 7 uses 3.5° patches (user's choice, Oct 19); the 7° blend is
   kept as poster_{light,dark}_7deg.
 
