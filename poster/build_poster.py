@@ -55,21 +55,21 @@ BG_SPHEREX = [B([("SPHEREx: ", True), ("NASA space telescope (launched March 202
                  "ingredients for life are found", False)])]
 BG_TEXT = [H("Zodiacal light"),
            B([("Sunlight scattered by dust from comets and asteroids, plus the dust's heat glow (Fig. 1)", False)]),
-           B([("Bright enough to be confused with faint light from distant galaxies", False)]),
-           B([("Changes with look direction and Earth's place in orbit → ", False), ("must be modeled and removed", True)]),
+           B([("Far brighter than the faint glow of distant galaxies SPHEREx aims to measure", False)]),
+           B([("Changes with pointing and Earth's place in orbit → ", False), ("must be modeled and removed", True)]),
            H("The Kelsall model"),
            B([("Standard dust model from NASA's COBE (Fig. 2); ", False), ("ZodiPy", True),
-              (" computes what SPHEREx would see from it", False)])]
+              (" evaluates its prediction of the zodiacal-light contribution to what SPHEREx observes", False)])]
 PROBLEM_L = [H("The problem"),
-             B([("Zodiacal light must be removed from every SPHEREx image, but models like Kelsall's were fit to older "
-                "data and leave errors behind", False)])]
+             B([("Zodiacal light must be removed from every SPHEREx image, but Kelsall's model uses a finite number of "
+                "analytic components that don't fully describe the spatial and spectral structure in real data", False)])]
 PROBLEM_R = [H("Research objective"),
              B([("A ", False), ("geometrically constrained", True), (" neural network that learns zodiacal light from "
                 "SPHEREx data and ", False), ("outperforms the Kelsall model", True),
                 (". First step: ZodiPy's simulated sky", False)])]
 METHOD_GEOM = [H("A geometrically constrained model"),
-               B([("No dates or sky-map positions: only ", False), ("9 numbers describing the viewing geometry", True),
-                  (" (Fig. 3)", False)]),
+               B([("No dates or sky coordinates: only ", False), ("9 numbers describing the viewing geometry", True),
+                  (" (Fig. 3), dot products of the pointing vector n", False)]),
                B([("It must learn how brightness depends on geometry, as the physics does, not memorize when and where "
                   "SPHEREx looked", False)])]
 INPUTS = [("n·S, n·E", "toward or away from the Sun (seen from SPHEREx and from Earth)"),
@@ -85,8 +85,9 @@ CAP_SKY = ("Figure 1. The whole sky at 5 μm from SPHEREx (ZodiPy): brightest to
            "planets. Grey: too close to the Sun to observe.")
 CAP_COMP = ("Figure 2. What makes up the zodiacal light SPHEREx sees (Kelsall model): a smooth cloud (88–95%) plus "
             "dust bands, a ring around the Sun, and a cloud trailing Earth, strongest when looking behind Earth.")
-CAP_GEOM = ("Figure 3. The geometry the network sees (top view, not to scale): n = where SPHEREx looks; S, E = Sun → "
-            "SPHEREx, Earth; v = orbital motion; λ⊕ = Earth's angle around its orbit. Jupiter and the Moon: context only.")
+CAP_GEOM = ("Figure 3. The geometry the network sees (top view, not to scale): n = SPHEREx's pointing vector; S, E = "
+            "SPHEREx, Earth positions; v = orbital motion; λ⊕ = Earth's angle around its orbit. Jupiter and the Moon are "
+            "tracked for real data: dust clouds leading and trailing Jupiter, and moonlight.")
 CAP_TRAIN = ("Figure 5. Error during training: 5 networks (thin), average (thick). The error on withheld months levels off "
              "and never rises: no overfitting.")
 TILES = [("0.018%", "median error on months\nwithheld from training"), ("97.5%", "of pointings within\n0.1% of ZodiPy"),

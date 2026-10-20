@@ -53,8 +53,8 @@ text!(ax2, 12, 6e-6, text="warm-up from 4×10⁻⁵", fontsize=16, color=:white,
 text!(ax2, 640, 4e-7, text="anneal to 10⁻⁷", fontsize=16, color=:white, align=(:right, :center))
 
 # --- settings table ---
-rows = [("Inputs", "9 viewing-geometry numbers (dot products of the look direction n)"),
-        ("Frame", "ecliptic coordinates; x⊕ = Sun → Earth, y⊕ = Earth's motion, z = ecliptic north"),
+rows = [("Inputs", "9 viewing-geometry numbers (dot products of the pointing vector n̂)"),
+        ("Frame", "barycentric ecliptic; x⊕, y⊕ = ecliptic x̂, ŷ rotated by Earth's longitude λ⊕"),
         ("Network", "4 hidden layers 64-64-32-16, GELU; linear output"),
         ("Loss / optimizer", "mean squared error (MJy/sr)²; Adam"),
         ("Batches", @sprintf("mini-batches of %d pointings (%d updates per epoch)", batch, steps_per_epoch)),

@@ -137,7 +137,7 @@ function fig_geometry(t)
         vec!(ax, E, E .+ 0.55 .* (cosd(vdir), sind(vdir)), cv)
         text!(ax, E[1] + 0.58cosd(vdir), E[2] + 0.58sind(vdir), text="v (orbital motion)", color=cv, fontsize=FS - 4, font=:bold, align=(:right, :bottom))
         vec!(ax, Sp, Sp .+ 0.95 .* (cosd(nd), sind(nd)), p.a2)
-        text!(ax, Sp[1] + 0.95cosd(nd) - 0.08, Sp[2] + 0.95sind(nd) + 0.02, text="n̂ = where SPHEREx looks", color=p.a2, fontsize=FS - 2, font=:bold, align=(:right, :center))
+        text!(ax, Sp[1] + 0.95cosd(nd) - 0.08, Sp[2] + 0.95sind(nd) + 0.02, text="n̂ = pointing vector", color=p.a2, fontsize=FS - 2, font=:bold, align=(:right, :center))
         lines!(ax, [Sp[1], Sp[1] + 0.55cosd(φS)], [Sp[2], Sp[2] + 0.55sind(φS)], color=(cS, 0.7), linewidth=2, linestyle=:dash)   # S direction, extended
         arc!(ax, Sp, 0.30, φS, nd, color=cS, linewidth=3)
         text!(ax, Sp[1] + 0.40cosd((φS + nd) / 2), Sp[2] + 0.40sind((φS + nd) / 2), text="n·S", color=cS, fontsize=FS, font=:bold, align=(:left, :center))
@@ -147,7 +147,7 @@ function fig_geometry(t)
         scatter!(ax, [zc[1]], [zc[2]], markersize=9, color=p.fg)
         text!(ax, zc[1] + 0.1, zc[2], text="ẑ points out of the page (north of the planets' plane): n·z = how high above it n̂ looks",
               color=p.fg, fontsize=FS - 6, align=(:left, :center))
-        text!(ax, -2.1, -1.28, text="Each input is a dot product n·a:\n+1 = looking along a, 0 = sideways, −1 = opposite",
+        text!(ax, -2.1, -1.28, text="Each input is a dot product n̂·a:\n+1 = pointing along a, 0 = sideways, −1 = opposite",
               color=p.fg, fontsize=FS - 4, align=(:left, :bottom))
         fig
     end
