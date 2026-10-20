@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-19 22:35, DESKTOP-BBASC81
+Updated: 2026-10-20 11:30, DESKTOP-BBASC81
 
 ## Headline
 The emulator reaches ~0.016–0.018% median error on months it never saw; the mentor's Earth-trailing-cloud test passes;
@@ -24,13 +24,13 @@ Earth-trailing cloud (5–9% of the light behind Earth): leftover fraction in th
 (750 epochs) — learned. Notebook: notebooks/10182026.ipynb.
 
 ## Running now
-Round 24 (started 2026-10-19 22:30): the 500-day data (z500), poster model + n·J, 6 shifted month splits × 5 seeds,
-500 epochs — 30 trainings in 3 stages (shifts 0+30, 10+40, 20+50), ~5.6 h per batch of 5, ~34 h in total. Runs until
-the user decides at their morning check-in whether to continue.
+- Round 24 (500-day data, poster model + n·J, 6 month splits × 5 seeds, 500 epochs): 25/30 done; last batch (shift 50)
+  finishes ~12:15 on 2026-10-20 (~4.7 GB RAM, below-normal priority). Preliminary: sky-map median 0.0162%,
+  ecliptic 0.063% (140-day model: 0.083%); test MSE 4.6e-8 vs 1.2e-7.
+- Round 25 queued right after it (~2.2 h, to ~14:30): the 500-day model without n·J (control), ~4.7 GB RAM.
 
 ## Waiting on user
-- Morning check-in: keep round 24 running or stop it.
-- More poster guidance (mentor's wording notes applied 2026-10-19; Jupiter/Moon stay in Fig. 3).
+- Poster redesign (larger text, no components figure, 140 vs 500-day sky-map pair): draft sent, awaiting feedback.
 - Mentor's feedback on poster v6 (meeting Oct 19). Fig. 7 uses 3.5° patches (user's choice, Oct 19); the 7° blend is
   kept as poster_{light,dark}_7deg.
 
