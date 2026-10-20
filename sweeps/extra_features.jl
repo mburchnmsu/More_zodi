@@ -139,6 +139,9 @@ const FEATURE_SETS = Dict(
     # round 11 (Sun frame): Sun-relative inputs only — no inertial n·x, n·y, no Jupiter
     :sunframe         => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕"],
     :sunframe_season  => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE"],
+    # round 26 (mentor's Earth test): the poster model WITHOUT the Earth dot products (n·E, n·vE, n·x⊕, n·y⊕); clock kept.
+    # Note: SPHEREx is ~5e-5 AU from Earth, so n·S ≈ n·E and n·vS ≈ n·vE still carry Earth's geometry.
+    :sunseason_noEarth => ["n·S", "n·z", "n·vS", "sinλE", "cosλE"],
     # round 24 (500-day data): the poster model + Jupiter's direction (Jupiter-associated dust matters for real data)
     :sunseason_J      => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE", "n·J"],
     # round 22: the poster model + the round-9 sharp dust-band profiles (target: the ecliptic stripe)

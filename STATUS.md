@@ -1,44 +1,39 @@
 # More_zodi status
-Updated: 2026-10-20 11:30, DESKTOP-BBASC81
+Updated: 2026-10-20 15:15, DESKTOP-BBASC81
 
 ## Headline
-The emulator reaches ~0.016–0.018% median error on months it never saw; the mentor's Earth-trailing-cloud test passes;
-the round-9 dust-band inputs remove the last big error (the ecliptic stripe). Poster v6 ready; mentor meeting today.
+On the new 500-day data the emulator reaches 0.016% median error on months it never saw and tests 98% of the sky;
+the plane-of-the-planets error drops from 0.083% (140 days) to 0.064%. Jupiter's direction (n·J) matters a lot at
+500 days: without it the error doubles. Poster redesigned (larger text, 140 vs 500-day sky-map pair).
 
 ## Best model
-Working model (poster v6): Sun-frame + time-of-year inputs (n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕),
-64-64-32-16 gelu MLP, Adam, batch 512, one-cycle LR (peak 1e-3), 750 epochs, 5-network average, corrected data (z115).
-Six shifted month-on/month-off splits, between-month windows (sky map): median |error| 0.0159%, p95 0.063%, within 2°
-of the ecliptic 0.083%, above 60° 0.0125%. (Experimental, not adopted: + Kelsall's fixed dust-band profiles cuts the
-ecliptic error to 0.034%.)
+500 days (round 24): Sun-frame + time-of-year inputs + n·J (n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕ n·J),
+64-64-32-16 gelu MLP, Adam, batch 512, one-cycle LR (peak 1e-3), 500 epochs, 5-network average, corrected 500-day
+targets (ZODI_DATA="z500"). Six shifted month splits, between-month windows (sky map): median |error| 0.0162%,
+p95 0.053%, within 2° of the ecliptic 0.064%, above 60° 0.014%.
+Poster model (140 days, no n·J, 750 epochs): median 0.0159%, p95 0.063%, ecliptic 0.083%.
 
 ## Latest results
-| Model (month splits, sky map, between-month windows) | Median abs. error | p95 | Ecliptic (<2°) |
+| Model (sky map / poster split, between-month windows) | Median abs. error | p95 | Ecliptic (<2°) |
 |---|---|---|---|
-| poster model, 100 epochs | 0.0246% | 0.104% | 0.094% |
-| poster model, 300 epochs | 0.0178% | 0.071% | 0.090% |
-| poster model, 750 epochs (poster v6) | 0.0159% | 0.063% | 0.083% |
-| + dust bands, 300 epochs (rounds 22–23) | 0.0165% | 0.060% | 0.034% |
+| 140 days, poster model, 750 epochs (sky map) | 0.0159% | 0.063% | 0.083% |
+| 500 days, + n·J, 500 epochs (sky map, round 24) | 0.0162% | 0.053% | 0.064% |
+| 500 days, + n·J (poster split only) | 0.0164% | 0.055% | 0.060% |
+| 500 days, without n·J (poster split only, round 25) | 0.0307% | 0.191% | 0.094% |
 
-Earth-trailing cloud (5–9% of the light behind Earth): leftover fraction in the residuals 0.06 ± 0.09% of the cloud
-(750 epochs) — learned. Notebook: notebooks/10182026.ipynb.
+Without n·J the error is largest at days 0–100 and 400–500 (the same time of year, one year apart): n·J lets the
+network tell the two years apart. Cause under investigation. Notebooks: notebooks/10182026.ipynb (10202026 coming).
 
 ## Running now
-- Round 24 (500-day data, poster model + n·J, 6 month splits × 5 seeds, 500 epochs): 25/30 done; last batch (shift 50)
-  finishes ~12:15 on 2026-10-20 (~4.7 GB RAM, below-normal priority). Preliminary: sky-map median 0.0162%,
-  ecliptic 0.063% (140-day model: 0.083%); test MSE 4.6e-8 vs 1.2e-7.
-- Round 25 queued right after it (~2.2 h, to ~14:30): the 500-day model without n·J (control), ~4.7 GB RAM.
+nothing (rounds 24 and 25 finished 12:05 and 14:26). The PC is clear for the other projects.
 
 ## Waiting on user
-- Poster redesign (larger text, no components figure, 140 vs 500-day sky-map pair): draft sent, awaiting feedback.
-- Mentor's feedback on poster v6 (meeting Oct 19). Fig. 7 uses 3.5° patches (user's choice, Oct 19); the 7° blend is
-  kept as poster_{light,dark}_7deg.
+- Mentor's trailing-cloud validation tests: test 1 (light) and test 2 (heavy, ~11 h overnight; poster model without
+  n·E, n·vE, n·x⊕, n·y⊕) are prepared and wait for Project Hub's go after Exoplanet and Solar. Not for the poster.
+- Poster redesign: latest draft sent (Fig. 6 = 140 vs 500-day maps; caption to mention the n·J result).
 
-Decided 2026-10-19: no fixed Kelsall dust-band inputs for now (they import Kelsall's band shapes/parameters, i.e. part
-of the simulator's answer); the poster stays on the 750-epoch model without bands. Future: learn the band parameters
-from the data.
+Decided 2026-10-19: no fixed Kelsall dust-band inputs for now; future: learn the band parameters from the data.
 
 ## Next up
-Mentor meeting (Oct 19). Later: learnable dust-band layer (band widths, tilts, nodes and shape fitted with the network,
-started from Kelsall's values) for real data; trailing-cloud knockout test (train without the cloud);
-ZodiOnboarding.ipynb to match the other projects.
+notebooks/10202026.ipynb (500-day data, rounds 24–25, poster redesign; tests 1–2 added when run). Find out why the
+500-day model needs n·J. Later: learnable dust-band layer; ZodiOnboarding.ipynb to match the other projects.
