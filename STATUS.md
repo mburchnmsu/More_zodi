@@ -25,11 +25,13 @@ Without n·J the error is largest at days 0–100 and 400–500 (the same time o
 network tell the two years apart. Cause under investigation. Notebooks: notebooks/10182026.ipynb (10202026 coming).
 
 ## Running now
-nothing (rounds 24 and 25 finished 12:05 and 14:26). The PC is clear for the other projects.
+Mentor's validation test 2 (round 26, started 2026-10-20 17:47): 140-day poster model without the Earth dot products
+(inputs n·S n·z n·vS sinλ⊕ cosλ⊕), 750 epochs, 6 month splits × 5 seeds; ~11 h, finish ~05:00–07:00 Oct 21;
+~4–5 GB RAM, below-normal priority. Not for the poster.
+Test 1 done (17:45): removing Kelsall's ring + trailing blob changes the emission-vs-angle curves, and the poster
+network minus cloud-free ZodiPy reproduces the ring + blob to 0.002% of the total → the network learned them.
 
 ## Waiting on user
-- Mentor's trailing-cloud validation tests: test 1 (light) and test 2 (heavy, ~11 h overnight; poster model without
-  n·E, n·vE, n·x⊕, n·y⊕) are prepared and wait for Project Hub's go after Exoplanet and Solar. Not for the poster.
 - Poster redesign: latest draft sent (Fig. 6 = 140 vs 500-day maps; caption to mention the n·J result).
 
 Decided 2026-10-19: no fixed Kelsall dust-band inputs for now; future: learn the band parameters from the data.
