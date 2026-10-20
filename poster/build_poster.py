@@ -96,7 +96,7 @@ CAP_SHIFT = ("Figure 5. Six versions of the test, sliding the withheld months 10
 RES_SKY = [B([("Largest errors ", True), ("along the plane of the planets, where the dust bands are; ", False),
               ("smallest ", True), ("toward the poles (Fig. 6)", False)]),
            B([("More data: ", True), ("with all 500 days the whole sky is tested and the plane-of-the-planets error drops "
-              "(0.083% → 0.063%)", False)])]
+              "(0.083% → 0.064%)", False)])]
 SUFFIX = os.environ.get("POSTER_SUFFIX", "")
 CAP_SKYERR = ("Figure 6. Error on pointings the network never saw, across the sky (3.5° patches, about SPHEREx's view). "
               "Left: the first 140 days. Right: all 500 days now available (that model also uses Jupiter's direction, n·J). "
