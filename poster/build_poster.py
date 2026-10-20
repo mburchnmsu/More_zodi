@@ -58,7 +58,7 @@ BG_TEXT = [H("Zodiacal light"),
            B([("Far brighter than the faint glow of distant galaxies SPHEREx aims to measure", False)]),
            B([("Changes with pointing and Earth's place in orbit → ", False), ("must be modeled and removed", True)]),
            H("The Kelsall model"),
-           B([("Standard dust model from NASA's COBE (Fig. 2); ", False), ("ZodiPy", True),
+           B([("Standard dust model from NASA's COBE; ", False), ("ZodiPy", True),
               (" evaluates its prediction of the zodiacal-light contribution to what SPHEREx observes", False)])]
 PROBLEM_L = [H("The problem"),
              B([("Zodiacal light must be removed from every SPHEREx image, but Kelsall's model uses a finite number of "
@@ -69,7 +69,7 @@ PROBLEM_R = [H("Research objective"),
                 (". First step: ZodiPy's simulated sky", False)])]
 METHOD_GEOM = [H("A geometrically constrained model"),
                B([("No dates or sky coordinates: only ", False), ("9 numbers describing the viewing geometry", True),
-                  (" (Fig. 3), dot products of the pointing vector n", False)]),
+                  (" (Fig. 2), dot products of the pointing vector n", False)]),
                B([("It must learn how brightness depends on geometry, as the physics does, not memorize when and where "
                   "SPHEREx looked", False)])]
 INPUTS = [("n·S, n·E", "toward or away from the Sun (seen from SPHEREx and from Earth)"),
@@ -79,37 +79,32 @@ INPUTS = [("n·S, n·E", "toward or away from the Sun (seen from SPHEREx and fro
           ("sin λ⊕, cos λ⊕", "Earth's position in its orbit: the time of year")]
 METHOD_TRAIN = [H("Training and testing"),
                 B([("423,607 simulated pointings (140 days, 5 μm); five small networks (Flux.jl), averaged", False)]),
-                B([("Tested on whole months and sky regions they never saw", False)]),
-                B([("Lesson: ", True), ("adding the time of year (sin λ⊕, cos λ⊕) cut the errors ~40–65×", False)])]
+                B([("Tested on whole months and sky regions they never saw", False)])]
 CAP_SKY = ("Figure 1. The whole sky at 5 μm from SPHEREx (ZodiPy): brightest toward the Sun and along the plane of the "
            "planets. Grey: too close to the Sun to observe.")
-CAP_COMP = ("Figure 2. What makes up the zodiacal light SPHEREx sees (Kelsall model): a smooth cloud (88–95%) plus "
-            "dust bands, a ring around the Sun, and a cloud trailing Earth, strongest when looking behind Earth.")
-CAP_GEOM = ("Figure 3. The geometry the network sees (top view, not to scale): n = SPHEREx's pointing vector; S, E = "
+CAP_GEOM = ("Figure 2. The geometry the network sees (top view, not to scale): n = SPHEREx's pointing vector; S, E = "
             "SPHEREx, Earth positions; v = orbital motion; λ⊕ = Earth's angle around its orbit. Jupiter and the Moon are "
             "tracked for real data: dust clouds leading and trailing Jupiter, and moonlight.")
-CAP_TRAIN = ("Figure 5. Error during training: 5 networks (thin), average (thick). The error on withheld months levels off "
+CAP_TRAIN = ("Figure 3. Error during training: 5 networks (thin), average (thick). The error on withheld months levels off "
              "and never rises: no overfitting.")
 TILES = [("0.018%", "median error on months\nwithheld from training"), ("97.5%", "of pointings within\n0.1% of ZodiPy"),
          ("≤0.03%", "median error for every\nchoice of withheld months")]
 CAP_ACC = ("Figure 4. Network vs. ZodiPy on the two 30-day blocks never used in training (days 30–60, 90–120; 180,166 "
            "pointings). Left: error through the mission; right: every pointing falls on the 1:1 line.")
-CAP_SHIFT = ("Figure 6. Six versions of the test, sliding the withheld months 10 days at a time: all reach 0.015–0.03% "
+CAP_SHIFT = ("Figure 5. Six versions of the test, sliding the withheld months 10 days at a time: all reach 0.015–0.03% "
              "(red). Predicting past the start/end of the data (orange) is harder: fine for ~10 days, then errors grow.")
-RES_SKY = [B([("Largest errors ", True), ("along the plane of the planets, where the dust bands are (0.08%); ", False),
-              ("smallest ", True), ("toward the poles (0.013%; Fig. 7)", False)])]
-# Fig. 7 variant (env POSTER_FIG7): "skyerror" = 3.5° patches (≈ SPHEREx's view), "skyerror7" = the 7° blend;
-# POSTER_SUFFIX is appended to the output names. Main poster (Oct 19, user's choice): 3.5° patches; the 7° blend is
-# kept as poster_{light,dark}_7deg (POSTER_FIG7=skyerror7 POSTER_SUFFIX=_7deg).
-FIG7 = os.environ.get("POSTER_FIG7", "skyerror")
+RES_SKY = [B([("Largest errors ", True), ("along the plane of the planets, where the dust bands are; ", False),
+              ("smallest ", True), ("toward the poles (Fig. 6)", False)]),
+           B([("More data: ", True), ("with all 500 days the whole sky is tested and the plane-of-the-planets error drops "
+              "(0.083% → 0.063%)", False)])]
 SUFFIX = os.environ.get("POSTER_SUFFIX", "")
-CAP_SKYERR = ("Figure 7. Error on pointings the network never saw, across the whole sky. " +
-              ("Each pointing is drawn 3.5° wide, about SPHEREx's view. " if FIG7 == "skyerror" else
-               "Each pointing is blended over a 7° patch to show the large-scale pattern. ") + "Grey: not tested.")
-STEPS = [("done", "Validate", "Learn ZodiPy's simulated sky from geometry alone; test on unseen months and sky regions"),
-         ("now", "Refine", "Longer training; all SPHEREx wavelengths (a first 1.25–5 μm version: ~0.1% error)"),
+CAP_SKYERR = ("Figure 6. Error on pointings the network never saw, across the sky (3.5° patches, about SPHEREx's view). "
+              "Left: the first 140 days. Right: all 500 days now available (that model also uses Jupiter's direction, n·J). "
+              "Grey: not tested.")
+STEPS = [("done", "Validate", "Learn ZodiPy's simulated sky from geometry alone"),
+         ("now", "Refine", "More data (500 days), longer training, Jupiter's direction"),
          ("next", "Scale up", "Move training to a computing cluster"),
-         ("next", "Real data", "Train on real SPHEREx images and compare with the Kelsall model")]
+         ("next", "Real data", "Train on real SPHEREx images; compare with Kelsall")]
 STEP_LABEL = {"done": "✓ DONE", "now": "IN PROGRESS", "next": "NEXT"}
 NEXT_NOTE = "All results so far are preliminary and use simulated data."
 ACK = ("This research is supported by a URS grant at New Mexico State University, funded by the National Science "
@@ -144,6 +139,7 @@ Numbers (poster v6): 5-network ensemble, 64-64-32-16 gelu (4 hidden layers), 750
 
 # ----------------------------------------------------------------------------------------------- helpers
 def rgb(h): return RGBColor.from_string(h)
+BODY, CAP = 30, 26                     # body text and caption sizes (pt); were ~25 and 22 before Oct 20 (mentor: larger)
 BUL_IN = 0.42                          # bullet hanging indent (in)
 
 def _runs(para):
@@ -202,7 +198,7 @@ class Poster:
                 f.size = Pt(sz); f.bold = b; f.name = font; f.color.rgb = rgb(col)
         return tb
 
-    def block(self, x, y, w, paras, size=26, spacing=1.08, after=6):
+    def block(self, x, y, w, paras, size=BODY, spacing=1.08, after=6):
         """Text block sized by est_height; returns its height."""
         h = est_height(paras, w, size, spacing, after)
         self.text(x, y, w, h, paras, size=size, spacing=spacing, after=after)
@@ -230,8 +226,8 @@ class Poster:
 
     def caption(self, x, y, w, txt):
         paras = [[(txt.split(". ", 1)[0] + ". ", True), (txt.split(". ", 1)[1], False)]]
-        h = est_height(paras, w, 22, 1.05, 0)
-        self.text(x, y, w, h, paras, size=22, color=self.t["sub"], spacing=1.05, after=0)
+        h = est_height(paras, w, CAP, 1.05, 0)
+        self.text(x, y, w, h, paras, size=CAP, color=self.t["sub"], spacing=1.05, after=0)
         return h
 
     def flow(self, x, y0, y1, w, items):
@@ -240,9 +236,9 @@ class Poster:
         evenly between items."""
         fixed, figs = 0.0, 0.0
         for it in items:
-            if it[0] == "text": fixed += est_height(it[1], w, it[2] if len(it) > 2 else 26, 1.08, 6)
+            if it[0] == "text": fixed += est_height(it[1], w, it[2] if len(it) > 2 else BODY, 1.08, 6)
             elif it[0] == "fig":
-                fixed += est_height([[(it[3], False)]], w, 22, 1.05, 0) + 0.1; figs += self.aspect(it[1]) * w * it[2]
+                fixed += est_height([[(it[3], False)]], w, CAP, 1.05, 0) + 0.1; figs += self.aspect(it[1]) * w * it[2]
             elif it[0] == "gap": fixed += it[1]
             elif it[0] == "custom": fixed += it[1]
         scale = min(1.0, (y1 - y0 - fixed - 0.15 * len(items)) / figs) if figs else 1.0
@@ -251,7 +247,7 @@ class Poster:
         y = y0 + min(pad, 0.4)
         pad = (y1 - y0 - used - min(pad, 0.4)) / len(items)
         for it in items:
-            if it[0] == "text": y += self.block(x, y, w, it[1], size=it[2] if len(it) > 2 else 26)
+            if it[0] == "text": y += self.block(x, y, w, it[1], size=it[2] if len(it) > 2 else BODY)
             elif it[0] == "fig":
                 fw = w * it[2] * scale; y += self.fig(it[1], x + (w - fw) / 2, y, fw) + 0.1
                 y += self.caption(x, y, w, it[3])
@@ -283,99 +279,94 @@ def build(theme):
     # ================= left column
     # Background: SPHEREx bullets across, then zodiacal light / Kelsall bullets beside Fig. 1
     y0 = top + 1.15 + 0.35
-    y = y0 + est_height(BG_SPHEREX, iw, 26, 1.08, 6) + 0.1
-    tw = iw * 0.53; fx = X1 + pad + tw + 0.3; fw = iw - tw - 0.3
+    y = y0 + est_height(BG_SPHEREX, iw, BODY, 1.08, 6) + 0.1
+    tw = iw * 0.50; fx = X1 + pad + tw + 0.3; fw = iw - tw - 0.3
     fh = fw * P.aspect("sky")
-    bg_h = max(est_height(BG_TEXT, tw, 24, 1.08, 6) * 1.06,
-               0.3 + fh + 0.1 + est_height([[(CAP_SKY, False)]], fw, 22, 1.05, 0))
-    cw_ = iw * 0.86; ch_ = cw_ * P.aspect("components")                 # Fig. 2 (components) across the section
-    comp_y = y + bg_h + 0.15
-    bg_bot = comp_y + ch_ + 0.1 + est_height([[(CAP_COMP, False)]], iw, 22, 1.05, 0) + 0.3
+    bg_h = max(est_height(BG_TEXT, tw, BODY - 2, 1.08, 6) * 1.06,
+               0.3 + fh + 0.1 + est_height([[(CAP_SKY, False)]], fw, CAP, 1.05, 0))
+    bg_bot = y + bg_h + 0.3
     P.section(X1, top, CW, bg_bot - top, "Background")
-    P.block(X1 + pad, y0, iw, BG_SPHEREX, size=26)
-    P.block(X1 + pad, y, tw, BG_TEXT, size=24)
+    P.block(X1 + pad, y0, iw, BG_SPHEREX, size=BODY)
+    P.block(X1 + pad, y, tw, BG_TEXT, size=BODY - 2)
     P.fig("sky", fx, y + 0.3, fw)
     P.caption(fx, y + 0.3 + fh + 0.1, fw, CAP_SKY)
-    P.fig("components", X1 + pad + (iw - cw_) / 2, comp_y, cw_)
-    P.caption(X1 + pad, comp_y + ch_ + 0.1, iw, CAP_COMP)
 
     # Problem / research objective: two halves of one box
     pr_top = bg_bot + 0.45
     hw = (iw - 0.5) / 2
-    ph = max(est_height(PROBLEM_L, hw, 25, 1.08, 6), est_height(PROBLEM_R, hw, 25, 1.08, 6)) * 1.06 + 0.5
+    ph = max(est_height(PROBLEM_L, hw, BODY - 2, 1.08, 6), est_height(PROBLEM_R, hw, BODY - 2, 1.08, 6)) * 1.06 + 0.5
     pr_bot = pr_top + ph
     P.rect(X1, pr_top, CW, ph, fill=t["problem"], line=t["problemborder"], lw=6)
-    P.block(X1 + pad, pr_top + 0.22, hw, PROBLEM_L, size=25)
-    P.block(X1 + pad + hw + 0.5, pr_top + 0.22, hw, PROBLEM_R, size=25)
+    P.block(X1 + pad, pr_top + 0.22, hw, PROBLEM_L, size=BODY - 2)
+    P.block(X1 + pad + hw + 0.5, pr_top + 0.22, hw, PROBLEM_R, size=BODY - 2)
 
     # Methods
     me_top = pr_bot + 0.45
     y = P.section(X1, me_top, CW, colbot - me_top, "Methods")
+    ROW = 0.56
     def inputs(x, y):
-        P.text(x, y, iw, 0.6, [[("The 9 inputs", True)]], size=28, color=t["accent2"], after=0); y += 0.6
+        P.text(x, y, iw, 0.65, [[("The 9 inputs", True)]], size=BODY + 2, color=t["accent2"], after=0); y += 0.68
         for sym, meaning in INPUTS:
-            P.text(x + 0.2, y, 3.6, 0.5, [[(sym, True)]], size=24, color=t["accent2"], after=0)
-            P.text(x + 3.8, y, iw - 3.8, 0.5, [meaning], size=24, after=0)
-            y += 0.47
+            P.text(x + 0.2, y, 4.0, ROW, [[(sym, True)]], size=BODY - 2, color=t["accent2"], after=0)
+            P.text(x + 4.2, y, iw - 4.2, ROW, [meaning], size=BODY - 4, after=0)
+            y += ROW
     def beside(paras, name, frac, cap):
         """Bullets on the left, a figure (frac of the width) on the right, caption below both → (height, draw)."""
         fw_ = iw * frac; fh_ = fw_ * P.aspect(name); bw_ = iw - fw_ - 0.3
-        bh = est_height(paras, bw_, 25, 1.08, 6)
+        bh = est_height(paras, bw_, BODY - 2, 1.08, 6)
         def draw(x, y):
-            P.text(x, y + max(0.0, (fh_ - bh) / 2), bw_, bh, paras, size=25, spacing=1.08, after=6)
+            P.text(x, y + max(0.0, (fh_ - bh) / 2), bw_, bh, paras, size=BODY - 2, spacing=1.08, after=6)
             P.fig(name, x + bw_ + 0.3, y, fw_)
             P.caption(x, y + max(fh_, bh) + 0.1, iw, cap)
-        return max(fh_, bh) + 0.1 + est_height([[(cap, False)]], iw, 22, 1.05, 0), draw
-    inputs_h = 0.6 + 0.47 * len(INPUTS)
+        return max(fh_, bh) + 0.1 + est_height([[(cap, False)]], iw, CAP, 1.05, 0), draw
+    inputs_h = 0.68 + ROW * len(INPUTS)
     avail = (colbot - 0.2) - (y - 0.2) - 0.3 * 4                       # leave ~0.3 in between items
-    train_h = est_height(METHOD_TRAIN, iw, 26, 1.08, 6)
-    for s in [1 - 0.02 * k for k in range(25)]:                        # shrink the geometry figure until it fits
-        geom_h, geom = beside(METHOD_GEOM, "geometry", 0.58 * s, CAP_GEOM)
+    for s in [1 - 0.02 * k for k in range(30)]:                        # shrink both figures together until it fits
+        geom_h, geom = beside(METHOD_GEOM, "geometry", 0.56 * s, CAP_GEOM)
+        train_h, train = beside(METHOD_TRAIN, "training", 0.50 * s, CAP_TRAIN)
         if geom_h + inputs_h + train_h <= avail: break
-    if s < 0.999: print(f"  methods figure scaled to {s:.2f}")
+    if s < 0.999: print(f"  methods figures scaled to {s:.2f}")
     P.flow(X1 + pad, y - 0.2, colbot - 0.2, iw,
-           [("custom", geom_h, geom), ("custom", inputs_h, inputs), ("text", METHOD_TRAIN)])
+           [("custom", geom_h, geom), ("custom", inputs_h, inputs), ("custom", train_h, train)])
 
     # ================= right column
-    res_bot = 36.9
+    res_bot = 38.4
     y = P.section(X2, top, CW, res_bot - top, "Results")
     tw_ = (iw - 2 * 0.35) / 3
     for i, (num, lbl) in enumerate(TILES):
         tx = X2 + pad + i * (tw_ + 0.35)
         P.rect(tx, y, tw_, 2.7, fill=t["tile"], shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.1)
         P.text(tx, y + 0.08, tw_, 1.4, [num], size=76, bold=True, color=t["tilenum"], align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
-        P.text(tx, y + 1.45, tw_, 1.2, lbl.split("\n"), size=23, color=t["text"], align=PP_ALIGN.CENTER, after=0, spacing=1.0)
+        P.text(tx, y + 1.45, tw_, 1.2, lbl.split("\n"), size=BODY - 4, color=t["text"], align=PP_ALIGN.CENTER, after=0, spacing=1.0)
     y += 2.7
     P.flow(X2 + pad, y, res_bot - 0.15, iw,
-           [("fig", "accuracy2", 1.0, CAP_ACC), ("fig", "training", 0.9, CAP_TRAIN), ("fig", "shifts", 1.0, CAP_SHIFT),
-            ("text", RES_SKY), ("fig", FIG7, 1.0, CAP_SKYERR)])
+           [("fig", "accuracy2", 0.9, CAP_ACC), ("fig", "shifts", 0.85, CAP_SHIFT),
+            ("text", RES_SKY), ("fig", "skyerror_pair", 1.0, CAP_SKYERR)])
 
-    # Next Steps (vertical roadmap)
+    # Next Steps: compact 2 × 2 roadmap (reading order: left → right, top → bottom; arrows between)
     ns_top = res_bot + 0.45
     y = P.section(X2, ns_top, CW, colbot - ns_top, "Next Steps", hh=1.0)
-    sh_, gap = 1.0, 0.24
+    gapx = 0.6; bw = (iw - gapx) / 2; bh = (colbot - 0.75 - y - 0.25) / 2
     for i, (state, head, body) in enumerate(STEPS):
         col = t["nxt" if state == "next" else state]
-        P.rect(X2 + pad, y, iw, sh_, fill=t["box"], line=col, lw=5, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.15)
-        P.text(X2 + pad + 0.25, y, 4.3, sh_, [STEP_LABEL[state], head], size=22, bold=True, color=col, anchor=MSO_ANCHOR.MIDDLE,
-               after=0, spacing=1.0)
-        P.text(X2 + pad + 4.6, y, iw - 4.85, sh_, [body], size=23, anchor=MSO_ANCHOR.MIDDLE, after=0, spacing=1.0)
-        y += sh_
-        if i < len(STEPS) - 1:
-            P.rect(X2 + pad + iw / 2 - 0.3, y + 0.03, 0.6, gap - 0.06, fill=t["accent"], shape=MSO_SHAPE.DOWN_ARROW)
-            y += gap
-    P.text(X2 + pad, y + 0.08, iw, 0.5, [NEXT_NOTE], size=21, color=t["sub"], align=PP_ALIGN.CENTER, after=0)
+        r, c = divmod(i, 2); bx = X2 + pad + c * (bw + gapx); by = y + r * (bh + 0.25)
+        P.rect(bx, by, bw, bh, fill=t["box"], line=col, lw=5, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.12)
+        P.text(bx + 0.2, by + 0.08, bw - 0.4, bh - 0.16, [[(f"{STEP_LABEL[state]}: {head}", True)], body], size=BODY - 8,
+               color=t["text"], anchor=MSO_ANCHOR.MIDDLE, after=2, spacing=1.0)
+        if c == 0:
+            P.rect(bx + bw + 0.1, by + bh / 2 - 0.2, gapx - 0.2, 0.4, fill=t["accent"], shape=MSO_SHAPE.RIGHT_ARROW)
+    P.text(X2 + pad, colbot - 0.6, iw, 0.45, [NEXT_NOTE], size=BODY - 8, color=t["sub"], align=PP_ALIGN.CENTER, after=0)
 
     # ================= bottom: Acknowledgements | References
     b_top, b_bot = colbot + 0.4, H_ - 0.5
     y = P.section(X1, b_top, CW, b_bot - b_top, "Acknowledgements", hh=0.85)
     lh = b_bot - y - 0.1
     P.picture(os.path.join(HERE, "src", "logo_nsf.png"), X1 + CW - pad - lh, y - 0.15, h=lh)
-    P.text(X1 + pad, y - 0.2, iw - lh - 0.3, lh + 0.2, [ACK], size=22, spacing=1.05)
+    P.text(X1 + pad, y - 0.2, iw - lh - 0.3, lh + 0.2, [ACK], size=BODY - 6, spacing=1.05)
     y = P.section(X2, b_top, CW, b_bot - b_top, "References", hh=0.85)
     cw2 = (iw - 0.4) / 2
     for j, col in enumerate(REFS):
-        P.text(X2 + pad + j * (cw2 + 0.4), y - 0.2, cw2, b_bot - y, col, size=21, spacing=1.0, after=6)
+        P.text(X2 + pad + j * (cw2 + 0.4), y - 0.2, cw2, b_bot - y, col, size=BODY - 7, spacing=1.0, after=6)
 
     P.s.notes_slide.notes_text_frame.text = NOTES
     out = os.path.join(HERE, f"poster_{theme}{SUFFIX}.pptx"); P.prs.save(out); print("wrote", out)
