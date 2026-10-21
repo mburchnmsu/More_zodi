@@ -31,6 +31,11 @@ Mentor's validation test 2 (round 26, started 2026-10-20 17:47): 140-day poster 
 Test 1 done (17:45): removing Kelsall's ring + trailing blob changes the emission-vs-angle curves, and the poster
 network minus cloud-free ZodiPy reproduces the ring + blob to 0.002% of the total → the network learned them.
 
+Round 27 scheduled for 22:00 (unless the user cancels): 500-day model, HELIOcentric inputs, no n·J, poster split,
+5 seeds, 500 epochs (~3–4 h alongside test 2). Why: the inputs were barycentric, but the Sun (and the dust cloud)
+moved 0.0035 AU about the barycentre over 500 days, pulled by Jupiter — n·J was standing in for the Sun's wobble.
+Heliocentric Earth distance repeats year to year (6e-5 AU), barycentric does not (2e-3 AU).
+
 ## Waiting on user
 - Poster redesign: latest draft sent (Fig. 6 = 140 vs 500-day maps; caption to mention the n·J result).
 
