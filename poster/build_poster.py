@@ -99,7 +99,8 @@ RES_SKY = [B([("Largest errors ", True), ("along the plane of the planets, where
               "(0.083% → 0.064%)", False)])]
 SUFFIX = os.environ.get("POSTER_SUFFIX", "")
 CAP_SKYERR = ("Figure 6. Error on pointings the network never saw, across the sky (3.5° patches, about SPHEREx's view). "
-              "Left: the first 140 days. Right: all 500 days now available (that model also uses Jupiter's direction, n·J). "
+              "Left: the first 140 days. Right: all 500 days now available; with more than a year of data, Jupiter's "
+              "direction (n·J) also helps the network tell the two years apart. "
               "Grey: not tested.")
 STEPS = [("done", "Validate", "Learn ZodiPy's simulated sky from geometry alone"),
          ("now", "Refine", "More data (500 days), longer training, Jupiter's direction"),
