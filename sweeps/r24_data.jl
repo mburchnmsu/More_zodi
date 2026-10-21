@@ -10,7 +10,8 @@ for f in ("mb_train.jl", "extra_features.jl", "summary_helpers.jl", "shift_helpe
 end
 include(joinpath(@__DIR__, "configs_v24.jl"))
 using JLD2
-fam(Δ) = "z500_nJ_shift$Δ"
+const FAM24 = get(ENV, "R24_FAM", "z500_nJ_shift")      # e.g. "z500h_noJ_shift" with ENV["ZODI_HELIO"] = "1" (round 27/28)
+fam(Δ) = "$(FAM24)$Δ"
 done = [Δ for Δ in SHIFTS24 if length(runs16(fam(Δ))) == 5]
 println("complete shifts: ", done)
 # out-of-sample prediction from the between-month windows, averaged over the versions that held each exposure out
