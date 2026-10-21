@@ -25,7 +25,7 @@ Poster model (140 days, no n·J, 750 epochs): median 0.0159%, p95 0.063%, eclipt
 Without n·J the error is largest at days 0–100 and 400–500 (the same time of year, one year apart): n·J lets the
 network tell the two years apart. Cause under investigation. Notebooks: notebooks/10182026.ipynb (10202026 coming).
 
-## Overnight results (Oct 20–21)
+## Overnight results (Oct 20–21) — notebook: notebooks/10202026.ipynb
 - **Heliocentric inputs fix the 500-day model** (round 27, poster split, no n·J): median 0.0157%, p95 0.051%,
   ecliptic 0.044%, test MSE 3.1e-8 — better than barycentric + n·J (0.0164%, 0.055%, 0.060%, 3.7e-8) and far better than
   barycentric without n·J (0.031%, 0.191%, 0.094%). The year-1/year-2 error excess is gone (days 0–100: 0.014%).
@@ -42,6 +42,6 @@ nothing (round 27 finished 01:48, test 2 / round 26 finished 04:08). The PC is c
 Decided 2026-10-19: no fixed Kelsall dust-band inputs for now; future: learn the band parameters from the data.
 
 ## Next up
-notebooks/10202026.ipynb (500-day data, rounds 24–27, tests 1–2, poster redesign). Decide with the user: switch all
+Decide with the user: switch all
 models to heliocentric inputs (and rerun the 500-day sky map with them)? Later: learnable dust-band layer;
 ZodiOnboarding.ipynb to match the other projects.
