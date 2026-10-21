@@ -96,6 +96,19 @@ earth_positions, v_earth, jupiter_positions, spherex_positions, v_spherex, moon_
         read(f["moon/positions"])
     end
 
+# ENV["ZODI_HELIO"] = "1": make all positions HELIOcentric (subtract the Sun's barycentric position, data/…/sun_positions.h5
+# from zodipy_gen/sun_positions.py). The vectors file is barycentric, but the dust cloud and ZodiPy's targets are
+# Sun-centred; the Sun moves ~0.0035 AU about the barycentre over 500 days (Oct 20 finding). Results go to *_helio.
+ZODI_HELIO = get(ENV, "ZODI_HELIO", "0") == "1"
+if ZODI_HELIO
+    sun_positions = h5open(f -> read(f["sun/positions"]), joinpath(dirname(pointing_file), "sun_positions.h5"))
+    @assert size(sun_positions) == size(earth_positions)
+    for P in (earth_positions, spherex_positions, jupiter_positions, moon_positions); P .-= sun_positions; end
+    RESULTS_DIR *= "_helio"
+    println("heliocentric positions (Sun offset ", @sprintf("%.4f–%.4f", extrema(sqrt.(sum(abs2, sun_positions, dims=1)))...),
+            " AU removed); results dir: ", relpath(RESULTS_DIR, PROJECT_DIR))
+end
+
 zhat_vec = zero(earth_positions); zhat_vec[3, :] .= 1.0
 xhat_vec = zero(earth_positions); xhat_vec[1, :] .= 1.0
 yhat_vec = zero(earth_positions); yhat_vec[2, :] .= 1.0
