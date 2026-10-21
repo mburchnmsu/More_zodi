@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-21 10:35, DESKTOP-BBASC81
+Updated: 2026-10-21 15:15, DESKTOP-BBASC81
 
 ## Headline
 On the new 500-day data the emulator reaches 0.016% median error on months it never saw and tests 98% of the sky;
@@ -34,10 +34,14 @@ barycentric inputs vs the Sun's wobble — see below.
   The trailing cloud is still learned (leftover 0.03 ± 0.09%): n·S ≈ n·E since SPHEREx is ~5e-5 AU from Earth.
 - **Test 1** passed (network − cloud-free ZodiPy reproduces ring + blob to 0.002% of the total).
 
+## Round 28 results (Oct 21)
+- Heliocentric 500-day sky map (no n·J, shifts 0 + 30): median 0.0160%, p95 0.053%, ecliptic **0.048%** (barycentric
+  + n·J: 0.064%), above 60° 0.014%. figures/10212026_skymap_helio.png.
+- Mentor's Jupiter null test (heliocentric + n·J, shift 0): no gain — slightly worse (median 0.0165% vs 0.0157%,
+  ecliptic 0.063% vs 0.044%). On Kelsall data n·J carries no real information once the inputs are heliocentric.
+
 ## Running now
-Round 28 (started 2026-10-21 10:30, ~4.4 h, ~4.7 GB RAM, below-normal priority): stage 1 = heliocentric 500-day model,
-no n·J, shift 30 (completes the heliocentric sky map with round 27's shift 0), done ~12:45; stage 2 = heliocentric
-+ n·J on shift 0 (the mentor's Jupiter null experiment), done ~15:00.
+nothing (round 28 finished 15:10). The PC is clear.
 ## Waiting on user
 - Poster redesign: latest draft sent (Fig. 6 = 140 vs 500-day maps; caption to mention the n·J result).
 
