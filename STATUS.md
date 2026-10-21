@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-21 04:20, DESKTOP-BBASC81
+Updated: 2026-10-21 10:35, DESKTOP-BBASC81
 
 ## Headline
 On the new 500-day data the emulator reaches 0.016% median error on months it never saw and tests 98% of the sky;
@@ -35,7 +35,9 @@ barycentric inputs vs the Sun's wobble — see below.
 - **Test 1** passed (network − cloud-free ZodiPy reproduces ring + blob to 0.002% of the total).
 
 ## Running now
-nothing (round 27 finished 01:48, test 2 / round 26 finished 04:08). The PC is clear.
+Round 28 (started 2026-10-21 10:30, ~4.4 h, ~4.7 GB RAM, below-normal priority): stage 1 = heliocentric 500-day model,
+no n·J, shift 30 (completes the heliocentric sky map with round 27's shift 0), done ~12:45; stage 2 = heliocentric
++ n·J on shift 0 (the mentor's Jupiter null experiment), done ~15:00.
 ## Waiting on user
 - Poster redesign: latest draft sent (Fig. 6 = 140 vs 500-day maps; caption to mention the n·J result).
 
