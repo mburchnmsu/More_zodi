@@ -22,8 +22,8 @@ Poster model (140 days, no n·J, 750 epochs): median 0.0159%, p95 0.063%, eclipt
 | 500 days, + n·J (poster split only) | 0.0164% | 0.055% | 0.060% |
 | 500 days, without n·J (poster split only, round 25) | 0.0307% | 0.191% | 0.094% |
 
-Without n·J the error is largest at days 0–100 and 400–500 (the same time of year, one year apart): n·J lets the
-network tell the two years apart. Cause under investigation. Notebooks: notebooks/10182026.ipynb (10202026 coming).
+Without n·J the error is largest at days 0–100 and 400–500 (the same time of year, one year apart). Cause found:
+barycentric inputs vs the Sun's wobble — see below.
 
 ## Overnight results (Oct 20–21) — notebook: notebooks/10202026.ipynb
 - **Heliocentric inputs fix the 500-day model** (round 27, poster split, no n·J): median 0.0157%, p95 0.051%,
