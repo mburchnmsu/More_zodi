@@ -45,6 +45,6 @@ nothing.
 Decided 2026-10-19: no fixed Kelsall dust-band inputs for now; future: learn the band parameters from the data.
 
 ## Next up
-ZodiOnboarding.ipynb (project root, orientation notebook like ExoOnboarding / SolOnboarding) done 2026-10-21. Then the full
-heliocentric sky map and notebook 10222026. If time remains: start the learnable dust-band layer.
+Done Oct 21–22: heliocentric default + full sky map, ZodiOnboarding.ipynb (project root), learnable dust-band layer
+(first results). Options: learnable bands on all 6 shifts (full sky map, ~13 h); a parallax version of the band layer.
 Later: the mentor's Earth-centric terms (n·δ̂, Moon) for real data; one-at-a-time ablation table.
