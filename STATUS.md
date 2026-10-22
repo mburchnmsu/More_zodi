@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-21 21:45, DESKTOP-BBASC81
+Updated: 2026-10-21 22:40, DESKTOP-BBASC81
 
 ## Headline
 Heliocentric (Sun-centred) inputs are now the default for the 500-day data: they remove the need for n·J and give the
@@ -30,6 +30,9 @@ Notebooks: notebooks/10202026.ipynb, notebooks/10212026.ipynb.
 ## Running now
 Round 29 (started 2026-10-21 20:59; ~4.8 GB RAM, below-normal priority): the remaining heliocentric 500-day sky-map
 shifts — stage 1 = shifts 10 + 40 (to ~01:30), stage 2 = shifts 20 + 50 (to ~06:00 Oct 22); 20 trainings, 500 epochs.
+Queued after it (auto-start): round 30, the learnable dust-band layer (sweeps/band_layer.jl, arch :bandmlp; trainable
+band tilt/node/width/shape), heliocentric 500 days, poster split, 5 seeds × 2 inits (Kelsall's values; deliberately
+perturbed = recovery test), 500 epochs, ~4.5 h → ~10:30. Smoke test passed (layer = Kelsall's profiles at init to 1e-6).
 
 ## Waiting on user
 nothing.

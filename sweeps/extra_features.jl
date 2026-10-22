@@ -139,6 +139,9 @@ const FEATURE_SETS = Dict(
     # round 11 (Sun frame): Sun-relative inputs only — no inertial n·x, n·y, no Jupiter
     :sunframe         => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕"],
     :sunframe_season  => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE"],
+    # learnable dust bands (sweeps/band_layer.jl, arch = :bandmlp): the poster inputs + the pointing's fixed-axis components,
+    # which only the band layer reads (to compute each band's latitude profile with trainable geometry)
+    :sunseason_learnband => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE", "n·x", "n·y", "n·z"],
     # round 26 (mentor's Earth test): the poster model WITHOUT the Earth dot products (n·E, n·vE, n·x⊕, n·y⊕); clock kept.
     # Note: SPHEREx is ~5e-5 AU from Earth, so n·S ≈ n·E and n·vS ≈ n·vE still carry Earth's geometry.
     :sunseason_noEarth => ["n·S", "n·z", "n·vS", "sinλE", "cosλE"],

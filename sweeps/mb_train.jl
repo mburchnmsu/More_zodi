@@ -74,7 +74,7 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
                   schedule=:onecycle, lr_max=3e-3, epochs=60, batchsize=1024, seed=42,
                   split_name="80/20 Chronological", sched_kw=(;), label="", verbose=true,
                   val_days=nothing, weight_decay=0.0, target=:linear, mix_alpha=0.25, eval_every=1,
-                  evals_per_epoch=0, eval_sub=50_000, keep_snaps=true)
+                  evals_per_epoch=0, eval_sub=50_000, keep_snaps=true, band_init=nothing)
     # evals_per_epoch = K > 0: also record train/test MSE K times per epoch on a FIXED random subsample of `eval_sub`
     # rows of each set (tr_fine, te_fine at fractional epochs fine_epoch), and keep the weight vector at each of those
     # points (snaps; rebuild with Optimisers.restructure) so an ensemble's curve can be computed afterwards.
@@ -106,7 +106,12 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
     mse_lin  = mean(abs2, y[te_idx] .- (A * (A[tr_idx, :] \ y[tr_idx]))[te_idx])
 
     rng   = Random.Xoshiro(seed)
-    model = arch === :mlp ? build_mlp(size(X, 1), hidden, rng) : build_resmlp(size(X, 1), width, blocks, rng)
+    # :bandmlp = learnable dust-band layer + MLP (sweeps/band_layer.jl); the last 3 features must be n·x, n·y, n·z
+    model = arch === :mlp ? build_mlp(size(X, 1), hidden, rng) :
+            arch === :bandmlp ? build_bandmlp(size(X, 1), hidden, rng, μ[end-2:end], σ[end-2:end];
+                                              init=something(band_init, KELSALL_BANDS)) :
+            build_resmlp(size(X, 1), width, blocks, rng)
+    arch === :bandmlp && @assert feature_names[end-2:end] == ["n·x", "n·y", "n·z"] "bandmlp: last 3 features must be n·x, n·y, n·z"
     target === :softplus && (model = Chain(model, z -> softplus.(z)))
     n_params = sum(length, Flux.trainables(model))
     lossfn = target === :relmse ? ((m, xb, yb) -> mean(abs2, (m(xb) .- yb) ./ yb)) :
@@ -168,3 +173,6 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
               lr_curve = [lr_at(schedule, t; lr_max, sched_kw...) for t in range(0, 1, length=500)],
               evals_per_epoch, tr_fine, te_fine, fine_epoch, snaps, sub_tr, sub_te)
 end
+
+# learnable dust-band layer (arch = :bandmlp)
+include(joinpath(@__DIR__, "band_layer.jl"))
