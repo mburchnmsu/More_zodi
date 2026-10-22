@@ -1,0 +1,70 @@
+target data: z500  (zodipy115_500d_boresight.h5);  results dir: sweeps\results_z500
+heliocentric positions (Sun offset 0.0054–0.0072 AU removed); results dir: sweeps\results_z500_helio
+description: Zodiacal light for the 500-day SPHEREx pointings, regenerated with ZodiPy
+wavelength:  5.0 micron
+units:       MJy/sr
+N = 1520194 exposures;  emission range = (0.30420442231770234, 1.3225553050088843)
+n·n     median  1.000e+00   iqr  0.000e+00
+n·S     median  2.604e-02   iqr  2.479e-01
+n·z     median -1.482e-02   iqr  1.357e+00
+n·E     median  2.600e-02   iqr  2.479e-01
+n·vS    median  5.993e-03   iqr  1.366e+00
+n·vE    median  1.416e-02   iqr  1.391e+00
+n·J     median  1.190e-02   iqr  3.079e+00
+n·x     median  3.207e-02   iqr  7.279e-01
+n·y     median  1.135e-02   iqr  6.443e-01
+S·S     median  1.017e+00   iqr  4.393e-02
+S·z     median  1.689e-05   iqr  8.048e-05
+S·E     median  1.017e+00   iqr  4.393e-02
+S·vS    median -1.245e-03   iqr  6.991e-02
+S·vE    median  4.948e-04   iqr  2.128e-02
+S·J     median -2.298e+00   iqr  7.382e+00
+S·x     median  5.729e-02   iqr  1.304e+00
+S·y     median -4.942e-01   iqr  1.311e+00
+z·z     median  1.000e+00   iqr  0.000e+00
+z·E     median  2.859e-05   iqr  7.925e-05
+z·vS    median  9.858e-04   iqr  3.473e-01
+z·vE    median -1.147e-05   iqr  7.141e-05
+z·J     median  1.775e-02   iqr  4.290e-02
+z·x     median  0.000e+00   iqr  0.000e+00
+z·y     median  0.000e+00   iqr  0.000e+00
+E·E     median  1.017e+00   iqr  4.393e-02
+E·vS    median -1.244e-03   iqr  6.993e-02
+E·vE    median  4.963e-04   iqr  2.129e-02
+E·J     median -2.298e+00   iqr  7.382e+00
+E·x     median  5.725e-02   iqr  1.304e+00
+E·y     median -4.942e-01   iqr  1.311e+00
+vS·vS   median  1.000e+00   iqr  1.110e-16
+vS·vE   median  9.833e-01   iqr  2.379e-02
+vS·J    median -3.087e-01   iqr  6.195e+00
+vS·x    median  4.688e-01   iqr  1.287e+00
+vS·y    median  5.390e-02   iqr  1.285e+00
+vE·vE   median  1.000e+00   iqr  3.331e-16
+vE·J    median -3.144e-01   iqr  6.276e+00
+vE·x    median  4.783e-01   iqr  1.311e+00
+vE·y    median  5.360e-02   iqr  1.304e+00
+J·J     median  2.717e+01   iqr  9.528e-01
+J·x     median -1.708e+00   iqr  1.819e+00
+J·y     median  4.925e+00   iqr  5.286e-01
+x·x     median  1.000e+00   iqr  0.000e+00
+x·y     median  0.000e+00   iqr  0.000e+00
+y·y     median  1.000e+00   iqr  0.000e+00
+
+Mission span: 500.3 days
+25/75 Chronological  train  380048   test 1140146   (25% train)
+30 day split         train  793471   test  726723   (52% train)
+50/50 Chronological  train  760097   test  760097   (50% train)
+50/50 mid-mission    train  760097   test  760097   (50% train)
+7-day alternating    train  765539   test  754655   (50% train)
+75/25 Chronological  train 1140145   test  380049   (75% train)
+80/20 Chronological  train 1216155   test  304039   (80% train)
+85/15 Chronological  train 1292164   test  228030   (85% train)
+random split         train  760097   test  760097   (50% train)
+All splits initialized.
+5 of 10 runs pending; 5 trainings at a time, 1 BLAS thread(s) each → C:\JuliaProjects\More_zodi\sweeps\results_z500_helio
+12:33:11  DONE z500h_noJ_shift30_s43        test 5.3587e-08  train 4.5385e-08  7302s  (worker 4)
+12:38:39  DONE z500h_noJ_shift30_s46        test 3.9836e-08  train 3.0673e-08  7631s  (worker 1)
+12:38:56  DONE z500h_noJ_shift30_s44        test 4.3426e-08  train 3.2037e-08  7647s  (worker 3)
+12:42:06  DONE z500h_noJ_shift30_s42        test 3.3989e-08  train 2.3348e-08  7838s  (worker 2)
+12:42:08  DONE z500h_noJ_shift30_s45        test 3.8233e-08  train 2.7416e-08  7839s  (worker 5)
+12:42:08  all workers finished
