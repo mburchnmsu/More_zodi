@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-21 22:40, DESKTOP-BBASC81
+Updated: 2026-10-22 06:15, DESKTOP-BBASC81
 
 ## Headline
 Heliocentric (Sun-centred) inputs are now the default for the 500-day data: they remove the need for n·J and give the
@@ -28,12 +28,13 @@ test 1 passed (ring + blob reproduced to 0.002% of the total); test 2 (no Earth 
 Notebooks: notebooks/10202026.ipynb, notebooks/10212026.ipynb.
 
 ## Running now
-Round 29 (started 2026-10-21 20:59; ~4.8 GB RAM, below-normal priority): the remaining heliocentric 500-day sky-map
-shifts — stage 1 = shifts 10 + 40 (to ~01:30), stage 2 = shifts 20 + 50 (to ~06:00 Oct 22); 20 trainings, 500 epochs.
-Queued after it (auto-start): round 30, the learnable dust-band layer (sweeps/band_layer.jl, arch :bandmlp; trainable
-band tilt/node/width/shape), heliocentric 500 days, poster split, 5 seeds × 2 inits (Kelsall's values; deliberately
-perturbed = recovery test), 500 epochs, ~4.5 h → ~10:30. Smoke test passed (layer = Kelsall's profiles at init to 1e-6).
+Round 30 (started 2026-10-22 06:02, ~4.5 h → ~10:30; ~5 GB RAM, below-normal priority): the learnable dust-band layer
+(sweeps/band_layer.jl), heliocentric 500 days, poster split, 5 seeds × 2 inits (Kelsall's values; deliberately perturbed =
+recovery test), 500 epochs.
 
+## Full heliocentric 500-day sky map (round 29 done 06:02)
+6 shifts × 5 seeds, no n·J: median **0.0154%**, p95 **0.050%**, within 2° of the ecliptic **0.050%**, above 60° **0.0130%**
+(barycentric + n·J: 0.0162% / 0.053% / 0.064% / 0.0140%). figures/10212026_skymap_helio.png (right panel).
 ## Waiting on user
 nothing.
 
