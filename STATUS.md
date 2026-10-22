@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-22 06:15, DESKTOP-BBASC81
+Updated: 2026-10-22 11:35, DESKTOP-BBASC81
 
 ## Headline
 Heliocentric (Sun-centred) inputs are now the default for the 500-day data: they remove the need for n·J and give the
@@ -28,9 +28,13 @@ test 1 passed (ring + blob reproduced to 0.002% of the total); test 2 (no Earth 
 Notebooks: notebooks/10202026.ipynb, notebooks/10212026.ipynb.
 
 ## Running now
-Round 30 (started 2026-10-22 06:02, ~4.5 h → ~10:30; ~5 GB RAM, below-normal priority): the learnable dust-band layer
-(sweeps/band_layer.jl), heliocentric 500 days, poster split, 5 seeds × 2 inits (Kelsall's values; deliberately perturbed =
-recovery test), 500 epochs.
+nothing (round 30 finished 11:08 Oct 22). The PC is clear.
+
+## Learnable dust-band layer (round 30, Oct 22) — notebook: notebooks/10222026.ipynb
+Kelsall's band profile with trainable inclination/node/width/shape per band (sweeps/band_layer.jl, arch :bandmlp),
+heliocentric 500 days, poster split: ecliptic error 0.044% → **0.033%** (median ~0.016%, ensemble MSE 3.1e-8 → 2.4–2.7e-8).
+Started from Kelsall's values or deliberately wrong ones, the fits converge to the same parameters; the strong band 2
+lands near Kelsall (node ~31° vs 30.3°, i ~1.0° vs 1.2°, width 2.45° vs 1.99°); faint bands 1 and 3 settle elsewhere.
 
 ## Full heliocentric 500-day sky map (round 29 done 06:02)
 6 shifts × 5 seeds, no n·J: median **0.0154%**, p95 **0.050%**, within 2° of the ecliptic **0.050%**, above 60° **0.0130%**
