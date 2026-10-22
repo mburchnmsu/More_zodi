@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-21 21:05, DESKTOP-BBASC81
+Updated: 2026-10-21 21:45, DESKTOP-BBASC81
 
 ## Headline
 Heliocentric (Sun-centred) inputs are now the default for the 500-day data: they remove the need for n·J and give the
@@ -37,6 +37,6 @@ nothing.
 Decided 2026-10-19: no fixed Kelsall dust-band inputs for now; future: learn the band parameters from the data.
 
 ## Next up
-Tonight, while round 29 trains: ZodiOnboarding.ipynb (to match ExoOnboarding / SolOnboarding). Then the full
+ZodiOnboarding.ipynb (project root, orientation notebook like ExoOnboarding / SolOnboarding) done 2026-10-21. Then the full
 heliocentric sky map and notebook 10222026. If time remains: start the learnable dust-band layer.
 Later: the mentor's Earth-centric terms (n·δ̂, Moon) for real data; one-at-a-time ablation table.
