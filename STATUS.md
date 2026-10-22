@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-21 15:15, DESKTOP-BBASC81
+Updated: 2026-10-21 16:10, DESKTOP-BBASC81
 
 ## Headline
 On the new 500-day data the emulator reaches 0.016% median error on months it never saw and tests 98% of the sky;
@@ -34,7 +34,7 @@ barycentric inputs vs the Sun's wobble — see below.
   The trailing cloud is still learned (leftover 0.03 ± 0.09%): n·S ≈ n·E since SPHEREx is ~5e-5 AU from Earth.
 - **Test 1** passed (network − cloud-free ZodiPy reproduces ring + blob to 0.002% of the total).
 
-## Round 28 results (Oct 21)
+## Round 28 results (Oct 21) — notebook: notebooks/10212026.ipynb
 - Heliocentric 500-day sky map (no n·J, shifts 0 + 30): median 0.0160%, p95 0.053%, ecliptic **0.048%** (barycentric
   + n·J: 0.064%), above 60° 0.014%. figures/10212026_skymap_helio.png.
 - Mentor's Jupiter null test (heliocentric + n·J, shift 0): no gain — slightly worse (median 0.0165% vs 0.0157%,

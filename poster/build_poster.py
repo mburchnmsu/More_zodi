@@ -79,7 +79,7 @@ INPUTS = [("n·S, n·E", "toward or away from the Sun (seen from SPHEREx and fro
           ("sin λ⊕, cos λ⊕", "Earth's position in its orbit: the time of year")]
 METHOD_TRAIN = [H("Training and testing"),
                 B([("423,607 simulated pointings (140 days, 5 μm); five small networks (Flux.jl), averaged", False)]),
-                B([("Tested on whole months and sky regions they never saw", False)])]
+                B([("Tested on whole months they never saw", False)])]
 CAP_SKY = ("Figure 1. The whole sky at 5 μm from SPHEREx (ZodiPy): brightest toward the Sun and along the plane of the "
            "planets. Grey: too close to the Sun to observe.")
 CAP_GEOM = ("Figure 2. The geometry the network sees (top view, not to scale): n = SPHEREx's pointing vector; S, E = "
@@ -115,27 +115,23 @@ REFS = [["Kelsall, T., et al. 1998, ApJ, 508, 44 (COBE/DIRBE zodiacal-light mode
         ["Doré, O., et al. 2014, arXiv:1412.4872 (SPHEREx)",
          "Innes, M. 2018, JOSS, 3, 602 (Flux.jl)"]]
 NOTES = """[CHECK with mentor]
-- Problem statement: 'physics models such as Kelsall's were fit to older data and leave errors behind' -- right framing?
 - Acknowledgment: exact name of the URS grant/program and the NSF award number (if one should be listed).
-- Fig. 3: Jupiter and the Moon are drawn for context; the poster's model inputs are n.S n.z n.E n.vS n.vE n.x_E n.y_E sin/cos(lambda_E) (no Jupiter, no Moon).
-Numbers (poster v6): 5-network ensemble, 64-64-32-16 gelu (4 hidden layers), 750 epochs (round 21, z115_m750_shift*).
-- Fig. 2 (poster/data_components.jl): ZodiPy components per pointing as % of the total. Smooth cloud 90.1% (|b|<5) to
-  94.8% (>60 deg); behind Earth (n.vE<-0.5, |b|<15) the trailing cloud is 7.0% vs 1.1% ahead.
+Numbers: 5-network ensemble, 64-64-32-16 gelu (4 hidden layers), one-cycle LR (peak 1e-3), 750 epochs (round 21,
+z115_m750_shift*), 140-day corrected data (ZODI_DATA=z115). Errors are relative to ZodiPy (the Kelsall model), not the real sky.
+- Fig. 2: Jupiter and the Moon are tracked for real data; the poster model's 9 inputs are n.S n.z n.E n.vS n.vE n.x_E n.y_E
+  sin/cos(lambda_E) (no Jupiter, no Moon). x_E, y_E = ecliptic x, y rotated by Earth's longitude lambda_E.
+- Fig. 3 (poster/data_training.jl): epoch-averaged MSE (mean of 10 in-epoch evaluations), poster split; final mean
+  train/test MSE 2.5e-8 / 1.2e-7 (MJy/sr)^2.
 - Fig. 4 (poster/data_accuracy.jl): trained on days 0-30, 60-90, 120-140; tested on days 30-60, 90-120 (180,166 pointings,
-  43%): median 0.018%, p95 0.069%, 97.5% within 0.1%. (100 epochs: 0.026%, 0.10%, 94.8%.)
-  Errors are relative to ZodiPy (the Kelsall model), not the real sky.
-- Fig. 5 (poster/data_training.jl): epoch-averaged MSE (mean of 10 in-epoch evaluations) on the training data and the
-  withheld months; final mean train/test MSE 2.5e-8 / 1.2e-7 (MJy/sr)^2.
-- Fig. 6: the 30-day split slid by 0, 10, ..., 50 days, 5 seeds each, 750 epochs. Red = withheld windows with training
-  data before and after (interpolation): 0.015-0.030%. Orange = windows at the mission's start/end (extrapolation in
-  time): 10 days 0.016-0.023%, 20-30 days 0.07-0.09% median.
-- Fig. 7 (poster/data_skyerror.jl): red (interior) windows only, 364,797 pointings (86%), each averaged over the versions
-  that withheld it: median 0.016%, p95 0.063%; within 2 deg of the ecliptic 0.083%, above 60 deg 0.0125%. Map: each
-  boresight spread over a disc on a 1-deg grid (radius 1.75 deg = 3.5-deg patches, or 3.5 deg = the 7-deg blend);
-  boresights lie on scan circles a few degrees apart, so without spreading thin pole-to-pole gaps appear.
-- Earth-trailing cloud (mentor's test, 10182026 notebook): stacking residuals along the ahead/behind-Earth angle and the
-  angle to the cloud's centre shows no leftover cloud signal; fitted missing fraction 0.06 +/- 0.09% (|b|<15, 750 ep).
-- Multi-wavelength (Refine step): round-15 'ep300' ensemble, 30-day blocks, 1.25-5.0 um, ~0.1% median (poster/data_spectra.jl).
+  43%): median 0.018%, p95 0.069%, 97.5% within 0.1%.
+- Fig. 5: the 30-day split slid by 0, 10, ..., 50 days, 5 seeds each. Red = withheld windows with training data before and
+  after: 0.015-0.030%. Orange = windows at the mission's start/end (extrapolation in time): 0.016-0.09%.
+- Fig. 6 (poster/data_skyerror.jl, sweeps/r24_data.jl): between-month windows, each pointing averaged over the versions
+  that withheld it; 3.5-deg patches. Left (140 d): median 0.016%, p95 0.063%, within 2 deg of the ecliptic 0.083%.
+  Right (500 d, poster model + n.J, 500 epochs, round 24): median 0.016%, p95 0.053%, ecliptic 0.064%.
+  If asked about n.J: on 500 days it stood in for the Sun's wobble about the barycentre (inputs were barycentric);
+  with heliocentric inputs and no n.J the 500-day ecliptic error is 0.048% (round 27/28, not shown).
+- Earth-trailing cloud (mentor's tests): the network reproduces Kelsall's ring + trailing blob to 0.002% of the total.
 """
 
 # ----------------------------------------------------------------------------------------------- helpers

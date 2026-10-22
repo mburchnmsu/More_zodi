@@ -142,11 +142,11 @@ function fig_geometry(t)
         arc!(ax, Sp, 0.30, φS, nd, color=cS, linewidth=3)
         text!(ax, Sp[1] + 0.40cosd((φS + nd) / 2), Sp[2] + 0.40sind((φS + nd) / 2), text="n·S", color=cS, fontsize=FS, font=:bold, align=(:left, :center))
         # ẑ out of the page
-        zc = (-1.95, 1.25)
+        zc = (0.22, -1.08)                                   # lower right (clear of the n̂ label at the top)
         scatter!(ax, [zc[1]], [zc[2]], marker=:circle, markersize=34, color=(p.bg, 0.0), strokecolor=p.fg, strokewidth=3)
         scatter!(ax, [zc[1]], [zc[2]], markersize=9, color=p.fg)
-        text!(ax, zc[1] + 0.1, zc[2], text="ẑ points out of the page (north of the planets' plane): n·z = how high above it n̂ looks",
-              color=p.fg, fontsize=FS - 6, align=(:left, :center))
+        text!(ax, zc[1] + 0.1, zc[2], text="ẑ points out of the page (north of the planets' plane):\nn̂·ẑ = how high above that plane n̂ points",
+              color=p.fg, fontsize=FS - 8, align=(:left, :center))
         text!(ax, -2.1, -1.28, text="Each input is a dot product n̂·a:\n+1 = pointing along a, 0 = sideways, −1 = opposite",
               color=p.fg, fontsize=FS - 4, align=(:left, :bottom))
         fig
