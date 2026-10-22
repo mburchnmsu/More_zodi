@@ -99,7 +99,9 @@ earth_positions, v_earth, jupiter_positions, spherex_positions, v_spherex, moon_
 # ENV["ZODI_HELIO"] = "1": make all positions HELIOcentric (subtract the Sun's barycentric position, data/…/sun_positions.h5
 # from zodipy_gen/sun_positions.py). The vectors file is barycentric, but the dust cloud and ZodiPy's targets are
 # Sun-centred; the Sun moves ~0.0035 AU about the barycentre over 500 days (Oct 20 finding). Results go to *_helio.
-ZODI_HELIO = get(ENV, "ZODI_HELIO", "0") == "1"
+# Default (Oct 21): heliocentric for the 500-day data ("z500"/"d500"); barycentric for the 140-day modes, whose saved
+# models (incl. the poster model) were trained on barycentric inputs. Set ENV["ZODI_HELIO"] = "0"/"1" to override.
+ZODI_HELIO = get(ENV, "ZODI_HELIO", ZODI_DATA in ("z500", "d500") ? "1" : "0") == "1"
 if ZODI_HELIO
     sun_positions = h5open(f -> read(f["sun/positions"]), joinpath(dirname(pointing_file), "sun_positions.h5"))
     @assert size(sun_positions) == size(earth_positions)

@@ -1,53 +1,42 @@
 # More_zodi status
-Updated: 2026-10-21 16:10, DESKTOP-BBASC81
+Updated: 2026-10-21 21:05, DESKTOP-BBASC81
 
 ## Headline
-On the new 500-day data the emulator reaches 0.016% median error on months it never saw and tests 98% of the sky;
-the plane-of-the-planets error drops from 0.083% (140 days) to 0.064%. Found and fixed: the inputs were barycentric
-while the dust follows the Sun; heliocentric inputs remove the need for n·J and are the best 500-day model so far.
-Mentor's trailing-cloud tests 1 and 2 done. Poster redesigned (larger text, 140 vs 500-day sky-map pair).
+Heliocentric (Sun-centred) inputs are now the default for the 500-day data: they remove the need for n·J and give the
+best model so far (500-day sky map: median 0.016%, within 2° of the ecliptic 0.048% vs 0.064% barycentric + n·J and
+0.083% for 140 days). The full heliocentric 6-shift sky map is training overnight. **Poster: final (sent to print
+2026-10-21); no further changes unless the user presents again.**
 
 ## Best model
-500 days (round 24): Sun-frame + time-of-year inputs + n·J (n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕ n·J),
-64-64-32-16 gelu MLP, Adam, batch 512, one-cycle LR (peak 1e-3), 500 epochs, 5-network average, corrected 500-day
-targets (ZODI_DATA="z500"). Six shifted month splits, between-month windows (sky map): median |error| 0.0162%,
-p95 0.053%, within 2° of the ecliptic 0.064%, above 60° 0.014%.
-Poster model (140 days, no n·J, 750 epochs): median 0.0159%, p95 0.063%, ecliptic 0.083%.
+500 days, heliocentric inputs (default for ZODI_DATA="z500" since Oct 21): n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕
+(no n·J), 64-64-32-16 gelu MLP, Adam, batch 512, one-cycle LR (peak 1e-3), 500 epochs, 5-network average, corrected
+500-day targets. Poster split: median 0.0157%, p95 0.051%, ecliptic 0.044%. Sky map (shifts 0 + 30 so far): median
+0.0160%, p95 0.053%, ecliptic 0.048%, above 60° 0.014%.
+Poster model (final; 140 days, barycentric, 750 epochs): median 0.0159%, p95 0.063%, ecliptic 0.083%.
 
 ## Latest results
-| Model (sky map / poster split, between-month windows) | Median abs. error | p95 | Ecliptic (<2°) |
+| Model (500 days, poster split, withheld months) | Median | p95 | Ecliptic (<2°) |
 |---|---|---|---|
-| 140 days, poster model, 750 epochs (sky map) | 0.0159% | 0.063% | 0.083% |
-| 500 days, + n·J, 500 epochs (sky map, round 24) | 0.0162% | 0.053% | 0.064% |
-| 500 days, + n·J (poster split only) | 0.0164% | 0.055% | 0.060% |
-| 500 days, without n·J (poster split only, round 25) | 0.0307% | 0.191% | 0.094% |
+| barycentric + n·J (round 24) | 0.0164% | 0.055% | 0.060% |
+| barycentric, no n·J (round 25) | 0.0307% | 0.191% | 0.094% |
+| **heliocentric, no n·J (round 27)** | **0.0157%** | **0.051%** | **0.044%** |
+| heliocentric + n·J (round 28, the mentor's Jupiter null test) | 0.0165% | 0.055% | 0.063% |
 
-Without n·J the error is largest at days 0–100 and 400–500 (the same time of year, one year apart). Cause found:
-barycentric inputs vs the Sun's wobble — see below.
-
-## Overnight results (Oct 20–21) — notebook: notebooks/10202026.ipynb
-- **Heliocentric inputs fix the 500-day model** (round 27, poster split, no n·J): median 0.0157%, p95 0.051%,
-  ecliptic 0.044%, test MSE 3.1e-8 — better than barycentric + n·J (0.0164%, 0.055%, 0.060%, 3.7e-8) and far better than
-  barycentric without n·J (0.031%, 0.191%, 0.094%). The year-1/year-2 error excess is gone (days 0–100: 0.014%).
-- **Mentor's test 2** (140 d, poster model without n·E, n·vE, n·x⊕, n·y⊕): sky-map median 0.0230% vs 0.0159%,
-  p95 0.131% vs 0.063%, poles 0.030% vs 0.0125% (worse, esp. near the north ecliptic pole); ecliptic 0.077% vs 0.083%.
-  The trailing cloud is still learned (leftover 0.03 ± 0.09%): n·S ≈ n·E since SPHEREx is ~5e-5 AU from Earth.
-- **Test 1** passed (network − cloud-free ZodiPy reproduces ring + blob to 0.002% of the total).
-
-## Round 28 results (Oct 21) — notebook: notebooks/10212026.ipynb
-- Heliocentric 500-day sky map (no n·J, shifts 0 + 30): median 0.0160%, p95 0.053%, ecliptic **0.048%** (barycentric
-  + n·J: 0.064%), above 60° 0.014%. figures/10212026_skymap_helio.png.
-- Mentor's Jupiter null test (heliocentric + n·J, shift 0): no gain — slightly worse (median 0.0165% vs 0.0157%,
-  ecliptic 0.063% vs 0.044%). On Kelsall data n·J carries no real information once the inputs are heliocentric.
+Why: the vectors file is barycentric, but the Sun (and the dust cloud and ZodiPy's targets with it) moved 0.0035 AU
+about the barycentre over 500 days, pulled by Jupiter; n·J was standing in for it. Mentor's trailing-cloud tests:
+test 1 passed (ring + blob reproduced to 0.002% of the total); test 2 (no Earth dot products) clearly worse (0.023%).
+Notebooks: notebooks/10202026.ipynb, notebooks/10212026.ipynb.
 
 ## Running now
-nothing (round 28 finished 15:10). The PC is clear.
+Round 29 (started 2026-10-21 20:59; ~4.8 GB RAM, below-normal priority): the remaining heliocentric 500-day sky-map
+shifts — stage 1 = shifts 10 + 40 (to ~01:30), stage 2 = shifts 20 + 50 (to ~06:00 Oct 22); 20 trainings, 500 epochs.
+
 ## Waiting on user
-- Poster redesign: latest draft sent (Fig. 6 = 140 vs 500-day maps; caption to mention the n·J result).
+nothing.
 
 Decided 2026-10-19: no fixed Kelsall dust-band inputs for now; future: learn the band parameters from the data.
 
 ## Next up
-Decide with the user: switch all
-models to heliocentric inputs (and rerun the 500-day sky map with them)? Later: learnable dust-band layer;
-ZodiOnboarding.ipynb to match the other projects.
+Tonight, while round 29 trains: ZodiOnboarding.ipynb (to match ExoOnboarding / SolOnboarding). Then the full
+heliocentric sky map and notebook 10222026. If time remains: start the learnable dust-band layer.
+Later: the mentor's Earth-centric terms (n·δ̂, Moon) for real data; one-at-a-time ablation table.

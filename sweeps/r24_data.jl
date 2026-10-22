@@ -3,6 +3,7 @@
 # Uses whichever of the 30 runs have finished (a shift counts once all 5 seeds are done).
 #   julia --project=. sweeps/r24_data.jl
 ENV["ZODI_DATA"] = "z500"
+get!(ENV, "ZODI_HELIO", "0")          # round 24 was barycentric; set ZODI_HELIO=1 + R24_FAM for the heliocentric runs
 using LinearAlgebra; BLAS.set_num_threads(2)
 include(joinpath(@__DIR__, "..", "zodi_setup.jl"))
 for f in ("mb_train.jl", "extra_features.jl", "summary_helpers.jl", "shift_helpers.jl")
