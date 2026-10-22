@@ -1,0 +1,7 @@
+﻿2026-10-19 22:30  stage: shifts 0 + 30
+2026-10-20 02:59  stage done (exit )
+2026-10-20 02:59  stage: shifts 10 + 40
+2026-10-20 07:28  stage done (exit )
+2026-10-20 07:28  stage: shifts 20 + 50
+2026-10-20 12:03  stage done (exit )
+2026-10-20 12:03  all stages done

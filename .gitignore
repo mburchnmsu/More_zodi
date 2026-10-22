@@ -12,3 +12,5 @@ data/*.h5
 poster/.venv/
 poster/*.jld2
 poster/*.npy
+
+data/**/*.h5
