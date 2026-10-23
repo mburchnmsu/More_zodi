@@ -18,6 +18,7 @@ tested top to bottom with `julia --project=. sweeps/test_nb.jl <MMDDYYYY>.ipynb`
 | 10142026_multiwavelength.ipynb | Multi-wavelength emulator, 1.25–5 μm (round 13–15) |
 | 10152026.ipynb | Shifted 30-day windows, train + test MSE, out-of-sample sky-error map (round 16) |
 | 10172026.ipynb | Loss curves and why they are jagged, smoothing, 80/20 at 300 epochs, error vs time gap, trailing-feature check, month splits at 300 epochs (rounds 17–20) |
+| 10232026.ipynb | Parallax dust-band layer, the full 500-day sky map with it (ecliptic 0.050% → 0.0285%), fitted band parameters, the mentor's Earth-centric null test (rounds 31–33) |
 | 10222026.ipynb | Heliocentric default, the full heliocentric 500-day sky map, the learnable dust-band layer (rounds 29–30) |
 | 10212026.ipynb | Heliocentric 500-day sky map, the Jupiter null experiment, comparison with the mentor's onboarding plan, poster review (rounds 27–28) |
 | 10202026.ipynb | 500-day data, the 500-day model, the Sun's wobble (heliocentric inputs replace n·J), the mentor's trailing-cloud tests 1–2, poster redesign (rounds 24–27) |
