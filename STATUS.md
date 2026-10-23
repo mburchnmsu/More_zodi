@@ -37,7 +37,9 @@ Heliocentric inputs replaced n·J (the Sun moved 0.0035 AU about the barycentre 
 products) clearly worse. Notebooks 10202026, 10212026, 10222026.
 
 ## Running now
-nothing (rounds 31–33 finished 13:29 Oct 23). The PC is clear.
+Round 34 (started 16:35 Fri Oct 23; sweeps/run_round34.ps1, below-normal, ~5.4 GB): the parallax band layer at **2000
+epochs** (vs 500), all 6 shifts × 5 seeds, ~11 h per shift: shift 0 ~03:30 Sat, 10 ~14:30 Sat, 20 ~01:30 Sun,
+30 ~12:30 Sun, 40 ~23:30 Sun, 50 ~10:30 Mon. Progress: sweeps/report34.jl → figures/r34_progress_{loss,sky}.png.
 
 ## Waiting on user
 nothing.
