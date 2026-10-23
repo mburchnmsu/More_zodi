@@ -39,7 +39,7 @@ end
 r0 = runs16(fam(0))
 TR = reduce(hcat, [epoch_avg(r)[1] for r in r0]); TE = reduce(hcat, [epoch_avg(r)[2] for r in r0])
 spe = cld(length(r0[1].tr_idx), 512)                         # updates per epoch
-jldsave(joinpath(RESULTS_DIR, "r24_summary.jld2"); G, G7, stats, done, per_shift=collect(per_shift), TR, TE, spe,
+jldsave(joinpath(RESULTS_DIR, get(ENV, "R24_OUT", "r24_summary.jld2")); G, G7, stats, done, per_shift=collect(per_shift), TR, TE, spe,
         ntrain=length(r0[1].tr_idx), span=span_days, N)
 @printf("sky map: %d exposures (%.1f%%), median %.4f%%, p95 %.3f%%, |β|<2° %.4f%%, |β|≥60° %.4f%%\n", stats.n, 100stats.frac,
         stats.med, stats.p95, stats.ecl, stats.pole)
