@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-22 19:05, DESKTOP-BBASC81
+Updated: 2026-10-22 21:55, DESKTOP-BBASC81
 
 ## Headline
 Heliocentric (Sun-centred) inputs are now the default for the 500-day data: they remove the need for n·J and give the
@@ -29,9 +29,10 @@ Notebooks: notebooks/10202026.ipynb, notebooks/10212026.ipynb.
 
 ## Running now
 Rounds 31→33 chain (sweeps/run_round31.ps1, started 19:01 Oct 22, below-normal priority, ~5 GB RAM, log sweeps/round31.log):
-- round 31: band layer WITH parallax (trainable ring distance R, start 1.5 AU), poster split, 5 seeds — ~2.5 h (→ ~21:30)
-- auto-pick: parallax vs round 30's no-parallax layer by ecliptic error (sweeps/decide31.jl)
-- round 32: the winner on shifts 10–50 → full sky map, 25 runs — ~12.5 h (→ ~10:00 Oct 23)
+- round 31 DONE 21:47: band layer WITH parallax (trainable ring distance R), poster split — **wins**: ecliptic 0.0326% →
+  **0.0292%**, ens MSE 2.66e-8 → 2.44e-8, median 0.016% (same). Fitted R ≈ 1.74 / 1.48 / 2.06 AU (bands 1/2/3);
+  band 2's node moved to ~89° (30° without parallax) — to look into.
+- round 32 (running since 21:48): parallax layer on shifts 10–50 → full sky map, 25 runs — ~12.5 h (→ ~10:30 Oct 23)
 - round 33: mentor's Earth-centric null test (+ n·δ̂, n·M̂; should not help on simulated data), 5 runs — ~2.5 h (→ ~12:30 Oct 23)
 Then: notebooks/10232026.ipynb.
 
