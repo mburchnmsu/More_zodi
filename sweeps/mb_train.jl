@@ -110,8 +110,12 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
     model = arch === :mlp ? build_mlp(size(X, 1), hidden, rng) :
             arch === :bandmlp ? build_bandmlp(size(X, 1), hidden, rng, μ[end-2:end], σ[end-2:end];
                                               init=something(band_init, KELSALL_BANDS)) :
+            arch === :bandplx ? build_bandplx(size(X, 1), hidden, rng, μ[end-5:end], σ[end-5:end];
+                                              init=something(band_init, KELSALL_BANDS)) :
             build_resmlp(size(X, 1), width, blocks, rng)
     arch === :bandmlp && @assert feature_names[end-2:end] == ["n·x", "n·y", "n·z"] "bandmlp: last 3 features must be n·x, n·y, n·z"
+    arch === :bandplx && @assert feature_names[end-5:end] == ["n·x", "n·y", "n·z", "S·x", "S·y", "S·z"] &&
+                                 ZODI_HELIO "bandplx: last 6 features must be n·x n·y n·z S·x S·y S·z, heliocentric inputs"
     target === :softplus && (model = Chain(model, z -> softplus.(z)))
     n_params = sum(length, Flux.trainables(model))
     lossfn = target === :relmse ? ((m, xb, yb) -> mean(abs2, (m(xb) .- yb) ./ yb)) :

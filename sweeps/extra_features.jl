@@ -90,7 +90,12 @@ logplanck(λ, T) = (c2 = 14387.77; -5log10(λ) - log10(expm1(c2 / (λ * T))))   
 logB_rel(λ, T) = logplanck(λ, T) - logplanck(5.0, T)
 const EXTRA_NAMES = ["n·δ̂", "n·Ĵfix", "n·Ĵ", "n·Ĵ⊥fix", "n·δ", "n·Jrot45", "n·Jrot90", "n·Jrot180", "n·Jscr",
                      "sinλE", "cosλE", BAND_SHARP_NAMES..., BAND_PLX_NAMES..., SUNFRAME_NAMES..., "logλ", "phC1", "phC2", "phC3",
-                     "logB250", "logB300"]
+                     "logB250", "logB300", "n·M̂"]
+# n·M̂ (Oct 22, the mentor's Earth-centric terms for real data): pointing · direction from SPHEREx to the Moon. With
+# n·δ̂ (pointing · Earth→SPHEREx direction; Earth's centre lies along −δ̂) these are the handles for Earthshine / limb stray
+# light and moonlight on real data. Kelsall/ZodiPy has neither, so on simulated data both should be a null.
+M_rel  = moon_positions .- spherex_positions
+M_unit = M_rel ./ sqrt.(sum(M_rel .^ 2, dims=1))
 extra_columns(nvec, idx) = hcat(dot_prod_matrix(nvec, δ_unit[:, idx]),
                                 vec(J_fix' * nvec),
                                 dot_prod_matrix(nvec, J_unit[:, idx]),
@@ -105,7 +110,8 @@ extra_columns(nvec, idx) = hcat(dot_prod_matrix(nvec, δ_unit[:, idx]),
                                 sunframe_columns(nvec, idx),
                                 log10.(WAVE[idx]),
                                 permutedims(reduce(hcat, phase_coeffs.(WAVE[idx]))),
-                                logB_rel.(WAVE[idx], 250.0), logB_rel.(WAVE[idx], 300.0))
+                                logB_rel.(WAVE[idx], 250.0), logB_rel.(WAVE[idx], 300.0),
+                                dot_prod_matrix(nvec, M_unit[:, idx]))
 if !("n·δ̂" in dot_names_all)
     global Fd_raw = hcat(Fd_raw, extra_columns(nvec_unit_cartesian, 1:N))
     append!(dot_names_all, EXTRA_NAMES)
@@ -142,6 +148,11 @@ const FEATURE_SETS = Dict(
     # learnable dust bands (sweeps/band_layer.jl, arch = :bandmlp): the poster inputs + the pointing's fixed-axis components,
     # which only the band layer reads (to compute each band's latitude profile with trainable geometry)
     :sunseason_learnband => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE", "n·x", "n·y", "n·z"],
+    # round 33: the mentor's Earth-centric null test (n·δ̂ = Earth-limb direction, n·M̂ = Moon direction) on the poster inputs
+    :sunseason_earthcentric => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE", "n·δ̂", "n·M̂"],
+    # parallax version (arch = :bandplx): + SPHEREx's heliocentric position components for the line-of-sight crossing
+    :sunseason_learnband_plx => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE",
+                                 "n·x", "n·y", "n·z", "S·x", "S·y", "S·z"],
     # round 26 (mentor's Earth test): the poster model WITHOUT the Earth dot products (n·E, n·vE, n·x⊕, n·y⊕); clock kept.
     # Note: SPHEREx is ~5e-5 AU from Earth, so n·S ≈ n·E and n·vS ≈ n·vE still carry Earth's geometry.
     :sunseason_noEarth => ["n·S", "n·z", "n·vS", "sinλE", "cosλE"],
