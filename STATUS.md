@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-23 14:10, DESKTOP-BBASC81
+Updated: 2026-10-24 04:30, DESKTOP-BBASC81
 
 ## Headline
 A learnable dust-band layer with parallax is now the best 500-day model: on the full 6-shift sky map it cuts the error
