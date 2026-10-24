@@ -40,6 +40,8 @@ products) clearly worse. Notebooks 10202026, 10212026, 10222026.
 Round 34 (started 16:35 Fri Oct 23; sweeps/run_round34.ps1, below-normal, ~5.4 GB): the parallax band layer at **2000
 epochs** (vs 500), all 6 shifts × 5 seeds, ~11 h per shift: shift 0 ~03:30 Sat, 10 ~14:30 Sat, 20 ~01:30 Sun,
 30 ~12:30 Sun, 40 ~23:30 Sun, 50 ~10:30 Mon. Progress: sweeps/report34.jl → figures/r34_progress_{loss,sky}.png.
+- Shift 0 (poster split) done 04:05 Sat — **big gain**: ecliptic 0.0292% → **0.0161%**, median 0.0162% → **0.0135%**,
+  p95 0.051% → 0.040%, ensemble MSE 2.44e-8 → 1.47e-8; final train/test MSE 7.1e-9 / 1.8e-8, test still falling.
 
 ## Waiting on user
 nothing.

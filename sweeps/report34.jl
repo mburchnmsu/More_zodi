@@ -50,7 +50,7 @@ for (c, xs) in enumerate((:epoch, :frac))
         lines!(ax, x, vec(mean(TE, dims=2)), color=col, linewidth=2.5, label="$lbl test (withheld months)")
         c == 1 && @printf("%s: final epoch-averaged train/test MSE %.3e / %.3e\n", lbl, mean(TR[end, :]), mean(TE[end, :]))
     end
-    ylims!(ax, 1e-8, 1e-5); c == 2 && axislegend(ax, position=:rt)
+    ylims!(ax, 3e-9, 1e-5); c == 2 && axislegend(ax, position=:rt)
 end
 save(joinpath(@__DIR__, "..", "figures", "r34_progress_loss.png"), fig, px_per_unit=2)
 include(joinpath(@__DIR__, "plot_sky_common.jl"))
