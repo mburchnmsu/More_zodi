@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-24 04:30, DESKTOP-BBASC81
+Updated: 2026-10-24 15:30, DESKTOP-BBASC81
 
 ## Headline
 A learnable dust-band layer with parallax is now the best 500-day model: on the full 6-shift sky map it cuts the error
@@ -42,6 +42,8 @@ epochs** (vs 500), all 6 shifts × 5 seeds, ~11 h per shift: shift 0 ~03:30 Sat,
 30 ~12:30 Sun, 40 ~23:30 Sun, 50 ~10:30 Mon. Progress: sweeps/report34.jl → figures/r34_progress_{loss,sky}.png.
 - Shift 0 (poster split) done 04:05 Sat — **big gain**: ecliptic 0.0292% → **0.0161%**, median 0.0162% → **0.0135%**,
   p95 0.051% → 0.040%, ensemble MSE 2.44e-8 → 1.47e-8; final train/test MSE 7.1e-9 / 1.8e-8, test still falling.
+- Shift 10 done 15:00 Sat (MSE 2.37e-8 → 1.48e-8). Sky map, shifts 0 + 10: ecliptic 0.0294% → 0.0164%, median
+  0.0156% → 0.0132%, p95 0.049% → 0.037%. Notebook: notebooks/10242026.ipynb.
 
 ## Waiting on user
 nothing.
