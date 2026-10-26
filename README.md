@@ -82,10 +82,10 @@ Other checks (details in the notebooks):
 ## Reproducing
 
 1. **Julia environment** (Julia 1.12): `julia --project=. -e "using Pkg; Pkg.instantiate()"`
-2. **Data.** The HDF5 inputs (~150 MB of pointing geometry and targets) are not in this repository. The SPHEREx
-   pointings come from the mission's public metadata at IRSA. The ZodiPy targets are regenerated with
-   `zodipy_gen/generate_500.py` (500-day data), using a Python environment with ZodiPy 1.1.5 and astropy.
-   `data/MANIFEST.tsv` lists the expected files.
+2. **Data.** The HDF5 inputs (pointing geometry, ephemerides and targets) are not in this repository because of their
+   size. The 140-day pointings and vectors came from the mentor's SPHEREx pipeline (listed with checksums in
+   `data/MANIFEST.tsv`). The 500-day pointings are SPHEREx image metadata from IRSA. The ZodiPy targets are regenerated
+   with `zodipy_gen/generate_500.py` (500-day data), using a Python environment with ZodiPy 1.1.5 and astropy.
 3. **Train**, e.g. the learnable parallax-band model on all 6 month splits: set the environment variables
    `ZODI_DATA=z500`, `R31_STAGE=plx` and run
    `julia -t 5 --project=. sweeps/run_threaded.jl sweeps/configs_v31.jl` (the poster split), then again with
