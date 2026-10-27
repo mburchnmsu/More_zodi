@@ -10,12 +10,13 @@
 #                training, then cosine anneal down to lr_max/1e4
 #   :cosexp    — single cosine × exponential envelope (no restarts):
 #                lr = lr_max · ½(1 + cos πt) · exp(−decay·t)
-#   :linear    — straight line from lr_max to lr_max/10 (the full-batch recipe)
+#   :cosexpw   — :cosexp after a cosine warm-up from lr_max/div over the first `warm` of training (t rescaled after it)
+#   :linear   — straight line from lr_max to lr_max/10 (the full-batch recipe)
 # ==============================================================================
 using Flux, Optimisers, Random, Statistics, Printf
 using Flux: DataLoader
 
-function lr_at(schedule, t; lr_max, pct=0.3, div=25.0, final_div=1e4, decay=3.0)
+function lr_at(schedule, t; lr_max, pct=0.3, div=25.0, final_div=1e4, decay=3.0, warm=0.05)
     if schedule === :onecycle
         lo, hi, fin = lr_max / div, lr_max, lr_max / final_div
         t <= pct && return lo + (hi - lo) * 0.5 * (1 - cos(π * t / pct))
@@ -23,6 +24,10 @@ function lr_at(schedule, t; lr_max, pct=0.3, div=25.0, final_div=1e4, decay=3.0)
         return fin + (hi - fin) * 0.5 * (1 + cos(π * u))
     elseif schedule === :cosexp
         return lr_max * 0.5 * (1 + cos(π * t)) * exp(-decay * t) + lr_max / 1e4
+    elseif schedule === :cosexpw
+        t <= warm && return lr_max / div + (lr_max - lr_max / div) * 0.5 * (1 - cos(π * t / warm))
+        u = (t - warm) / (1 - warm)
+        return lr_max * 0.5 * (1 + cos(π * u)) * exp(-decay * u) + lr_max / 1e4
     elseif schedule === :linear
         return lr_max + (lr_max / 10 - lr_max) * t
     else

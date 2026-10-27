@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-27 01:30, DESKTOP-BBASC81
+Updated: 2026-10-27 10:05, DESKTOP-BBASC81
 
 ## Headline
 A learnable dust-band layer with parallax is now the best 500-day model: on the full 6-shift sky map it cuts the error
@@ -56,6 +56,12 @@ epochs** (vs 500), all 6 shifts × 5 seeds, ~11 h per shift: shift 0 ~03:30 Sat,
   from ~epoch 1600 while the training loss keeps falling (figures/r34_seed_curves.png; sweeps/diag34_shift30.jl,
   sweeps/diag34b.jl). Sky map, 4 shifts, still better overall: ecliptic 0.0288% → **0.0169%**, median 0.0159% →
   **0.0136%**, p95 0.050% → **0.038%**.
+
+**Queued — round 35 (user approved 2026-10-27):** learning-rate schedule test. cos×exp with a 5% warm-up (new schedule
+`:cosexpw` in sweeps/mb_train.jl; peak 2e-3, decay 3), against the one-cycle runs (peak 1e-3). Both have the same average
+learning rate (5.1e-4), so only the shape differs: cos×exp spends longer at small learning rates. Parallax band layer,
+500 epochs, shifts 0 and 30 × 5 seeds (sweeps/configs_v35.jl). sweeps/run_round35.ps1 is waiting for round 34 to
+finish, then starts automatically (~00:00 Wed, ~5.5 h, done ~05:30 Wed).
 
 ## Waiting on user
 nothing.
