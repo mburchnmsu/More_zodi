@@ -67,7 +67,10 @@ learning rate (5.1e-4), so only the shape differs: cos×exp spends longer at sma
 finish, then starts automatically (~00:00 Wed, ~5.5 h, done ~05:30 Wed).
 
 ## Waiting on user
-nothing.
+Cluster access: Zodi is moving to the NMSU HPC cluster (Slurm; access form in progress, 2026-10-27). No cluster work
+yet. Rule: never run heavy compute on the login node; every heavy step goes through `sbatch` on compute nodes, using
+`module load` for software and `squeue` to monitor. Template: pipeline/cluster/train_array.sbatch (partition, account and
+module names still marked EDIT; precompilation should run in a job, not on the login node).
 
 Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters from the data (done: round 30–32).
 
