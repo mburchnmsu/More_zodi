@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-28 05:00, DESKTOP-BBASC81
+Updated: 2026-10-28 16:30, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -51,6 +51,19 @@ figures/10282026_r35_schedule.png).
   0.0299% → 0.0261%.
 - The loss falls much faster early. The withheld-month loss flattens from ~epoch 350 while the training loss keeps
   falling.
+
+## Mentor's requests (Oct 28 afternoon) — notebook 10282026 §4–6, sweeps/mentor1028.jl
+Best model (round 34), saved runs only.
+- **Interpolation vs extrapolation sky map.** The usual map already uses interpolation windows only: median 0.0130%,
+  p95 0.035%, ecliptic 0.0162%. Adding the first/last withheld windows changes little (0.0132% / 0.035% / 0.0166%).
+  The extrapolation windows alone (10% of exposures, only 10–30 days past the training data): 0.0168% / 0.043% / 0.0226%,
+  about 30% worse. Figure: figures/10282026_r34_interp_extrap_sky.png.
+- **2-D trailing-cloud residual map** (longitude from Earth's direction of motion, 0–360°, × ecliptic latitude): **no
+  residual from the cloud.** Fitted missing fraction −0.0001 ± 0.0001 near the plane. Behind vs ahead of Earth:
+  −0.0006% vs +0.0005%, against −0.07% if 1% of the cloud were missed. SPHEREx covers 38% of this frame (near 0°, 180°
+  and the poles). Figure: figures/10282026_r34_trailing_2d.png.
+- **Precision target (user leading, reading the Kelsall paper):** our 0.013% is emulation error (network vs Kelsall).
+  Kelsall's residuals are model vs DIRBE data. The target should come from SPHEREx's zodi-subtraction needs.
 
 ## Running now
 Nothing. The PC is idle; the next run needs the user's OK.

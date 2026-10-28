@@ -1,4 +1,5 @@
-# Cell contents for 10282026.ipynb — Oct 27–28: round 35, cos×exp learning-rate schedule vs one-cycle.
+# Cell contents for 10282026.ipynb — Oct 27–28: round 35, cos×exp learning-rate schedule vs one-cycle; the mentor's
+# requests (interpolation vs extrapolation sky maps, 2-D trailing-cloud residual map; sweeps/mentor1028.jl).
 #     julia --project=. sweeps/build_nb.jl sweeps/r35_text.jl 10282026.ipynb
 CELLS = Pair{String,String}[
 
@@ -61,5 +62,67 @@ showpng("10282026_r35_schedule.png")
 * cos×exp at 2000 epochs, to see whether the schedule and longer training add up. It may overfit more, since it spends
   even longer at small learning rates.
 * A fix for the late flattening seen on shift 30 (a validation month with best-epoch selection, or weight decay).
+""",
+
+"markdown" => raw"""
+# Mentor's requests (Oct 28 afternoon)
+Both use the best model (round 34: parallax band layer, 2000 epochs, 6 shifts × 5 seeds) and only saved runs, no new
+training. Script: `sweeps/mentor1028.jl`.
+
+## 4. Sky map: interpolation only vs interpolation + extrapolation
+In the month-on/month-off splits, a withheld month with training months on both sides tests **interpolation**. The
+first or last withheld window of a split has training data on one side only, so it tests **extrapolation** in time.
+Our usual sky maps already use the interpolation windows only (`is_interior`).
+
+| windows used | exposures | median | p95 | within 2° of the ecliptic | above 60° |
+|---|---|---|---|---|---|
+| interpolation only (usual map) | 98% | 0.0130% | 0.035% | 0.0162% | 0.0120% |
+| interpolation + extrapolation | 100% | 0.0132% | 0.035% | 0.0166% | 0.0122% |
+| extrapolation only | 10% | 0.0168% | 0.043% | 0.0226% | 0.0153% |
+
+* Adding the extrapolation windows barely changes the map: they hold only 10% of the withheld exposures, and those
+  exposures are mostly also covered by interpolation windows from other splits.
+* On their own, the extrapolation windows are about **30% worse** (median 0.0168% vs 0.0130%). They come from different
+  parts of the sky (the first and last ~30 days of the data), so this comparison is not exactly like for like.
+* These windows extrapolate only 10–30 days past the training data. Longer extrapolation (predicting a whole future
+  period) would need its own training run, like the Oct 14 test.
+""",
+
+"code" => raw"""
+showpng("10282026_r34_interp_extrap_sky.png")
+""",
+
+"markdown" => raw"""
+## 5. The Earth-trailing cloud on the full 0–360° sky
+The frame moves with Earth. Longitude is measured in the ecliptic plane from Earth's direction of motion: 0° = ahead,
+90° = the Sun, 180° = behind Earth (where Kelsall's trailing cloud sits), 270° = away from the Sun. Latitude is
+ecliptic latitude. Bins are 3° × 3°; colours are means over the withheld (interpolation) exposures.
+SPHEREx always looks about 90° from the Sun, so it only sees near 0° and 180° longitude (and near the poles). The grey
+areas are never observed, so 38% of the frame is covered.
+
+**Do we see residuals from the trailing cloud? No.**
+* Kelsall's cloud is up to ~8% of the light near longitude 180–210°, latitude 0 (top left). Missing just 1% of it would
+  leave residuals of about −0.07% there (top right).
+* Our mean residuals (bottom left) are a few thousandths of a percent everywhere, with no feature where the cloud is.
+* Fitting residual = a × (cloud share) + b gives a = −0.0001 ± 0.0001 near the plane (|β| < 15°) and 0.0000 ± 0.0002
+  over the whole sky. **The network has learned the cloud to about 0.01% of its own brightness.**
+* Behind Earth (longitude 150–210°, |β| < 15°; the cloud is 6.9% of the light) the mean residual is −0.0006%. Ahead
+  (330–30°; 1.0% of the light) it is +0.0005%. That difference is ~100× smaller than a 1%-missing cloud would give.
+* The bottom-right panel divides by the standard error. That error assumes every exposure is independent, but nearby
+  exposures share the same sky and time, so it overstates how significant the stripes are. The stripes follow the scan
+  pattern, not the cloud. The largest real residual feature is near longitude 330°, latitude +30° (about +0.02%),
+  well away from the cloud.
+""",
+
+"code" => raw"""
+showpng("10282026_r34_trailing_2d.png")
+""",
+
+"markdown" => raw"""
+## 6. To keep in mind: how precise does the emulator need to be?
+Our ~0.013% is the **emulation error**: how well the network copies the Kelsall model. Kelsall's own residuals are
+**model vs the real DIRBE sky**, which is a different comparison (numbers to come from the paper; the user is reading
+it). The precision target should come from SPHEREx: how well zodiacal light has to be subtracted compared with the noise
+in one image. The plan is to put all three on one plot once the numbers are in.
 """,
 ]

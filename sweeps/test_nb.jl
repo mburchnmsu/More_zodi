@@ -19,7 +19,7 @@ for c in nb["cells"]
     if v !== nothing && isdefined(Main, :Makie) && v isa Main.Makie.FigureLike
         Main.save(joinpath(out, "cell_$(c["id"]).png"), v)
     elseif v !== nothing
-        show(stdout, MIME("text/plain"), v); println()
+        show(IOContext(stdout, :limit => true), MIME("text/plain"), v); println()   # :limit keeps images/arrays short in a log file
     end
     @printf("   (%.0f s)\n", time() - t1)
 end
