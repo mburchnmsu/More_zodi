@@ -1,5 +1,5 @@
 # Fitted parallax band-layer parameters (rounds 31–32), per shift and seed, to check they are consistent across splits.
-#   julia --project=. sweeps/band_params_r32.jl
+#   julia --project=. sweeps/band_params_r32.jl            (ENV["BAND_FAM"] = "z500h_bandplx2k_shift" for round 34)
 ENV["ZODI_DATA"] = "z500"; ENV["ZODI_HELIO"] = "1"
 using LinearAlgebra; BLAS.set_num_threads(2)
 redirect_stdout(devnull) do
@@ -8,7 +8,8 @@ redirect_stdout(devnull) do
 end
 println("Kelsall: i ", KELSALL_BANDS.i, "  Ω ", KELSALL_BANDS.Ω, "  δζ ", KELSALL_BANDS.δζ, "  v ", KELSALL_BANDS.v)
 P = Dict(k => Float64[] for k in (:i, :Ω, :δζ, :v, :R))
-for Δ in (0, 10, 20, 30, 40, 50), r in runs16("z500h_bandplx_kelsall_shift$Δ")
+const FAM = get(ENV, "BAND_FAM", "z500h_bandplx_kelsall_shift")
+for Δ in (0, 10, 20, 30, 40, 50), r in runs16("$FAM$Δ")
     local p = band_params(r.model[1])
     for k in keys(P); append!(P[k], getfield(p, k)); end
     @printf("shift %2d seed %d | i %s | Ω %s | δζ %s | v %s | R %s\n", Δ, r.seed,

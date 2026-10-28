@@ -45,7 +45,7 @@ brightness for any pointing and time, from inputs built out of the observing geo
 | poster model (Oct 2026) | 140 days, 423,607 pointings | 0.016% | 0.063% | 0.083% |
 | heliocentric inputs | 500 days, 1,520,194 pointings | 0.015% | 0.050% | 0.050% |
 | + learnable parallax dust-band layer | 500 days | 0.016% | 0.049% | **0.029%** |
-| same, trained 2000 epochs instead of 500 *(in progress: 5 of 6 test splits)* | 500 days | **0.013%** | **0.035%** | **0.016%** |
+| same, trained 2000 epochs instead of 500 | 500 days | **0.013%** | **0.035%** | **0.016%** |
 
 All errors are |network − ZodiPy| / ZodiPy on months withheld from training. Sky maps combine all 6 shifted splits
 except where noted.
