@@ -1,11 +1,11 @@
 # More_zodi status
-Updated: 2026-10-27 23:35, DESKTOP-BBASC81
+Updated: 2026-10-28 05:00, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
 model so far. On the full 6-shift sky map: median 0.0157% → **0.0130%**, p95 0.049% → **0.035%**, within 2° of the
 ecliptic 0.0285% → **0.0162%**. 5 of 6 splits improve by 29–41%; shift 30 is worse (+11%, mild overfitting in 2 of 5
-seeds). Round 35 (learning-rate schedule test) is running. **Poster: final (presented 2026-10-23).**
+seeds). Round 35: a cos×exp learning-rate schedule beats one-cycle at 500 epochs (shift 0 −21%, shift 30 −8%). **Poster: final (presented 2026-10-23).**
 
 ## Best model
 500 days, heliocentric inputs (default for ZODI_DATA="z500" since Oct 21): n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕
@@ -41,11 +41,19 @@ Heliocentric inputs replaced n·J (the Sun moved 0.0035 AU about the barycentre 
 tests: test 1 passed; test 2 (no Earth dot products) clearly worse. Learnable bands (round 30), the parallax band layer
 (rounds 31–32: ecliptic 0.050% → 0.0285%), Earth-centric null test passes (round 33). Notebooks 10202026–10232026.
 
+## Round 35 (done 04:35 Wed Oct 28) — notebook: notebooks/10282026.ipynb
+Learning-rate schedule test: cos×exp with a 5% warm-up (new schedule `:cosexpw` in sweeps/mb_train.jl; peak 2e-3,
+decay 3) against one-cycle (peak 1e-3). Both have the same average learning rate (5.1e-4), so only the shape differs.
+Parallax band layer, 500 epochs, shifts 0 and 30 × 5 seeds (sweeps/configs_v35.jl; report sweeps/report35.jl →
+figures/10282026_r35_schedule.png).
+- **cos×exp wins.** Shift 0: ensemble MSE 2.44e-8 → **1.94e-8** (−21%, ~2.7 standard errors over seeds), median
+  0.0162% → 0.0149%, ecliptic 0.0292% → 0.0247%. Shift 30: 2.53e-8 → **2.32e-8** (−8%, within seed noise), ecliptic
+  0.0299% → 0.0261%.
+- The loss falls much faster early. The withheld-month loss flattens from ~epoch 350 while the training loss keeps
+  falling.
+
 ## Running now
-Round 35 (started 23:10 Tue Oct 27, user approved): learning-rate schedule test. cos×exp with a 5% warm-up (new schedule
-`:cosexpw` in sweeps/mb_train.jl; peak 2e-3, decay 3), against the one-cycle runs (peak 1e-3). Both have the same average
-learning rate (5.1e-4), so only the shape differs. Parallax band layer, 500 epochs, shifts 0 and 30 × 5 seeds
-(sweeps/configs_v35.jl, sweeps/run_round35.ps1, below-normal). ~5.5 h, done ~04:45 Wed.
+Nothing. The PC is idle; the next run needs the user's OK.
 
 ## Waiting on user
 Cluster access: Zodi is moving to the NMSU HPC cluster (Slurm; access form in progress, 2026-10-27). No cluster work
@@ -56,7 +64,8 @@ module names still marked EDIT; precompilation should run in a job, not on the l
 Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters from the data (done: round 30–32).
 
 ## Next up
-After round 35: a fix for the shift-30 overfitting (a validation month with best-epoch selection, or weight decay),
+Options from round 35: cos×exp on the remaining 4 shifts at 500 epochs (~11 h, full sky map); cos×exp at 2000 epochs;
+a fix for the shift-30 overfitting (a validation month with best-epoch selection, or weight decay),
 needs the user's OK. Other options: per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).
