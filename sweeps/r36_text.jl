@@ -189,4 +189,31 @@ showpng("10292026_ecl045_movie_frame.png")
 "code" => raw"""
 showpng("10292026_ecl045_lightcurve.png")
 """,
+
+"markdown" => raw"""
+## 8. Why the pole brightens and fades: the geometry (`realdata/geometry.py`, `realdata/plot_geometry.jl`)
+The Kelsall smooth dust cloud (the main part of the model behind ZodiPy) is written out explicitly here. Dust density
+about a tilted, slightly offset centre; temperature 286 K × R^−0.467. At 4.9 μm the model has no scattered sunlight,
+so the brightness is ∫ density × B_ν(T) along the line of sight.
+**Check:** this integral gives 95% of ZodiPy at the pole and 91% on the ecliptic (the rest is the dust bands), and follows
+ZodiPy's yearly curve with correlation 0.999.
+
+Two effects, both from where Earth sits in the cloud:
+1. **Distance from the Sun.** Earth is closest on ~Jan 4. The nearby dust is then denser and warmer, and at 5 μm (the
+   short-wavelength side of 280 K emission) brightness is very sensitive to temperature.
+2. **The cloud's 2° tilt.** Earth is farthest below the dust's midplane on ~Mar 9 (more dust overhead, looking north)
+   and farthest above it on ~Sep 8.
+
+The model's brightest day at the pole is **Feb 2–3**, between the two. Its faintest is ~Aug 10–13, between aphelion
+(Jul 4) and Sep 10. So both effects matter. **Half of the pole's light comes from within 0.15 AU of Earth**, and half
+of the ecliptic point's light from within 0.28 AU. That's why Earth's own position sets the yearly cycle.
+""",
+
+"code" => raw"""
+showpng("10292026_geometry_3panel.png")
+""",
+
+"code" => raw"""
+showpng("10292026_geometry_2panel.png")
+""",
 ]
