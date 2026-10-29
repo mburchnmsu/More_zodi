@@ -28,7 +28,8 @@ import Pkg; Pkg.activate(@__DIR__)
 using HDF5, Statistics, Printf, CairoMakie
 const ROOT = @__DIR__
 const DATA = joinpath(ROOT, "data"); const FIG = joinpath(ROOT, "figures")
-showpng(f) = CairoMakie.Makie.FileIO.load(isabspath(f) ? f : joinpath(FIG, f))
+struct PNGFile; path::String; end; Base.show(io::IO, ::MIME"image/png", p::PNGFile) = write(io, read(p.path))   # raw PNG bytes: renders in any Jupyter front end
+showpng(f) = PNGFile(isabspath(f) ? f : joinpath(FIG, f))
 println("project: ", ROOT)
 """,
 

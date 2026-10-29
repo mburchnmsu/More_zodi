@@ -21,7 +21,8 @@ Continuation of `notebooks/10242026.ipynb`: round 34 trains the parallax dust-ba
 "code" => raw"""
 using CairoMakie
 const R = joinpath(@__DIR__, "..")
-showpng(f) = CairoMakie.Makie.FileIO.load(joinpath(R, "figures", f))
+struct PNGFile; path::String; end; Base.show(io::IO, ::MIME"image/png", p::PNGFile) = write(io, read(p.path))   # raw PNG bytes: renders in any Jupyter front end
+showpng(f) = PNGFile(joinpath(R, "figures", f))
 """,
 
 "markdown" => raw"""

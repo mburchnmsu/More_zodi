@@ -26,7 +26,8 @@ runs: heliocentric 500-day data, 5 μm, 5 seeds, 500 epochs, band parameters sta
 "code" => raw"""
 using CairoMakie
 const R = joinpath(@__DIR__, "..")
-showpng(f) = CairoMakie.Makie.FileIO.load(joinpath(R, "figures", f))
+struct PNGFile; path::String; end; Base.show(io::IO, ::MIME"image/png", p::PNGFile) = write(io, read(p.path))   # raw PNG bytes: renders in any Jupyter front end
+showpng(f) = PNGFile(joinpath(R, "figures", f))
 """,
 
 "markdown" => raw"""
