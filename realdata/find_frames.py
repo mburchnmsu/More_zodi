@@ -7,7 +7,8 @@ pixel is found by inverting the bilinear map from detector pixels to the tangent
 is read from the detector's spectral lookup table (9x9 grid, the WCS-WAVE extension of any D6 cutout). Accurate to a
 few pixels (~0.005 um), so the selection is made with a small margin and the exact wavelength comes from each cutout.
 
-    python -I realdata/find_frames.py <wave_table_cutout.fits> [out.csv]
+    python -I realdata/find_frames.py <wave_table_cutout.fits> [out.csv] [RA Dec]
+(another sky point: give its RA and Dec in degrees, ICRS; default the north ecliptic pole)
 """
 import csv, io, sys, urllib.parse, urllib.request
 import numpy as np
@@ -63,8 +64,11 @@ def wave_table(path):
 
 
 def main():
+    global RA0, DEC0
     lam = wave_table(sys.argv[1])
-    out = sys.argv[2] if len(sys.argv) > 2 else None
+    out = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] != "-" else None
+    if len(sys.argv) > 4:
+        RA0, DEC0 = float(sys.argv[3]), float(sys.argv[4])
     rows = tap(f"SELECT obs_id, obs_collection, t_min, access_url, s_region FROM spherex.obscore "
                f"WHERE energy_bandpassname = '{DET}' AND CONTAINS(POINT('ICRS', {RA0}, {DEC0}), s_region) = 1 ORDER BY t_min")
     print(f"{len(rows)} {DET} images cover ({RA0}, {DEC0})")

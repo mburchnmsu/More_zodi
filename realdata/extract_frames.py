@@ -8,7 +8,7 @@ Per frame:
   * ZodiPy (Kelsall/DIRBE model, as for the simulated training data) at the target, the frame's mid-exposure time and
     the target's own wavelength. Observer = Earth: SPHEREx is ~7000 km from Earth's centre (5e-5 AU), negligible here.
 
-    python -I realdata/extract_frames.py data/spherex_real/nep_d6 data/spherex_real/nep_d6_frames.csv data/spherex_real/nep_d6.h5
+    python -I realdata/extract_frames.py data/spherex_real/nep_d6 data/spherex_real/nep_d6_frames.csv data/spherex_real/nep_d6.h5 [RA Dec]
 """
 import csv, glob, os, sys, warnings
 import numpy as np
@@ -22,7 +22,7 @@ import zodipy
 
 warnings.filterwarnings("ignore", category=FITSFixedWarning)
 warnings.filterwarnings("ignore", message=".*SIP.*")
-RA0, DEC0 = 270.0, 66.560708
+RA0, DEC0 = (float(sys.argv[4]), float(sys.argv[5])) if len(sys.argv) > 5 else (270.0, 66.560708)   # optional RA Dec (default: the NEP)
 LAM_LO, LAM_HI = 4.9, 5.1
 NG, PIX = 160, 6.15 / 3600            # common grid: 160 x 160 pixels of 6.15" (SPHEREx's pixel scale)
 BOX = 15                               # half-size of the box at the target (31 x 31 pixels)
@@ -86,7 +86,7 @@ def main():
         o["obsid"] = np.array([d["obsid"] for d in F], dtype="S"); o["collection"] = np.array([d["coll"] for d in F], dtype="S")
         for k in ("img", "zodi", "lam", "flags"):
             o.create_dataset(k, data=np.stack([d[k] for d in F]).astype(np.float32), compression="gzip")
-        o.attrs["target"] = f"north ecliptic pole RA {RA0} Dec {DEC0}"; o.attrs["grid"] = f"{NG}x{NG} TAN, {PIX * 3600:.2f} arcsec, north up"
+        o.attrs["target"] = f"RA {RA0} Dec {DEC0}"; o.attrs["grid"] = f"{NG}x{NG} TAN, {PIX * 3600:.2f} arcsec, north up"
         o.attrs["box"] = f"{2 * BOX + 1}x{2 * BOX + 1} px median, pixels at {LAM_LO}-{LAM_HI} um"
     print(f"wrote {sys.argv[3]}: {len(F)} frames; target wavelength {lam0.min():.3f}-{lam0.max():.3f} um; "
           f"in {LAM_LO}-{LAM_HI}: {np.sum((lam0 >= LAM_LO) & (lam0 <= LAM_HI))}")

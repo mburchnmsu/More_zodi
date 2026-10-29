@@ -3,7 +3,7 @@ Each image's file URL comes from its IRSA datalink record (the processing-versio
 service returns a SIZE x SIZE pixel cutout centred on the target, with all extensions (IMAGE, FLAGS, VARIANCE, ZODI,
 EPSF, WCS-WAVE), ~4.5 MB each.
 
-    python -I realdata/download_cutouts.py data/spherex_real/nep_d6_frames.csv data/spherex_real/nep_d6
+    python -I realdata/download_cutouts.py data/spherex_real/nep_d6_frames.csv data/spherex_real/nep_d6 [RA Dec]
 """
 import csv, os, re, sys, time, urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -41,6 +41,9 @@ def fetch(row, outdir):
 
 
 def main():
+    global RA0, DEC0
+    if len(sys.argv) > 4:                                   # optional RA Dec of the cutout centre (default: the NEP)
+        RA0, DEC0 = float(sys.argv[3]), float(sys.argv[4])
     rows = list(csv.DictReader(open(sys.argv[1])))
     outdir = sys.argv[2]; os.makedirs(outdir, exist_ok=True)
     t0 = time.time(); n = {"ok": 0, "skip": 0, "fail": 0}

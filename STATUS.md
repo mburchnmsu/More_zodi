@@ -1,5 +1,5 @@
-# More_zodi status
-Updated: 2026-10-29 07:00, DESKTOP-BBASC81
+﻿# More_zodi status
+Updated: 2026-10-29 10:30, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -86,8 +86,17 @@ one-cycle 2000: 1.47 1.48 1.54 2.80 1.73 1.43 (mean 1.74).
 - Sky map, 6 shifts: cos×exp 500 median 0.0147%, p95 0.046%, ecliptic 0.0247%, above 60° 0.0128% (one-cycle 500:
   0.0157 / 0.049 / 0.0285 / 0.0134). One-cycle 2000 is still the best model (0.0130 / 0.035 / 0.0162 / 0.0120).
 
+## Real data, Oct 29 — notebook 10292026 §6–7
+- qr3-only pole movie (figures/10292026_nep_qr3_movie.mp4, 64 frames, git-ignored): SPHEREx zodi = 1.168 × ZodiPy, steady.
+- Ecliptic point at longitude 45° (RA 42.536, Dec 16.336, Galactic latitude −38°; chosen by realdata/scan_ecliptic.py): only 8 frames
+  at 4.9–5.1 μm (3 visits: Aug 2025, Jan 2026 in qr2; Aug 2026 in qr3). Zodi ~2× the pole; the same qr2→qr3 jump
+  (1.06 → 1.20 × ZodiPy); non-zodi light ~0.2 MJy/sr. Data in data/spherex_real/ecl045_d6* (git-ignored).
+- find_frames / download_cutouts / extract_frames / make_movie now take any sky point.
+- Git history rewritten 2026-10-29 (template images removed); the other PC must re-clone or `git fetch; git reset --hard origin/main`.
+
 ## Running now
-Nothing.
+Round 37 (started 09:43 Oct 29): cheap test, cos×exp at 1000 epochs, shifts 0 and 30 × 5 seeds (sweeps/configs_v37.jl,
+run_round37.ps1), 5 threads, ~5–6.5 GB. Expected ~22:00. Tell the hub when it ends (Solar R4 is booked after it).
 
 ## Waiting on user
 Cluster access: Zodi is moving to the NMSU HPC cluster (Slurm; access form in progress, 2026-10-27). No cluster work
@@ -98,7 +107,7 @@ module names still marked EDIT; precompilation should run in a job, not on the l
 Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters from the data (done: round 30–32).
 
 ## Next up
-Options after round 36: cos×exp at 2000 epochs (~40 h here, or a cluster job);
+Decided Oct 29: cos×exp at 2000 epochs on all 6 shifts goes to the HPC cluster once access arrives (round 37 first). Other options:
 a fix for the shift-30 overfitting (a validation month with best-epoch selection, or weight decay),
 needs the user's OK. Other options: per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the

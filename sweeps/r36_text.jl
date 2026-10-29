@@ -132,4 +132,61 @@ average learning rate as one-cycle, so only the shape differs.
 "code" => raw"""
 showpng("10292026_r36_sky.png")
 """,
+
+"markdown" => raw"""
+## 6. The north ecliptic pole in qr3 only
+The same pole, using only the 64 qr3 exposures (Jul 24 – Sep 20, 2026). Movie `figures/10292026_nep_qr3_movie.mp4`
+(64 frames, 8 fps, 8 s, git-ignored; `julia --project=. realdata/make_movie.jl 10292026 qr3`).
+* **SPHEREx's zodi model is a steady 1.168 × ZodiPy** (1.156–1.179) through all two months, so the qr3 jump is a constant
+  rescaling, not something that drifts.
+* Image − SPHEREx zodi = **0.030 MJy/sr** (scatter 0.003) in qr3, against ~0.10 in qr2: qr3 assigns more of the pole's
+  light to zodi.
+* The brightness starts to rise in late August, as ZodiPy predicts for this part of the yearly cycle.
+* Each colour has a few lower points: frames where the pole lands nearest 4.90 μm (zodi rises steeply with wavelength).
+""",
+
+"code" => raw"""
+showpng("10292026_nep_qr3_movie_frame.png")
+""",
+
+"code" => raw"""
+showpng("10292026_nep_qr3_lightcurve.png")
+""",
+
+"markdown" => raw"""
+## 7. A point on the ecliptic (longitude 45°)
+To compare with the pole, a point on the ecliptic. `realdata/scan_ecliptic.py` counted, every 15° of ecliptic longitude,
+the D6 images that see the point at 4.9–5.1 μm. **Only 4–12 per point**, against 644 at the pole: the pole is in SPHEREx's
+deep field, while an ecliptic point is only seen around ±90° from the Sun (a few visits a year), and at 4.9–5.1 μm only
+when it falls in the first ~400 detector rows. Longitude 45° (RA 42.54°, Dec 16.34°, Galactic latitude −38°, away from
+the Milky Way) is one of the best covered and has both releases: 10 images, **8 with the point at 4.9–5.1 μm**, in three
+visits (Aug 2025, Jan 2026 in qr2; Aug 2026 in qr3). Movie `figures/10292026_ecl045_movie.mp4` (8 frames, 2 fps).
+
+| | ecliptic, longitude 45° | north ecliptic pole |
+|---|---|---|
+| ZodiPy (MJy/sr) | 0.60–0.92 | 0.32–0.46 |
+| image (MJy/sr) | 0.78–1.17 | 0.40–0.63 |
+| SPHEREx zodi / ZodiPy, qr2 | 1.06–1.07 | 1.04 |
+| SPHEREx zodi / ZodiPy, qr3 | 1.19–1.21 | 1.17 |
+| image − SPHEREx zodi, qr2 (MJy/sr) | ~0.20 | ~0.10 |
+
+* **Zodi is roughly 2× brighter on the ecliptic** than at the pole: a longer path through the dust disk.
+* **The qr2 → qr3 calibration jump is the same here** (~1.06 → ~1.20 × ZodiPy), so it's a change in SPHEREx's zodi model
+  everywhere, not something specific to the deep field.
+* **More non-zodi light** (~0.2 vs ~0.1 MJy/sr). This point is closer to the Milky Way (Galactic latitude −38° vs +30° at
+  the pole), but with 8 frames this is only a first look.
+* ZodiPy changes by ~25% between the August and January visits (Earth sees the point from opposite sides of its orbit),
+  and the image follows. The image / ZodiPy ratio drops from 1.37 to 1.28, as expected for a constant non-zodi offset on top of a
+  brighter zodi.
+* For a smooth light curve on the ecliptic, the window would have to be wider than 4.9–5.1 μm, or several nearby points
+  would have to be combined.
+""",
+
+"code" => raw"""
+showpng("10292026_ecl045_movie_frame.png")
+""",
+
+"code" => raw"""
+showpng("10292026_ecl045_lightcurve.png")
+""",
 ]
