@@ -19,6 +19,7 @@ tested top to bottom with `julia --project=. sweeps/test_nb.jl <MMDDYYYY>.ipynb`
 | 10152026.ipynb | Shifted 30-day windows, train + test MSE, out-of-sample sky-error map (round 16) |
 | 10172026.ipynb | Loss curves and why they are jagged, smoothing, 80/20 at 300 epochs, error vs time gap, trailing-feature check, month splits at 300 epochs (rounds 17–20) |
 | 10282026.ipynb | Learning-rate schedule test: cos×exp (with warm-up) vs one-cycle at equal average learning rate, shifts 0 and 30 (round 35); the mentor's requests: interpolation-only vs interpolation + extrapolation sky maps, 2-D trailing-cloud residual map (no residual from the cloud) |
+| 10292026.ipynb | First real SPHEREx data: the north ecliptic pole at 4.9–5.1 μm over 15 months (435 frames), movie, light curve vs ZodiPy and SPHEREx's zodi model; round 36 (cos×exp on all 6 shifts) |
 | 10272026.ipynb | Round 34 complete: 2000 vs 500 epochs on all 6 shifts, full sky map (ecliptic 0.0285% → 0.0162%), the shift-30 overfitting, fitted bands at 2000 epochs, round 35 queued |
 | 10262026.ipynb | Round 34 halfway: 3 of 6 shifts at 2000 epochs, per-shift MSE (−36 to −40%), 3-shift sky map, the standby pause |
 | 10242026.ipynb | Parallax band layer trained 2000 vs 500 epochs: first 2 of 6 shifts, loss curves, partial sky map (round 34) |

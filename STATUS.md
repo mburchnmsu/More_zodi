@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-10-28 16:30, DESKTOP-BBASC81
+Updated: 2026-10-28 22:45, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -65,8 +65,21 @@ Best model (round 34), saved runs only.
 - **Precision target (user leading, reading the Kelsall paper):** our 0.013% is emulation error (network vs Kelsall).
   Kelsall's residuals are model vs DIRBE data. The target should come from SPHEREx's zodi-subtraction needs.
 
+## Real SPHEREx data (Oct 28–29) — notebook 10292026, realdata/
+The user's task: one sky point, all SPHEREx images of it at 4.9–5.1 μm, a movie over time. Point: the north ecliptic
+pole. Detector D6 covers 4.41–5.01 μm, so the window is 4.9–5.01 μm. IRSA TAP search plus footprint-based wavelength
+estimates selected 644 images; 200-px cutouts downloaded (3.3 GB, git-ignored in data/spherex_real/). **435 frames**
+with the pole at 4.90–4.97 μm, June 2025 – September 2026 (371 qr2 + 64 qr3).
+- Movie figures/10292026_nep_movie.mp4 (git-ignored; realdata/make_movie.jl), light curve, montage. Stars not masked.
+- Yearly cycle of ~±15% at the pole, matched by ZodiPy (amplitude 14.3% vs 14.8%, peaks ~8 days apart). qr2: image =
+  1.06–1.09 × ZodiPy + 0.10 MJy/sr, scatter 0.006–0.008 MJy/sr (~1.5%).
+- SPHEREx's own zodi layer: 1.04 × ZodiPy in qr2, 1.17 × in qr3 (a one-day jump at the release boundary; the image level
+  drops ~7% too). The releases are calibrated differently: ask the mentor which to trust.
+
 ## Running now
-Nothing. The PC is idle; the next run needs the user's OK.
+Round 36 (started 17:28 Oct 28): cos×exp schedule on shifts 10, 20, 40, 50 × 5 seeds, 500 epochs (sweeps/configs_v36.jl,
+run_round36.ps1). Shift 10 done (ensemble 1.96e-8 vs one-cycle 2.37e-8, −17%); the rest expected ~07:30 Oct 29.
+Report: sweeps/report36.jl.
 
 ## Waiting on user
 Cluster access: Zodi is moving to the NMSU HPC cluster (Slurm; access form in progress, 2026-10-27). No cluster work
