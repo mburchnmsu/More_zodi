@@ -1,5 +1,5 @@
 ﻿# More_zodi status
-Updated: 2026-10-29 10:30, DESKTOP-BBASC81
+Updated: 2026-10-29 16:19, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -91,6 +91,11 @@ one-cycle 2000: 1.47 1.48 1.54 2.80 1.73 1.43 (mean 1.74).
 - Ecliptic point at longitude 45° (RA 42.536, Dec 16.336, Galactic latitude −38°; chosen by realdata/scan_ecliptic.py): only 8 frames
   at 4.9–5.1 μm (3 visits: Aug 2025, Jan 2026 in qr2; Aug 2026 in qr3). Zodi ~2× the pole; the same qr2→qr3 jump
   (1.06 → 1.20 × ZodiPy); non-zodi light ~0.2 MJy/sr. Data in data/spherex_real/ecl045_d6* (git-ignored).
+- Geometry figures (§8): figures/10292026_geometry_3panel.png / _2panel.png (realdata/geometry.py, plot_geometry.jl). Both
+  perihelion (Jan 4) and the cloud's 2° tilt set the pole's yearly cycle; half the light comes from within 0.15 AU.
+- Precision comparison (§9): figures/10292026_precision_compare.png (realdata/precision_compare.jl). Emulator 0.013% vs
+  Kelsall-vs-DIRBE ≥0.28% (~20×), few % to 30% vs other data, SPHEREx zodi model 4–21% off ZodiPy. The emulator is not the
+  limit. Literature numbers still to check against the papers (Table 5 at 4.9 μm).
 - find_frames / download_cutouts / extract_frames / make_movie now take any sky point.
 - Git history rewritten 2026-10-29 (template images removed); the other PC must re-clone or `git fetch; git reset --hard origin/main`.
 

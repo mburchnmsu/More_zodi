@@ -205,7 +205,7 @@ Two effects, both from where Earth sits in the cloud:
    and farthest above it on ~Sep 8.
 
 The model's brightest day at the pole is **Feb 2–3**, between the two. Its faintest is ~Aug 10–13, between aphelion
-(Jul 4) and Sep 10. So both effects matter. **Half of the pole's light comes from within 0.15 AU of Earth**, and half
+(Jul 4) and Sep 8. So both effects matter. **Half of the pole's light comes from within 0.15 AU of Earth**, and half
 of the ecliptic point's light from within 0.28 AU. That's why Earth's own position sets the yearly cycle.
 """,
 
@@ -215,5 +215,23 @@ showpng("10292026_geometry_3panel.png")
 
 "code" => raw"""
 showpng("10292026_geometry_2panel.png")
+""",
+
+"markdown" => raw"""
+## 9. How precise does the emulator need to be? (`realdata/precision_compare.jl`)
+On one log scale: our emulator's error against the Kelsall model, set beside the Kelsall model's own error against real data.
+- **Emulator vs Kelsall (round 34):** median 0.013% per pixel, 0.016% near the ecliptic.
+- **Kelsall vs DIRBE (Kelsall et al. 1998):** best band 0.28% (Table 5), single pixels up to ~4%. About 20× above our error.
+- **Kelsall vs other data:** a few % at high latitude, 10–30% near the ecliptic.
+- **Our SPHEREx 5 μm data:** ~1.5% scatter at the pole. SPHEREx's own zodi model differs from ZodiPy by 4–21%, and there is
+  a ~12% jump between releases qr2 and qr3.
+
+**Conclusion:** the emulator is not the limiting factor; the zodi model is. The next gain would come from re-fitting to
+SPHEREx data. The literature rows come from a summary and still need checking against the papers (in particular Table 5
+at 4.9 μm). SPHEREx's own requirement is still to be added.
+""",
+
+"code" => raw"""
+showpng("10292026_precision_compare.png")
 """,
 ]
