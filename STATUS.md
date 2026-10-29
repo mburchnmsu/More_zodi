@@ -1,11 +1,12 @@
 # More_zodi status
-Updated: 2026-10-28 22:45, DESKTOP-BBASC81
+Updated: 2026-10-29 07:00, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
 model so far. On the full 6-shift sky map: median 0.0157% → **0.0130%**, p95 0.049% → **0.035%**, within 2° of the
 ecliptic 0.0285% → **0.0162%**. 5 of 6 splits improve by 29–41%; shift 30 is worse (+11%, mild overfitting in 2 of 5
-seeds). Round 35: a cos×exp learning-rate schedule beats one-cycle at 500 epochs (shift 0 −21%, shift 30 −8%). **Poster: final (presented 2026-10-23).**
+seeds). Rounds 35–36: a cos×exp learning-rate schedule beats one-cycle at 500 epochs on all 6 shifts (mean −12%,
+ecliptic 0.0285% → 0.0247%), but 2000 epochs still win. First real SPHEREx data: the north ecliptic pole at 5 μm (notebook 10292026). **Poster: final (presented 2026-10-23).**
 
 ## Best model
 500 days, heliocentric inputs (default for ZODI_DATA="z500" since Oct 21): n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕
@@ -76,10 +77,17 @@ with the pole at 4.90–4.97 μm, June 2025 – September 2026 (371 qr2 + 64 qr3
 - SPHEREx's own zodi layer: 1.04 × ZodiPy in qr2, 1.17 × in qr3 (a one-day jump at the release boundary; the image level
   drops ~7% too). The releases are calibrated differently: ask the mentor which to trust.
 
+## Round 36 (done 06:35 Thu Oct 29) — notebook 10292026 §5
+cos×exp schedule on all 6 shifts, 500 epochs (sweeps/configs_v36.jl; report sweeps/report36.jl →
+figures/10292026_r36_sky.png). Ensemble test MSE ×10⁻⁸, shifts 0/10/20/30/40/50:
+one-cycle 500: 2.44 2.37 2.40 2.53 2.43 2.37 (mean 2.42); **cos×exp 500: 1.93 1.96 2.25 2.32 2.28 2.10 (mean 2.14, −12%)**;
+one-cycle 2000: 1.47 1.48 1.54 2.80 1.73 1.43 (mean 1.74).
+- cos×exp wins on every split (−6 to −21%). Per seed, that's 2.4–2.9 standard errors on shifts 0/10/50 and 0.7–1.2 on 20/30/40.
+- Sky map, 6 shifts: cos×exp 500 median 0.0147%, p95 0.046%, ecliptic 0.0247%, above 60° 0.0128% (one-cycle 500:
+  0.0157 / 0.049 / 0.0285 / 0.0134). One-cycle 2000 is still the best model (0.0130 / 0.035 / 0.0162 / 0.0120).
+
 ## Running now
-Round 36 (started 17:28 Oct 28): cos×exp schedule on shifts 10, 20, 40, 50 × 5 seeds, 500 epochs (sweeps/configs_v36.jl,
-run_round36.ps1). Shift 10 done (ensemble 1.96e-8 vs one-cycle 2.37e-8, −17%); the rest expected ~07:30 Oct 29.
-Report: sweeps/report36.jl.
+Nothing.
 
 ## Waiting on user
 Cluster access: Zodi is moving to the NMSU HPC cluster (Slurm; access form in progress, 2026-10-27). No cluster work
@@ -90,7 +98,7 @@ module names still marked EDIT; precompilation should run in a job, not on the l
 Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters from the data (done: round 30–32).
 
 ## Next up
-Options from round 35: cos×exp on the remaining 4 shifts at 500 epochs (~11 h, full sky map); cos×exp at 2000 epochs;
+Options after round 36: cos×exp at 2000 epochs (~40 h here, or a cluster job);
 a fix for the shift-30 overfitting (a validation month with best-epoch selection, or weight decay),
 needs the user's OK. Other options: per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
