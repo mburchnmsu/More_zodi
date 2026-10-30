@@ -8,7 +8,9 @@ Mentored research project; validate on simulated data before real SPHEREx data.
 - Packaged model: `emulator/`. Real-data pipeline: `pipeline/` (star masking is off until the user says otherwise).
 - Read the latest notebook and reports before proposing new experiments.
 
-## Syncing between PCs (GitHub: mburchnmsu/More_zodi, private)
+## Syncing between PCs (GitHub: mburchnmsu/More_zodi, public since 2026-10-30)
+
+The repo is public: never commit credentials, private emails or messages, or personal details.
 
 The user works on two PCs. Keep the repo in sync without being asked:
 - Start of a session: `git pull --ff-only` (a hook may already have done it).
