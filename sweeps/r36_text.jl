@@ -234,4 +234,29 @@ at 4.9 μm). SPHEREx's own requirement is still to be added.
 "code" => raw"""
 showpng("10292026_precision_compare.png")
 """,
+
+"markdown" => raw"""
+## 10. Round 37: cos×exp at 1000 epochs (`sweeps/configs_v37.jl`, report `sweeps/report37.jl`)
+Same cos×exp schedule as rounds 35–36 (5% warm-up, peak 2e-3, decay 3), trained 1000 epochs. Shifts 0 and 30 × 5 seeds.
+
+| Ensemble test MSE (×10⁻⁸) | Shift 0 | Shift 30 |
+|---|---|---|
+| One-cycle, 500 epochs | 2.44 | 2.53 |
+| cos×exp, 500 epochs | 1.93 | 2.32 |
+| **cos×exp, 1000 epochs** | **1.38** | **1.57** |
+| One-cycle, 2000 epochs (round 34, best so far) | 1.47 | 2.80 |
+
+Per seed (mean ± std): cos×exp 1000 is 1.75 ± 0.24 and 2.12 ± 0.14, against one-cycle 2000 at 1.82 ± 0.19 and 3.51 ± 0.91.
+- **cos×exp at 1000 epochs beats one-cycle at 2000, with half the training.** On shift 0 it's a tie within seed noise
+  (−6% ensemble, ~0.5 standard errors per seed). On shift 30 it's −44% (~3.4 standard errors): **no overfitting**, and
+  every seed sits at 1.95–2.31 (one-cycle 2000 had two seeds near 4.5).
+- Sky map (interpolation windows, shifts 0 and 30): median 0.0132%, p95 0.041%, ecliptic 0.0181%, above 60° 0.0122%.
+  One-cycle 2000 on the same two shifts: 0.0156% / 0.048% / 0.0183% / 0.0154%. The striped pattern in the one-cycle
+  2000 map is shift 30's overfitting in the withheld windows.
+- Training time: ~7 h for shift 0 and ~6 h for shift 30, 5 seeds at a time, on this laptop.
+""",
+
+"code" => raw"""
+showpng("10292026_r37_sky.png")
+""",
 ]
