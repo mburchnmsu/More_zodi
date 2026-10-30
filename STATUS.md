@@ -110,7 +110,7 @@ figures/10292026_r37_sky.png). Ensemble test MSE ×10⁻⁸, shift 0 / 30: one-c
   shifts: 0.0156 / 0.048 / 0.0183 / 0.0154).
 
 ## Running now
-Round 38 (approved Oct 29, queued 23:20): cos×exp at 1000 epochs on shifts 10/20/40/50 × 5 seeds (sweeps/configs_v38.jl, run_round38.ps1), starts when Solar R4 (PID 38588) exits and ≥6 GB is free; ~26 h, 5 threads, ~5–6.5 GB. Then a 6-shift report vs one-cycle 2000.
+Round 38 (approved Oct 29, queued 23:20): cos×exp at 1000 epochs on shifts 10/20/40/50 × 5 seeds (sweeps/configs_v38.jl, run_round38.ps1), starts when Solar R4's done marker (SolarFlareForcast\sweeps\results\.lowprio_done) appears and ≥6 GB is free; ~26 h, 5 threads, ~5–6.5 GB. Then a 6-shift report vs one-cycle 2000.
 
 ## Waiting on user
 Cluster access: Zodi is moving to the NMSU HPC cluster (Slurm; access form in progress, 2026-10-27). No cluster work
