@@ -4,6 +4,8 @@
 #   julia -t 4 --project=. sweeps/run_threaded.jl <configs_vN.jl> [--dry-run] [--only name1,name2]
 # ZODI_DATA chooses the data/results folder as everywhere else. BLAS threads per training: ENV["BLAS_THREADS"] (default 1,
 # so K trainings × 1 BLAS thread fill K cores). Finished runs are skipped; saves are atomic (.part → rename).
+# Each training prints a flushed progress line every ENV["PROGRESS_EVERY"] epochs (default 50; 0 = off): epoch, losses,
+# min/epoch, ETA. So `tail -f` the log to see a run's speed.
 using LinearAlgebra; BLAS.set_num_threads(parse(Int, get(ENV, "BLAS_THREADS", "1")))
 const ROOT = normpath(joinpath(@__DIR__, ".."))
 include(joinpath(ROOT, "zodi_setup.jl"))
@@ -15,6 +17,7 @@ resdir = get(ENV, "RESULTS_OVERRIDE", RESULTS_DIR); mkpath(resdir)   # override 
 only = let i = findfirst(==("--only"), ARGS); i === nothing ? nothing : split(ARGS[i+1], ',') end
 todo = sort(filter(n -> !isfile(joinpath(resdir, "$n.jls")) && (only === nothing || n in only), collect(keys(CONFIGS))))
 K = Threads.nthreads()
+const PROGRESS_EVERY = parse(Int, get(ENV, "PROGRESS_EVERY", "50"))
 println("$(length(todo)) of $(length(CONFIGS)) runs pending; $K trainings at a time, $(BLAS.get_num_threads()) BLAS thread(s) each → $resdir")
 "--dry-run" in ARGS && (foreach(println, todo); exit(0))
 
@@ -27,7 +30,7 @@ workers = map(1:K) do w
         kw = CONFIGS[name]
         try
             t = @elapsed r = train_mb(FEATURE_SETS[get(kw, :features, :look_dir)]; label=name, verbose=false,
-                                      Base.structdiff(kw, NamedTuple{(:features,)})...)
+                                      progress_every=PROGRESS_EVERY, Base.structdiff(kw, NamedTuple{(:features,)})...)
             tmp = out * ".part"; serialize(tmp, r); mv(tmp, out; force=true)
             logmsg(@sprintf("DONE %-28s test %.4e  train %.4e  %4.0fs  (worker %d)", name, r.te_hist[end], r.tr_hist[end], t, w))
         catch err

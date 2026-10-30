@@ -15,6 +15,8 @@
 # ==============================================================================
 using Flux, Optimisers, Random, Statistics, Printf
 using Flux: DataLoader
+using Dates
+@isdefined(PROGRESS_LOCK) || global PROGRESS_LOCK = ReentrantLock()   # progress lines from parallel trainings
 
 function lr_at(schedule, t; lr_max, pct=0.3, div=25.0, final_div=1e4, decay=3.0, warm=0.05)
     if schedule === :onecycle
@@ -79,7 +81,9 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
                   schedule=:onecycle, lr_max=3e-3, epochs=60, batchsize=1024, seed=42,
                   split_name="80/20 Chronological", sched_kw=(;), label="", verbose=true,
                   val_days=nothing, weight_decay=0.0, target=:linear, mix_alpha=0.25, eval_every=1,
-                  evals_per_epoch=0, eval_sub=50_000, keep_snaps=true, band_init=nothing)
+                  evals_per_epoch=0, eval_sub=50_000, keep_snaps=true, band_init=nothing, progress_every=0)
+    # progress_every = P > 0: every P epochs print one flushed line (time, epoch, losses, min/epoch, ETA) so a running
+    # job's log shows its speed (`tail -f`). Printing only: the trained network is identical either way.
     # evals_per_epoch = K > 0: also record train/test MSE K times per epoch on a FIXED random subsample of `eval_sub`
     # rows of each set (tr_fine, te_fine at fractional epochs fine_epoch), and keep the weight vector at each of those
     # points (snaps; rebuild with Optimisers.restructure) so an ensemble's curve can be computed afterwards.
@@ -155,6 +159,7 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
     evals_per_epoch > 0 && record_fine!(0.0)
 
     t0 = time(); step = 0
+    t_last_val, k_last = Ref(0.0), Ref(0)          # progress lines: time per epoch over the last interval
     for epoch in 1:epochs
         for (i, (xb, yb)) in enumerate(loader)
             step += 1
@@ -173,6 +178,18 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
         if verbose && (epoch % max(1, epochs ÷ 10) == 0 || epoch == 1)
             @printf("  [%s] epoch %3d/%d  lr %.2e  train %.3e  val %.3e  test %.3e  %.0fs\n",
                     label, epoch, epochs, lr_epoch[end], tr_hist[end], va_hist[end], te_hist[end], t_epoch[end])
+            flush(stdout)
+        end
+        if progress_every > 0 && (epoch % progress_every == 0 || epoch == 1)
+            t_now = time() - t0
+            rate = epoch == 1 ? t_now : (t_now - t_last_val[]) / (epoch - k_last[])
+            t_last_val[] = t_now; k_last[] = epoch
+            lock(PROGRESS_LOCK) do
+                @printf("%s  [%s] epoch %d/%d  test %.3e  train %.3e  lr %.2e  %.2f min/epoch  ETA %.1f h\n",
+                        Dates.format(Dates.now(), "HH:MM:SS"), label, epoch, epochs, te_hist[end], tr_hist[end],
+                        lr_epoch[end], rate / 60, rate * (epochs - epoch) / 3600)
+                flush(stdout)
+            end
         end
     end
     ypred = Float64.(pred(X))

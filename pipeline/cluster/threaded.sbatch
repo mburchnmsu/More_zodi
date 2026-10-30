@@ -3,6 +3,8 @@
 # (sweeps/run_threaded.jl, exactly as on the laptop: 1 BLAS thread per training, one shared copy of the data).
 # K = --cpus-per-task. Finished runs are skipped, so resubmitting is safe. Submit from the More_zodi project root:
 #     sbatch --cpus-per-task=5 pipeline/cluster/threaded.sbatch sweeps/configs_v37.jl [--only name1,name2]
+# Progress: each training logs "epoch E/N, losses, min/epoch, ETA" every PROGRESS_EVERY epochs (default 50):
+#     tail -f logs/zodi-train_<jobid>.out
 # Memory: ~1.2 GB per training on the 500-day data plus ~2 GB shared (round 37 on the laptop: 5.2–6.5 GB for 5).
 #SBATCH --job-name=zodi-train
 #SBATCH --partition=normal
