@@ -113,8 +113,8 @@ figures/10292026_r37_sky.png). Ensemble test MSE ×10⁻⁸, shift 0 / 30: one-c
 Round 38 (approved Oct 29, queued 23:20): cos×exp at 1000 epochs on shifts 10/20/40/50 × 5 seeds (sweeps/configs_v38.jl, run_round38.ps1), starts when Solar R4's done marker (SolarFlareForcast\sweeps\results\.lowprio_done) appears and ≥6 GB is free; ~26 h, 5 threads, ~5–6.5 GB. Then a 6-shift report vs one-cycle 2000.
 
 ## Waiting on user
-Cluster access: Zodi is moving to the NMSU HPC cluster (Slurm; access form in progress, 2026-10-27). No cluster work
-yet. Rule: never run heavy compute on the login node; every heavy step goes through `sbatch` on compute nodes, using
+Cluster: access to NMSU Discovery granted (2026-10-30; first test job ran, Julia 1.12.4 container module). No zodi
+cluster work yet. To plan with the user: data copy, package install/precompile in an interactive job, how Claude connects. Rule: never run heavy compute on the login node; every heavy step goes through `sbatch` on compute nodes, using
 `module load` for software and `squeue` to monitor. Template: pipeline/cluster/train_array.sbatch (partition, account and
 module names still marked EDIT; precompilation should run in a job, not on the login node).
 
