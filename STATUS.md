@@ -1,5 +1,5 @@
 ﻿# More_zodi status
-Updated: 2026-10-30 15:40, DESKTOP-BBASC81
+Updated: 2026-10-30 16:17, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -110,13 +110,21 @@ figures/10292026_r37_sky.png). Ensemble test MSE ×10⁻⁸, shift 0 / 30: one-c
   shifts: 0.0156 / 0.048 / 0.0183 / 0.0154).
 
 ## Running now
-Round 38 (approved Oct 29, queued 23:20): cos×exp at 1000 epochs on shifts 10/20/40/50 × 5 seeds (sweeps/configs_v38.jl, run_round38.ps1), starts when Solar R4's done marker (SolarFlareForcast\sweeps\results\.lowprio_done) appears and ≥6 GB is free; ~26 h, 5 threads, ~5–6.5 GB. Then a 6-shift report vs one-cycle 2000.
+- ThinkPad: round 38 (started 23:59 Oct 29): cos×exp at 1000 epochs on shifts 10/20/40/50 × 5 seeds
+  (sweeps/configs_v38.jl, run_round38.ps1); ~26 h, 5 threads, ~5–6.5 GB; expected ~02:00 Sat Oct 31. Then a 6-shift
+  report vs one-cycle 2000.
+- Discovery: validation job 689233 (started 16:16 Oct 30, node c17): round 37 shift 0 × 5 seeds, rerun on the cluster to
+  check it matches the laptop (ensemble 1.38e-8). Expected ~4–7 h.
+
+## Cluster (NMSU Discovery, set up 2026-10-30)
+Passwordless SSH from the ThinkPad (alias `discovery`). Repo in ~/More_zodi (home is backed up; scratch purges after
+120 days), juliaup Julia 1.12.6 (same as the laptop), data/*.h5 copied (sha256 match). Packages precompiled by
+pipeline/cluster/setup_discovery.sbatch (job 689215, 10 min). Training: `sbatch --cpus-per-task=K
+pipeline/cluster/threaded.sbatch sweeps/configs_vN.jl [--only ...]`, logs in ~/More_zodi/logs/. Rule: never heavy
+compute on the login node. Real SPHEREx data: the mentor is putting it on Discovery directly (no location yet).
 
 ## Waiting on user
-Cluster: access to NMSU Discovery granted (2026-10-30; first test job ran, Julia 1.12.4 container module). No zodi
-cluster work yet. To plan with the user: data copy, package install/precompile in an interactive job, how Claude connects. Rule: never run heavy compute on the login node; every heavy step goes through `sbatch` on compute nodes, using
-`module load` for software and `squeue` to monitor. Template: pipeline/cluster/train_array.sbatch (partition, account and
-module names still marked EDIT; precompilation should run in a job, not on the login node).
+After the validation job: which runs go to the cluster (e.g. cos×exp at 2000 epochs on all 6 shifts).
 
 Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters from the data (done: round 30–32).
 
