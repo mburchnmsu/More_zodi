@@ -11,7 +11,8 @@
 using HDF5, CairoMakie, Statistics, Printf, Dates
 const R = joinpath(@__DIR__, ".."); tag = isempty(ARGS) ? "nep" : ARGS[1]
 rel = length(ARGS) >= 2 ? ARGS[2] : "all"; tgt = length(ARGS) >= 3 ? ARGS[3] : "nep"
-NAME, PT = get(Dict("nep" => ("North ecliptic pole", "pole"), "ecl045" => ("The ecliptic at longitude 45°", "point")), tgt, (tgt, "point"))
+NAME, PT = get(Dict("nep" => ("North ecliptic pole", "pole"), "ecl045" => ("The ecliptic at longitude 45°", "point"),
+                     "b30l210" => ("30° above the ecliptic (longitude 210°)", "point")), tgt, (tgt, "point"))
 base = rel == "all" ? "$(tag)_$(tgt)" : "$(tag)_$(tgt)_$(rel)"; rtxt = rel == "all" ? "" : ", $rel only"
 f = h5open(joinpath(R, "data", "spherex_real", "$(tgt)_d6.h5"))
 mjd, lam0, img0, zodi0, zp, var0 = (read(f[k]) for k in ("mjd", "lam0", "img0", "zodi0", "zodipy", "var0"))

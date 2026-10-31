@@ -10,7 +10,7 @@ few pixels (~0.005 um), so the selection is made with a small margin and the exa
     python -I realdata/find_frames.py <wave_table_cutout.fits> [out.csv] [RA Dec]
 (another sky point: give its RA and Dec in degrees, ICRS; default the north ecliptic pole)
 """
-import csv, io, sys, urllib.parse, urllib.request
+import csv, io, sys, time, urllib.parse, urllib.request
 import numpy as np
 from astropy.io import fits
 
@@ -21,10 +21,16 @@ DET = "SPHEREx-D6"
 TAP = "https://irsa.ipac.caltech.edu/TAP/sync"
 
 
-def tap(q):
+def tap(q, tries=4):
     url = TAP + "?" + urllib.parse.urlencode({"LANG": "ADQL", "FORMAT": "csv", "QUERY": q})
-    with urllib.request.urlopen(url, timeout=600) as r:
-        return list(csv.DictReader(io.StringIO(r.read().decode())))
+    for k in range(tries):                 # IRSA sometimes resets the connection: wait and retry
+        try:
+            with urllib.request.urlopen(url, timeout=600) as r:
+                return list(csv.DictReader(io.StringIO(r.read().decode())))
+        except OSError:
+            if k == tries - 1:
+                raise
+            time.sleep(30 * (k + 1))
 
 
 def tangent(ra, dec):
