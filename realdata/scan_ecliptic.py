@@ -2,7 +2,7 @@
 images that see the point at 4.9-5.1 um (estimated, same method as find_frames.py), and give the Galactic latitude so
 points in the Milky Way's plane (bright, crowded) can be avoided. Only IRSA metadata, no images.
 
-    python -I realdata/scan_ecliptic.py <wave_table_cutout.fits>
+    python -I realdata/scan_ecliptic.py <wave_table_cutout.fits> [ecliptic latitude, deg (default 0)] [longitude step]
 """
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -11,9 +11,12 @@ from astropy.coordinates import SkyCoord, GeocentricTrueEcliptic
 import astropy.units as u
 
 lam = ff.wave_table(sys.argv[1])
+LAT = float(sys.argv[2]) if len(sys.argv) > 2 else 0.0
+STEP = int(sys.argv[3]) if len(sys.argv) > 3 else 15
+print(f"ecliptic latitude {LAT:g} deg")
 print(f"{'lon':>5} {'RA':>8} {'Dec':>8} {'gal b':>6} {'cover':>6} {'in 4.9-5.1':>10}  by release")
-for lon in range(0, 360, 15):
-    c = SkyCoord(lon=lon * u.deg, lat=0 * u.deg, frame=GeocentricTrueEcliptic(equinox="J2000")).icrs
+for lon in range(0, 360, STEP):
+    c = SkyCoord(lon=lon * u.deg, lat=LAT * u.deg, frame=GeocentricTrueEcliptic(equinox="J2000")).icrs
     ff.RA0, ff.DEC0 = round(c.ra.deg, 6), round(c.dec.deg, 6)
     rows = ff.tap(f"SELECT obs_collection, t_min, s_region FROM spherex.obscore WHERE energy_bandpassname = '{ff.DET}' "
                   f"AND CONTAINS(POINT('ICRS', {ff.RA0}, {ff.DEC0}), s_region) = 1")
