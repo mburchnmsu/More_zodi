@@ -1,5 +1,5 @@
 ﻿# More_zodi status
-Updated: 2026-10-30 22:10, DESKTOP-BBASC81
+Updated: 2026-10-31 08:30, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -127,11 +127,16 @@ Figures 10302026_b30l210_{lightcurve,montage}.png; movie git-ignored. Data in da
 
 ## Running now
 - ThinkPad: no zodi training.
-- Discovery: validation job 689233 (started 16:16 Oct 30, node c17): round 37 shift 0 × 5 seeds, rerun on the cluster to
-  check it matches the laptop (ensemble 1.38e-8). Its log is silent until it ends (it started before the progress-line
-  commit); CPU use ~4.8 cores, so it is training. Expected ~23:00–23:30 Oct 30.
-- Next, if the validation matches: round 39 (sweeps/configs_v39.jl, cos×exp at 2000 epochs, all 6 shifts × 5 seeds),
-  one Discovery job per shift (user approved conditionally on Oct 30).
+- Discovery: **round 39** (submitted 08:25 Oct 31; user approved Oct 30, on condition the validation passed):
+  cos×exp at 2000 epochs, all 6 shifts × 5 seeds (sweeps/configs_v39.jl). One job per shift, 5 CPUs, 12 GB, 36 h limit:
+  jobs 689786–689791 (shifts 0/10/20/30/40/50), logs ~/More_zodi/logs/zodi-r39-s<shift>_<job>.out with progress lines
+  every 50 epochs. Expected ~21 h of training each, once the jobs start.
+
+## Cluster validation (job 689233, done 03:02 Oct 31)
+Round 37 shift 0 (cos×exp 1000, 5 seeds) rerun on Discovery node c17: **identical to the laptop** (test MSE 1.5204,
+1.7110, 1.7876, 1.5979, 2.1394e-8 for seeds 42–46, the same to all printed digits). 10.75 h total: ~16 min package
+precompiling on the compute node, then ~37,000 s per run vs ~25,000 s on the laptop (cluster cores ~1.5× slower each).
+MaxRSS 7.9 GB for 5 trainings. Results in sweeps/results_cluster_check/ (git-ignored).
 
 ## Cluster (NMSU Discovery, set up 2026-10-30)
 Passwordless SSH from the ThinkPad (alias `discovery`). Repo in ~/More_zodi (home is backed up; scratch purges after
@@ -141,12 +146,13 @@ pipeline/cluster/threaded.sbatch sweeps/configs_vN.jl [--only ...]`, logs in ~/M
 compute on the login node. Real SPHEREx data: the mentor is putting it on Discovery directly (no location yet).
 
 ## Waiting on user
-Nothing blocking (round 39 approved if the cluster validation passes).
+Nothing blocking.
 
 Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters from the data (done: round 30–32).
 
 ## Next up
-Round 39 (cos×exp 2000, all 6 shifts) on Discovery. Other options:
+Round 39 report when the 6 jobs finish (fetch with pipeline/cluster/fetch_results.ps1, then a 6-shift report vs
+cos×exp 1000 and one-cycle 2000). Other options:
 a fix for the shift-30 overfitting (a validation month with best-epoch selection, or weight decay),
 needs the user's OK. Other options: per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
