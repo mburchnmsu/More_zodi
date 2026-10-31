@@ -1,0 +1,6 @@
+﻿2026-10-29 23:20  waiting for PID 38588 to exit
+2026-10-29 23:21  launcher stopped; trigger changed to Solar's .lowprio_done marker (hub request)
+2026-10-29 23:21  waiting for C:\JuliaProjects\SolarFlareForcast\sweeps\results\.lowprio_done
+2026-10-29 23:59  found C:\JuliaProjects\SolarFlareForcast\sweeps\results\.lowprio_done
+2026-10-29 23:59  round 38 start (13.1 GB free)
+2026-10-30 21:40  round 38 done

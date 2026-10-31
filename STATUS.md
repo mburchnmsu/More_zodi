@@ -1,5 +1,5 @@
 ﻿# More_zodi status
-Updated: 2026-10-30 16:17, DESKTOP-BBASC81
+Updated: 2026-10-30 22:10, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -7,7 +7,8 @@ model so far. On the full 6-shift sky map: median 0.0157% → **0.0130%**, p95 0
 ecliptic 0.0285% → **0.0162%**. 5 of 6 splits improve by 29–41%; shift 30 is worse (+11%, mild overfitting in 2 of 5
 seeds). Rounds 35–36: a cos×exp learning-rate schedule beats one-cycle at 500 epochs on all 6 shifts (mean −12%,
 ecliptic 0.0285% → 0.0247%). **Round 37: cos×exp at 1000 epochs beats one-cycle at 2000** on shifts 0 and 30
-(ensemble MSE 1.38 / 1.57 vs 1.47 / 2.80; shift 30 no longer overfits). First real SPHEREx data: the north ecliptic pole at 5 μm (notebook 10292026). **Poster: final (presented 2026-10-23).**
+(ensemble MSE 1.38 / 1.57 vs 1.47 / 2.80; shift 30 no longer overfits). **Round 38: on all 6 shifts it ties one-cycle
+2000** (mean 1.52 vs 1.74; sky median 0.0130% both; ecliptic 0.0181% vs 0.0162%). First real SPHEREx data: the north ecliptic pole at 5 μm (notebook 10292026). **Poster: final (presented 2026-10-23).**
 
 ## Best model
 500 days, heliocentric inputs (default for ZODI_DATA="z500" since Oct 21): n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕
@@ -109,12 +110,28 @@ figures/10292026_r37_sky.png). Ensemble test MSE ×10⁻⁸, shift 0 / 30: one-c
 - Sky map (shifts 0 and 30): median 0.0132%, p95 0.041%, ecliptic 0.0181%, above 60° 0.0122% (one-cycle 2000 on the same
   shifts: 0.0156 / 0.048 / 0.0183 / 0.0154).
 
+## Round 38 (done 21:40 Fri Oct 30) — notebook 10302026 §1
+cos×exp at 1000 epochs on shifts 10/20/40/50 × 5 seeds (sweeps/configs_v38.jl, ThinkPad, ~5.4 h per shift; report
+sweeps/report38.jl → figures/10302026_r38_sky.png). Ensemble test MSE ×10⁻⁸, shifts 0/10/20/30/40/50:
+**cos×exp 1000: 1.38 1.46 1.70 1.57 1.50 1.53 (mean 1.52)**; one-cycle 2000: 1.47 1.48 1.54 2.80 1.73 1.43 (mean 1.74).
+- **A tie with one-cycle 2000 at half the epochs** (1.51 vs 1.53 without shift 30). Per seed: better on 30 (and 40,
+  ~1 SE), equal on 0/10, worse on 20 (~4.5 SE) and 50 (~3 SE). No overfitting: all 30 seeds 1.5–2.3.
+- Sky map, 6 shifts: median 0.0130% (tie), p95 0.038% vs 0.035%, ecliptic 0.0181% vs **0.0162%**, above 60° **0.0118%**
+  vs 0.0120%. One-cycle 2000 still wins on the ecliptic.
+
+## Real data 30° above the ecliptic (Oct 30) — notebook 10302026 §2
+β = 30°, λ = 210° (RA 218.487, Dec 16.649, Galactic latitude +64°; chosen by realdata/scan_ecliptic.py at β = 30° and
+40°). 15 frames at 4.9–5.1 μm, all qr2 (June 2025, Jan 2026, June 2026). January ~1.8× brighter (solar elongation ~91°
+vs ~119°), matched by ZodiPy. Image = 1.11 × ZodiPy + 0.11 MJy/sr (rms 0.008), like the pole; SPHEREx zodi / ZodiPy 1.055.
+Figures 10302026_b30l210_{lightcurve,montage}.png; movie git-ignored. Data in data/spherex_real/b30l210_d6* (git-ignored).
+
 ## Running now
-- ThinkPad: round 38 (started 23:59 Oct 29): cos×exp at 1000 epochs on shifts 10/20/40/50 × 5 seeds
-  (sweeps/configs_v38.jl, run_round38.ps1); ~26 h, 5 threads, ~5–6.5 GB; expected ~02:00 Sat Oct 31. Then a 6-shift
-  report vs one-cycle 2000.
+- ThinkPad: no zodi training.
 - Discovery: validation job 689233 (started 16:16 Oct 30, node c17): round 37 shift 0 × 5 seeds, rerun on the cluster to
-  check it matches the laptop (ensemble 1.38e-8). Expected ~4–7 h.
+  check it matches the laptop (ensemble 1.38e-8). Its log is silent until it ends (it started before the progress-line
+  commit); CPU use ~4.8 cores, so it is training. Expected ~23:00–23:30 Oct 30.
+- Next, if the validation matches: round 39 (sweeps/configs_v39.jl, cos×exp at 2000 epochs, all 6 shifts × 5 seeds),
+  one Discovery job per shift (user approved conditionally on Oct 30).
 
 ## Cluster (NMSU Discovery, set up 2026-10-30)
 Passwordless SSH from the ThinkPad (alias `discovery`). Repo in ~/More_zodi (home is backed up; scratch purges after
@@ -124,14 +141,12 @@ pipeline/cluster/threaded.sbatch sweeps/configs_vN.jl [--only ...]`, logs in ~/M
 compute on the login node. Real SPHEREx data: the mentor is putting it on Discovery directly (no location yet).
 
 ## Waiting on user
-After the validation job: which runs go to the cluster (e.g. cos×exp at 2000 epochs on all 6 shifts).
+Nothing blocking (round 39 approved if the cluster validation passes).
 
 Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters from the data (done: round 30–32).
 
 ## Next up
-Decided Oct 29: cos×exp at 2000 epochs on all 6 shifts goes to the HPC cluster once access arrives. Round 37 suggests
-cos×exp at 1000 epochs on the remaining 4 shifts (10, 20, 40, 50) is also worth running (~13 h locally, or on the
-cluster); the user decides. Other options:
+Round 39 (cos×exp 2000, all 6 shifts) on Discovery. Other options:
 a fix for the shift-30 overfitting (a validation month with best-epoch selection, or weight decay),
 needs the user's OK. Other options: per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
