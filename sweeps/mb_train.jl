@@ -81,7 +81,7 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
                   schedule=:onecycle, lr_max=3e-3, epochs=60, batchsize=1024, seed=42,
                   split_name="80/20 Chronological", sched_kw=(;), label="", verbose=true,
                   val_days=nothing, weight_decay=0.0, target=:linear, mix_alpha=0.25, eval_every=1,
-                  evals_per_epoch=0, eval_sub=50_000, keep_snaps=true, band_init=nothing, progress_every=0)
+                  evals_per_epoch=0, eval_sub=50_000, keep_snaps=true, band_init=nothing, progress_every=0, adamw=0.0)
     # progress_every = P > 0: every P epochs print one flushed line (time, epoch, losses, min/epoch, ETA) so a running
     # job's log shows its speed (`tail -f`). Printing only: the trained network is identical either way.
     # evals_per_epoch = K > 0: also record train/test MSE K times per epoch on a FIXED random subsample of `eval_sub`
@@ -131,8 +131,13 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
              target === :mixlog ? ((m, xb, yb) -> (z = m(xb); Flux.mse(exp.(z), yb) + Float32(mix_alpha) * Flux.mse(z, log.(yb)))) :
                                   ((m, xb, yb) -> Flux.mse(m(xb), yb))
     # weight decay applied after the Adam step (decoupled): each step shrinks weights by weight_decay
-    rule  = weight_decay > 0 ? Optimisers.OptimiserChain(Adam(lr_max), Optimisers.WeightDecay(weight_decay)) : Adam(lr_max)
+    # adamw = λ > 0: AdamW instead (each step shrinks weights by lr·λ, so the decay follows the LR schedule), on the MLP
+    # only: the band layer's physical parameters (inclination, node, width, R) are not pulled toward zero
+    @assert !(adamw > 0 && weight_decay > 0) "use weight_decay or adamw, not both"
+    rule  = adamw > 0 ? Optimisers.AdamW(lr_max, (0.9, 0.999), adamw) :
+            weight_decay > 0 ? Optimisers.OptimiserChain(Adam(lr_max), Optimisers.WeightDecay(weight_decay)) : Adam(lr_max)
     opt   = Flux.setup(rule, model)
+    adamw > 0 && arch in (:bandmlp, :bandplx) && Optimisers.adjust!(opt.layers[1]; lambda=0.0)
     Xva, yva = X[:, val_idx], Float32.(y[val_idx])
     loader = DataLoader((Xtr, Ytr); batchsize, shuffle=true, rng=Random.Xoshiro(seed + 1))
     steps_per_epoch = length(loader)
@@ -194,7 +199,7 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
     end
     ypred = Float64.(pred(X))
     return (; label, feature_names, arch, hidden, width, blocks, schedule, lr_max, sched_kw, epochs,
-              batchsize, seed, n_params, split_name, tr_idx, te_idx, val_idx, val_days, weight_decay, target, mix_alpha,
+              batchsize, seed, n_params, split_name, tr_idx, te_idx, val_idx, val_days, weight_decay, adamw, target, mix_alpha,
               μ, σ, model, tr_hist, te_hist, va_hist, lr_epoch, t_epoch, ypred, mse_null, mse_lin,
               lr_curve = [lr_at(schedule, t; lr_max, sched_kw...) for t in range(0, 1, length=500)],
               evals_per_epoch, tr_fine, te_fine, fine_epoch, snaps, sub_tr, sub_te)
