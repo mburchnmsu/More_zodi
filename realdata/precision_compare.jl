@@ -1,6 +1,7 @@
 # How precise is each piece? Emulator error vs the Kelsall model's own error against real data, on one log scale:
 #   figures/<tag>_precision_compare.png
-#     julia --project=. realdata/precision_compare.jl [tag]
+#     julia --project=. realdata/precision_compare.jl [tag] [nospherex]
+# nospherex: leave out the SPHEREx group (rows of our own real-data fits) → figures/<tag>_precision_compare_nospherex.png
 # Numbers: ours from round 34 (sweeps/report34*.jl sky map) and notebook 10292026 (real SPHEREx data); the literature
 # rows are from the user's Kelsall-precision summary (Kelsall et al. 1998 Table 5; later independent tests) and still
 # need checking against the papers (in particular the 4.9 um row of Table 5).
@@ -27,8 +28,10 @@ groups = [
         ("Jump between releases qr2 → qr3", 12.3, 12.7, [12.5], "calibration, not the zodi model"),
     ]),
 ]
+nosx = "nospherex" in ARGS
+nosx && (groups = groups[1:3])
 
-fig = Figure(size=(1700, 900), fontsize=17)
+fig = Figure(size=(1700, nosx ? 700 : 900), fontsize=17)
 ax = Axis(fig[1, 1], xscale=log10, xlabel="error or difference (%)", yticksvisible=false,
           xticks=([0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30], ["0.01", "0.03", "0.1", "0.3", "1", "3", "10", "30"]),
           title="Our emulator is ~20× more precise than the Kelsall model's best fit to real data",
@@ -57,8 +60,9 @@ text!(ax, sqrt(0.0130 * 0.28), y + 0.55, text="×20", color=:grey30, fontsize=15
 arrows2d!(ax, [0.0145], [y + 0.25], [0.28 - 0.0145 - 0.02], [0.0], color=:grey40, shaftwidth=1.5, tipwidth=9, tiplength=9)
 limits!(ax, 0.004, 60, y - 0.1, 0.6)
 hidespines!(ax, :t, :r, :l)
-Label(fig[2, 1], "Different rows measure different things: ours are per-pixel errors (emulator vs model) or fits to one sky point; Kelsall's Table 5 is the spread of weekly all-sky residuals.\n" *
+Label(fig[2, 1], "Different rows measure different things: ours are per-pixel errors (emulator vs model)" * (nosx ? "" : " or fits to one sky point") *
+      "; Kelsall's Table 5 is the spread of weekly all-sky residuals.\n" *
       "Literature rows: from a summary of Kelsall et al. (1998) and later tests, not yet checked against the papers. SPHEREx's own zodi-subtraction requirement is not shown (to be added).",
       fontsize=13, color=:grey35, justification=:left, halign=:left)
-save(joinpath(R, "figures", "$(tag)_precision_compare.png"), fig, px_per_unit=1.5)
+save(joinpath(R, "figures", "$(tag)_precision_compare$(nosx ? "_nospherex" : "").png"), fig, px_per_unit=1.5)
 println("ok")
