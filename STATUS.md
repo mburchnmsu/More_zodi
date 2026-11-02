@@ -1,5 +1,5 @@
-﻿# More_zodi status
-Updated: 2026-11-01 19:40, DESKTOP-BBASC81
+# More_zodi status
+Updated: 2026-11-02 16:50, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -136,12 +136,20 @@ one-cycle 2000: 1.47 1.48 1.54 2.80 1.73 1.43 (1.74).
   (cos×exp 1000: 0.0130 / 0.038 / 0.0181 / 0.0118; one-cycle 2000: 0.0130 / 0.035 / 0.0162 / 0.0120).
 - 2000 epochs helps the ecliptic and shifts 20/50, but overfitting returns on shifts 30 (seeds 1.89–3.94) and 40.
 
+## Round 40 (Discovery, done 16:03 Mon Nov 2)
+Round 39's setup + AdamW weight decay (new `adamw` kwarg in train_mb: lr-scaled, MLP only, band layer not decayed),
+λ = 1e-4 / 1e-3 / 1e-2 × shifts 0/30/40 × 5 seeds (sweeps/configs_v40.jl; jobs 691131–691139; report sweeps/report40.jl,
+numbers only). Ensemble test MSE ×10⁻⁸, shifts 0/30/40 (mean); ecliptic median over those shifts:
+cos×exp 1000: 1.38 1.57 1.50 (1.48), 0.0178% · cos×exp 2000: 1.39 2.12 1.68 (1.73), 0.0164% ·
+**+1e-4: 1.29 1.99 1.70 (1.66), 0.0164%** · +1e-3: 1.45 1.80 1.59 (1.61), 0.0190% · +1e-2: 6.18 6.31 6.24 (underfits).
+- Decay helps shift 30 a little but no λ beats cos×exp 1000 there; 1e-3 loses the ecliptic gain. 1e-4 keeps it and gives
+  the best shift 0 yet (seeds 1.60 ± 0.09). Seed 43 on shift 30 overfits every time (3.5–4.2): not a weight-size problem.
+- Next candidates: best-epoch selection on a validation month; λ = 1e-4 on shifts 10/20/50.
+
 ## Running now
-- ThinkPad: no zodi training.
-- Discovery: **round 40** (submitted ~19:30 Nov 1, user chose it): round 39's setup + AdamW weight decay (new `adamw`
-  kwarg in train_mb: lr-scaled, MLP only, band layer not decayed), λ = 1e-4 / 1e-3 / 1e-2 × shifts 0/30/40 × 5 seeds =
-  45 runs (sweeps/configs_v40.jl). 9 jobs 691131–691139 (order λ 1e-4 s0/s30/s40, 1e-3 ..., 1e-2 ...), 5 CPUs, 12 GB,
-  36 h limit; ~13–21 h each. Smoke test job 691126 OK.
+- Nothing (ThinkPad and Discovery idle for zodi).
+- Meeting deck for Dr. Saydjari (Nov 3), organized by last week's 4 tasks: https://claude.ai/artifact/Sg4Rbzq7QuvVqff4EPXsXD
+  (private until shared).
 
 ## Cluster validation (job 689233, done 03:02 Oct 31)
 Round 37 shift 0 (cos×exp 1000, 5 seeds) rerun on Discovery node c17: **identical to the laptop** (test MSE 1.5204,
