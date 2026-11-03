@@ -81,7 +81,11 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
                   schedule=:onecycle, lr_max=3e-3, epochs=60, batchsize=1024, seed=42,
                   split_name="80/20 Chronological", sched_kw=(;), label="", verbose=true,
                   val_days=nothing, weight_decay=0.0, target=:linear, mix_alpha=0.25, eval_every=1,
-                  evals_per_epoch=0, eval_sub=50_000, keep_snaps=true, band_init=nothing, progress_every=0, adamw=0.0)
+                  evals_per_epoch=0, eval_sub=50_000, keep_snaps=true, band_init=nothing, progress_every=0, adamw=0.0,
+                  val_tranges=nothing, keep_best=false)
+    # val_tranges = [(t0, t1), ...]: training exposures with t0 ≤ t_rel < t1 are held out as a validation set (whole time
+    # windows, so the validation loss tests filling a gap in time, like the test windows). keep_best = true: after
+    # training, restore the weights of the epoch with the lowest validation loss (best_epoch, te_best in the result).
     # progress_every = P > 0: every P epochs print one flushed line (time, epoch, losses, min/epoch, ETA) so a running
     # job's log shows its speed (`tail -f`). Printing only: the trained network is identical either way.
     # evals_per_epoch = K > 0: also record train/test MSE K times per epoch on a FIXED random subsample of `eval_sub`
@@ -96,6 +100,13 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
         val_idx = tr_idx[t_rel[tr_idx] .>= val_days]
         tr_idx  = tr_idx[t_rel[tr_idx] .<  val_days]
     end
+    if val_tranges !== nothing
+        @assert val_days === nothing "use val_days or val_tranges, not both"
+        inval = [any(t0 <= t_rel[i] < t1 for (t0, t1) in val_tranges) for i in tr_idx]
+        val_idx = tr_idx[inval]; tr_idx = tr_idx[.!inval]
+        @assert !isempty(val_idx) "val_tranges selects no training exposures"
+    end
+    @assert !keep_best || !isempty(val_idx) "keep_best needs a validation set (val_days or val_tranges)"
     cols = [findfirst(==(nm), dot_names_all) for nm in feature_names]
     F  = Fd_raw[:, cols]
     μ  = [median(F[tr_idx, j]) for j in axes(F, 2)]
@@ -165,6 +176,7 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
 
     t0 = time(); step = 0
     t_last_val, k_last = Ref(0.0), Ref(0)          # progress lines: time per epoch over the last interval
+    best_va, best_epoch, best_w = Inf, 0, Float32[]
     for epoch in 1:epochs
         for (i, (xb, yb)) in enumerate(loader)
             step += 1
@@ -178,6 +190,9 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
         push!(tr_hist, mse(pred(Xtr), ytr))
         push!(te_hist, mse(pred(Xte), yte))
         push!(va_hist, eval_va())
+        if keep_best && va_hist[end] < best_va
+            best_va, best_epoch, best_w = va_hist[end], epoch, copy(Optimisers.destructure(model)[1])
+        end
         push!(lr_epoch, lr_at(schedule, (step - 1) / max(S - 1, 1); lr_max, sched_kw...))
         push!(t_epoch, time() - t0)
         if verbose && (epoch % max(1, epochs ÷ 10) == 0 || epoch == 1)
@@ -190,16 +205,21 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
             rate = epoch == 1 ? t_now : (t_now - t_last_val[]) / (epoch - k_last[])
             t_last_val[] = t_now; k_last[] = epoch
             lock(PROGRESS_LOCK) do
-                @printf("%s  [%s] epoch %d/%d  test %.3e  train %.3e  lr %.2e  %.2f min/epoch  ETA %.1f h\n",
+                @printf("%s  [%s] epoch %d/%d  test %.3e  train %.3e%s  lr %.2e  %.2f min/epoch  ETA %.1f h\n",
                         Dates.format(Dates.now(), "HH:MM:SS"), label, epoch, epochs, te_hist[end], tr_hist[end],
+                        isempty(val_idx) ? "" : @sprintf("  val %.3e (best epoch %d)", va_hist[end], best_epoch),
                         lr_epoch[end], rate / 60, rate * (epochs - epoch) / 3600)
                 flush(stdout)
             end
         end
     end
+    # restore the best-validation weights in place (no rebinding of `model`, which closures capture); histories stay complete
+    keep_best && Flux.loadmodel!(model, Optimisers.destructure(model)[2](best_w))
+    te_best = keep_best ? mse(pred(Xte), yte) : NaN
     ypred = Float64.(pred(X))
     return (; label, feature_names, arch, hidden, width, blocks, schedule, lr_max, sched_kw, epochs,
-              batchsize, seed, n_params, split_name, tr_idx, te_idx, val_idx, val_days, weight_decay, adamw, target, mix_alpha,
+              batchsize, seed, n_params, split_name, tr_idx, te_idx, val_idx, val_days, val_tranges, keep_best, best_epoch,
+              te_best, weight_decay, adamw, target, mix_alpha,
               μ, σ, model, tr_hist, te_hist, va_hist, lr_epoch, t_epoch, ypred, mse_null, mse_lin,
               lr_curve = [lr_at(schedule, t; lr_max, sched_kw...) for t in range(0, 1, length=500)],
               evals_per_epoch, tr_fine, te_fine, fine_epoch, snaps, sub_tr, sub_te)

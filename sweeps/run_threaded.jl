@@ -32,7 +32,7 @@ workers = map(1:K) do w
             t = @elapsed r = train_mb(FEATURE_SETS[get(kw, :features, :look_dir)]; label=name, verbose=false,
                                       progress_every=PROGRESS_EVERY, Base.structdiff(kw, NamedTuple{(:features,)})...)
             tmp = out * ".part"; serialize(tmp, r); mv(tmp, out; force=true)
-            logmsg(@sprintf("DONE %-28s test %.4e  train %.4e  %4.0fs  (worker %d)", name, r.te_hist[end], r.tr_hist[end], t, w))
+            logmsg(@sprintf("DONE %-28s test %.4e  train %.4e  %4.0fs  (worker %d)", name, get(r, :keep_best, false) ? r.te_best : r.te_hist[end], r.tr_hist[end], t, w))
         catch err
             logmsg("FAILED $name: " * sprint(showerror, err))
         end
