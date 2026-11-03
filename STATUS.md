@@ -146,8 +146,12 @@ cos×exp 1000: 1.38 1.57 1.50 (1.48), 0.0178% · cos×exp 2000: 1.39 2.12 1.68 (
   the best shift 0 yet (seeds 1.60 ± 0.09). Seed 43 on shift 30 overfits every time (3.5–4.2): not a weight-size problem.
 - Next candidates: best-epoch selection on a validation month; λ = 1e-4 on shifts 10/20/50.
 
-## Running now
-- Nothing (ThinkPad and Discovery idle for zodi).
+## Running now (submitted ~17:00 Nov 2, user chose both)
+- Discovery **round 41**: AdamW 1e-4 on shifts 10/20/50 × 5 seeds (sweeps/configs_v41.jl), jobs 691528–691530, running
+  since ~17:00; completes the 6-shift picture for λ = 1e-4. ~13–21 h.
+- Discovery **round 42**: best-epoch selection (new `val_tranges` + `keep_best` in train_mb; validation = training window
+  k = 8, t_rel ∈ [Δ+240, Δ+270), ~1/8 of training data) on cos×exp 2000, no decay, shifts 0/30/40 × 5 seeds
+  (sweeps/configs_v42.jl), jobs 691539–691541 (queued). Local smoke test sweeps/smoke_best.jl OK (old path bit-identical).
 - Meeting deck for Dr. Saydjari (Nov 3), organized by last week's 4 tasks: https://claude.ai/artifact/Sg4Rbzq7QuvVqff4EPXsXD
   (private until shared).
 
