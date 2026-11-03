@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-11-02 16:50, DESKTOP-BBASC81
+Updated: 2026-11-03, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -9,8 +9,8 @@ seeds). Rounds 35–36: a cos×exp learning-rate schedule beats one-cycle at 500
 ecliptic 0.0285% → 0.0247%). **Round 37: cos×exp at 1000 epochs beats one-cycle at 2000** on shifts 0 and 30
 (ensemble MSE 1.38 / 1.57 vs 1.47 / 2.80; shift 30 no longer overfits). **Round 38: on all 6 shifts it ties one-cycle
 2000** (mean 1.52 vs 1.74; sky median 0.0130% both; ecliptic 0.0181% vs 0.0162%). **Round 39 (first cluster round):
-cos×exp 2000 gives the best sky map** (median 0.0129%, ecliptic 0.0163%) but overfits again on shifts 30/40; round 40
-tests weight decay. First real SPHEREx data: the north ecliptic pole at 5 μm (notebook 10292026). **Poster: final (presented 2026-10-23).**
+cos×exp 2000 gives the best sky map** (median 0.0129%, ecliptic 0.0163%) but overfits again on shifts 30/40. Rounds 40–41: AdamW λ = 1e-4 is a marginal
+gain (ecliptic 0.0161%); round 42's best-epoch selection failed (its validation window leaves a 90-day orbital hole). First real SPHEREx data: the north ecliptic pole at 5 μm (notebook 10292026). **Poster: final (presented 2026-10-23).**
 
 ## Best model
 500 days, heliocentric inputs (default for ZODI_DATA="z500" since Oct 21): n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕
@@ -146,12 +146,20 @@ cos×exp 1000: 1.38 1.57 1.50 (1.48), 0.0178% · cos×exp 2000: 1.39 2.12 1.68 (
   the best shift 0 yet (seeds 1.60 ± 0.09). Seed 43 on shift 30 overfits every time (3.5–4.2): not a weight-size problem.
 - Next candidates: best-epoch selection on a validation month; λ = 1e-4 on shifts 10/20/50.
 
-## Running now (submitted ~17:00 Nov 2, user chose both)
-- Discovery **round 41**: AdamW 1e-4 on shifts 10/20/50 × 5 seeds (sweeps/configs_v41.jl), jobs 691528–691530, running
-  since ~17:00; completes the 6-shift picture for λ = 1e-4. ~13–21 h.
-- Discovery **round 42**: best-epoch selection (new `val_tranges` + `keep_best` in train_mb; validation = training window
-  k = 8, t_rel ∈ [Δ+240, Δ+270), ~1/8 of training data) on cos×exp 2000, no decay, shifts 0/30/40 × 5 seeds
-  (sweeps/configs_v42.jl), jobs 691539–691541 (queued). Local smoke test sweeps/smoke_best.jl OK (old path bit-identical).
+## Round 41 (Discovery, done ~13:30 Tue Nov 3) — notebook 11032026 §1
+AdamW 1e-4 on shifts 10/20/50 (jobs 691528–691530) → full 6 shifts with round 40 (report sweeps/report41.jl,
+figure figures/11032026_r41_sky.png). Ensemble MSE ×10⁻⁸, shifts 0–50 (mean): 1.29 1.51 1.59 1.99 1.70 1.40 (1.58) vs
+cos×exp 2000 1.61 and cos×exp 1000 **1.52**. Sky map: median 0.0129%, p95 0.035%, **ecliptic 0.0161%** (vs 0.0163% / 0.0181%).
+Marginal, mostly neutral gain over no decay.
+
+## Round 42 (Discovery, done ~13:17 Tue Nov 3) — notebook 11032026 §2
+Best-epoch selection (validation = training window k = 8, t_rel ∈ [Δ+240, Δ+270); jobs 691539–691541; report
+sweeps/report42.jl). **Failed: ensemble MSE 6.72 / 7.70 / 4.54 vs 1.39 / 2.12 / 1.68** (shifts 0/30/40); last-epoch
+networks just as bad, best epochs 111–531. Cause: days ~135–365 of Earth's orbit are seen only once in the 500 days, so
+holding out window 8 leaves a 90-day orbital-phase hole with no training data (validation MSE ~1–4 × 10⁻⁶). Every test
+window degrades 2–7× (why the far ones degrade too is not proven). Retry only with a validation window whose orbital
+phase repeats (days 365–500 ↔ 0–135) or a few days from each training window.
+
 - Meeting deck for Dr. Saydjari (Nov 3), organized by last week's 4 tasks: https://claude.ai/artifact/Sg4Rbzq7QuvVqff4EPXsXD
   (private until shared).
 
@@ -174,8 +182,7 @@ Nothing blocking.
 Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters from the data (done: round 30–32).
 
 ## Next up
-Round 40 report when the 9 jobs finish (fetch with pipeline/cluster/fetch_results.ps1). If weight decay works: the best
-λ on the other 3 shifts. Other options: best-epoch selection with a validation month (needs code: val_days exists, no
-snapshot selection yet); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
+Nothing running. Waiting on Dr. Saydjari's feedback from the Nov 3 meeting. Options: best-epoch selection with a
+validation window whose orbital phase repeats (code exists: val_tranges + keep_best); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).
