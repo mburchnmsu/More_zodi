@@ -9,7 +9,8 @@ tt, hdr = readdlm(joinpath(D, "tt_nep_per_image.csv"), ',', header=true); h = ve
 col(nm) = Float64.(tt[:, findfirst(==(nm), h)])
 t_tt, f_tt, z_tt, n_tt, w_tt = col("t_mid_mjd"), col("flux_median"), col("zodi_median"), col("n_pix"), col("wavelength_median")
 c = h5open(joinpath(D, "nep_d6.h5")) do f
-    (; mjd=read(f["mjd"]), img=read(f["img0"]), zodi=read(f["zodi0"]), zodipy=read(f["zodipy"]), n=read(f["n_box"]))
+    (; mjd=read(f["mjd"]), img=read(f["img0"]), zodi=read(f["zodi0"]), zodipy=read(f["zodipy"]), n=read(f["n_box"]),
+       coll=read(f["collection"]), lam=read(f["lam0"]))
 end
 okc = (c.n .> 0) .& .!isnan.(c.img)
 @printf("tall table: %d exposures, MJD %.1f–%.1f, median %d pixels each, wavelength %.3f–%.3f μm\n", length(t_tt),
@@ -24,6 +25,11 @@ rel(a, b) = 100 .* (a .- b) ./ b
 @printf("matched: %d of %d cutout frames\n", length(ic), sum(okc))
 @printf("flux  (tall table − cutouts): median %+.3f%%, median |Δ| %.3f%%\n", median(rel(f_tt[jt], c.img[ic])), median(abs.(rel(f_tt[jt], c.img[ic]))))
 @printf("zodi  (tall table − cutouts): median %+.3f%%, median |Δ| %.3f%%\n", median(rel(z_tt[jt], c.zodi[ic])), median(abs.(rel(z_tt[jt], c.zodi[ic]))))
+for cl in unique(c.coll[ic])                      # the cutouts come from two SPHEREx releases (qr2, qr3)
+    k = c.coll[ic] .== cl
+    @printf("  %-18s n=%3d  flux %+.3f%%  zodi %+.3f%%  (cutout target wavelength %.3f–%.3f μm)\n", cl, sum(k),
+            median(rel(f_tt[jt[k]], c.img[ic[k]])), median(rel(z_tt[jt[k]], c.zodi[ic[k]])), extrema(c.lam[ic[k]])...)
+end
 mjd2date(x) = Date(1858, 11, 17) + Day(floor(Int, x))
 set_theme!(merge(Theme(fontsize=17), theme_black()))
 fig = Figure(size=(1700, 1000))
