@@ -10,6 +10,7 @@ exposure comes back, not millions of pixels. Runs on Discovery (~/envs/talltable
 import sys, time
 from pathlib import Path
 import healpy as hp
+import requests
 from talltable import PixelQuery
 from talltable.client import fetch_arrow_stream
 
@@ -27,9 +28,16 @@ for spec in sys.argv[2:]:
     sql = ("SELECT imageid, min(t_beg) AS t_beg, min(t_end) AS t_end, count(*) AS n_pix, median(wavelength) AS wavelength, "
            "median(flux) AS flux_median, median(zodi) AS zodi_median, quantile_cont(flux, 0.25) AS flux_q25, "
            "quantile_cont(flux, 0.75) AS flux_q75 FROM (" + inner + ") GROUP BY imageid ORDER BY t_beg")
-    t0 = time.time()
-    t = fetch_arrow_stream(f"{q._base_url}/sql", {"query": sql, "partitions": parts})
-    dt = time.time() - t0
+    for attempt in range(12):                         # the service answers 503 "busy with other queries" at times
+        try:
+            t0 = time.time()
+            t = fetch_arrow_stream(f"{q._base_url}/sql", {"query": sql, "partitions": parts})
+            dt = time.time() - t0
+            break
+        except requests.HTTPError as e:
+            if "503" not in str(e) or attempt == 11:
+                raise
+            print(f"  {name}: server busy, retry {attempt + 1} in 60 s", flush=True); time.sleep(60)
     out = OUT / f"ttbin_L{level}_{name}.csv"
     cols = t.column_names; data = [t[c].to_pylist() for c in cols]
     with open(out, "w") as f:
