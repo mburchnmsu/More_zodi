@@ -194,7 +194,14 @@ Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters
 sweeps/extra_features.jl); best model with vs without n·δ̂, n·M̂, shift 0 × 3 seeds (sweeps/configs_v44.jl), Discovery
 jobs 692185–692186. Found while designing it: n·δ̂ = (n·S − n·E)/|δ| is already a function of the base inputs (R²
 0.9998 from the MLP's 9 inputs), n·M̂ is not (0.41). Without n·S: 0.25 linear / 0.69 quadratic. So round 44b adds a
-third model without n·S (sweeps/configs_v44b.jl, jobs 692203–692204, user's choice). More tasks from the Nov 3 meeting coming from the user. Other options: best-epoch selection with a
+third model without n·S (sweeps/configs_v44b.jl, jobs 692203–692204, user's choice).
+**Running:** round 45, the mentor's "with + without Earth cloud" (Week 13): best model (cos×exp 1000) on the sky without
+Kelsall's Earth-trailing cloud (ZODI_NOCLOUD; the emission file stores the cloud, so no ZodiPy rerun), 6 shifts × 5
+seeds (sweeps/configs_v45.jl), jobs 692277–692282, submitted 11:03 Nov 4. Cloud on = rounds 37–38.
+Week 13 notes: Discovery job start-up is only 2–3 min (job start → epoch 1) since round 40; the ~16 min compile was
+a one-time event after setup, so the mentor's compile-once tip already holds there (use it on Colibrí). Discovery's
+normal partition also has GPU nodes (A100/V100/T4). Real data: the NYU "tall table" (web service first; the full ~111 TB
+is coming to the HPC). More tasks from the Nov 3 meeting coming from the user. Other options: best-epoch selection with a
 validation window whose orbital phase repeats (code exists: val_tranges + keep_best); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).
