@@ -6,6 +6,7 @@
 #   ecliptic frame:     ecliptic longitude / latitude, centred on 0°, as in our other sky maps
 #     julia --project=. sweeps/earth2d.jl [tag]            → figures/<tag>_earth2d_moll.png
 #     EARTH2D_ONLY_WITHOUT=1 julia ... (preview before round 43 exists: the without-Earth model only)
+#     EARTH2D_PLOT_ONLY=1 julia ...    (redraw from the maps cached by the last full run; no statistics)
 ENV["ZODI_DATA"] = "z500"; ENV["ZODI_HELIO"] = "1"
 using LinearAlgebra; BLAS.set_num_threads(2)
 redirect_stdout(devnull) do
@@ -13,7 +14,7 @@ redirect_stdout(devnull) do
     for f in ("mb_train.jl", "extra_features.jl", "summary_helpers.jl", "shift_helpers.jl"); include(joinpath(@__DIR__, f)); end
     include(joinpath(@__DIR__, "configs_v24.jl"))
 end
-using CairoMakie, HDF5
+using CairoMakie, HDF5, JLD2
 include(joinpath(@__DIR__, "plot_sky_common.jl"))
 tag = isempty(ARGS) ? "earth2d" : ARGS[1]
 only_without = get(ENV, "EARTH2D_ONLY_WITHOUT", "0") == "1"
@@ -22,12 +23,16 @@ FAMS = [("z500h_bandplx_cosexp1k_shift", "without Earth-centric inputs"),
 β = Float64.(ecliptic_latitude_deg); aβ = abs.(β)
 
 """Out-of-sample % error on the interpolation windows of all 6 shifts (5-network ensemble, or one seed)."""
+const PER = Dict{String, Vector{Float64}}()                   # ensemble test MSE per shift (all withheld windows)
 function oos(fam; seed=nothing)
     s = zeros(N); n = zeros(Int, N)
+    seed === nothing && (PER[fam] = Float64[])
     for Δ in SHIFTS24
         rs = runs16("$fam$Δ"); @assert length(rs) == 5 "$fam$Δ: $(length(rs)) runs"
-        te = rs[1].te_idx; te = te[is_interior(Δ, te)]
+        te = rs[1].te_idx
         p = seed === nothing ? ensemble_pred(rs) : rs[seed].ypred
+        seed === nothing && push!(PER[fam], mean(abs2, p[te] .- y[te]))
+        te = te[is_interior(Δ, te)]
         s[te] .+= p[te]; n[te] .+= 1
         empty!(_R16)
     end
@@ -56,10 +61,17 @@ function grid(v, lon; lon0=0.0, minn=30)
 end
 fitA(E, k) = (i = findall(k .& .!isnan.(E)); ([share[i] ones(length(i))] \ E[i])[1])
 
-E = [oos(f) for (f, _) in FAMS]
-for ((f, lbl), e) in zip(FAMS, E)
+# EARTH2D_PLOT_ONLY=1: reuse the residual maps cached by the last full run (figure tweaks only, no statistics)
+cache = joinpath(RESULTS_DIR, "earth2d_E$(length(FAMS)).jld2")
+plot_only = get(ENV, "EARTH2D_PLOT_ONLY", "0") == "1"
+E = plot_only ? load(cache, "E") : [oos(f) for (f, _) in FAMS]
+plot_only || jldsave(cache; E)
+for ((f, lbl), e) in zip(FAMS, plot_only ? () : E)
     ok = .!isnan.(e); a = abs.(e[ok])
-    @printf("\n%s: %d exposures, median |error| %.4f%%, mean residual %+.5f%%\n", lbl, sum(ok), median(a), mean(e[ok]))
+    @printf("\n%s: %d exposures, median |error| %.4f%%, p95 %.3f%%, |β|<2° %.4f%%, mean residual %+.5f%%\n", lbl, sum(ok),
+            median(a), quantile(a, 0.95), median(abs.(e[ok .& (aβ .< 2)])), mean(e[ok]))
+    @printf("  ensemble test MSE ×10⁻⁸, shifts %s: %s (mean %.2f)\n", join(SHIFTS24, "/"),
+            join((@sprintf("%.2f", 1e8x) for x in PER[f]), " "), 1e8mean(PER[f]))
     for (kl, k) in (("|β| < 15°", aβ .< 15), ("whole sky", trues(N)))
         as = [fitA(oos(f; seed=s), k) for s in 1:5]
         @printf("  missing fraction of the trailing cloud (%s): %+.4f  (seed spread ± %.4f)\n", kl, fitA(e, k), std(as))
@@ -89,8 +101,7 @@ function frame_labels!(ax, lon0, names)
         d = mod(l - lon0 + 180, 360) - 180
         for dd in (abs(d) > 170 ? (-168.0, 168.0) : (d,))
             x, y0 = moll_fwd(dd, 0)
-            text!(ax, x, y0 + 0.05; text=txt, color=:white, fontsize=15, font=:bold, strokecolor=:black, strokewidth=2,
-                  align=(:center, :bottom))
+            text!(ax, x, y0 + 0.05; text=txt, color=:yellow, fontsize=19, font=:bold, align=(:center, :bottom))
         end
     end
 end

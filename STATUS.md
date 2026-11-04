@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-11-03, DESKTOP-BBASC81
+Updated: 2026-11-04, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -160,6 +160,13 @@ holding out window 8 leaves a 90-day orbital-phase hole with no training data (v
 window degrades 2–7× (why the far ones degrade too is not proven). Retry only with a validation window whose orbital
 phase repeats (days 365–500 ↔ 0–135) or a few days from each training window.
 
+## Round 43 (Discovery, done ~08:20 Wed Nov 4) — notebook 11042026
+Dr. Saydjari's Nov 3 request: the 2-D residual map as Mollweide maps (Earth-motion + ecliptic frames), with vs without
+the Earth-centric inputs n·δ̂, n·M̂ (best model, cos×exp 1000, 6 shifts × 5 seeds; sweeps/configs_v43.jl, jobs
+692009–692014; figure sweeps/earth2d.jl → figures/11042026_earth2d_moll.png). **Null again:** ensemble MSE mean 1.56 vs
+1.52, ecliptic 0.0173% vs 0.0181%, median 0.0130% both; with − without rms 0.006%. Missing trailing-cloud share
+0.0000–0.0002 ± 0.0001 in both (no trailing-cloud residual).
+
 - Meeting deck for Dr. Saydjari (Nov 3), organized by last week's 4 tasks: https://claude.ai/artifact/Sg4Rbzq7QuvVqff4EPXsXD
   (private until shared).
 
@@ -182,10 +189,7 @@ Nothing blocking.
 Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters from the data (done: round 30–32).
 
 ## Next up
-**Running:** round 43 (Dr. Saydjari, Nov 3): best model (cos×exp 1000) + Earth-centric inputs n·δ̂, n·M̂, 6 shifts × 5
-seeds (sweeps/configs_v43.jl), Discovery jobs 692009–692014, submitted Nov 3. Then sweeps/earth2d.jl: the 2-D residual
-map as Mollweide maps (Earth-motion and ecliptic frames), with vs without the Earth-centric inputs. More tasks from the
-meeting coming from the user in a day or two. Other options: best-epoch selection with a
+Nothing running. More tasks from the Nov 3 meeting coming from the user. Other options: best-epoch selection with a
 validation window whose orbital phase repeats (code exists: val_tranges + keep_best); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).
