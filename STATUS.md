@@ -205,7 +205,16 @@ is coming to the HPC). First query works (client in ~/envs/talltable on Discover
 realdata/talltable_pole.py, north ecliptic pole 4.9–5.0 μm → 811 exposures (May 2025 – Sep 2026). It matches our
 qr3 cutouts (flux −0.4%, zodi −0.02%) but not our older qr2 cutouts (−7% flux, +13% zodi): the tall table has the
 newer calibration, so earlier qr2-based real-data numbers (e.g. SPHEREx zodi vs ZodiPy) need redoing with it.
-Figure figures/11042026_talltable_nep.png (realdata/compare_talltable_nep.jl). More tasks from the Nov 3 meeting coming from the user. Other options: best-epoch selection with a
+Figure figures/11042026_talltable_nep.png (realdata/compare_talltable_nep.jl).
+**Our model on real data** (realdata/talltable_ours.jl; geometry from the nearest simulated exposure, ~1 min; wavelength
+moved from 5.0 μm with ZodiPy's spectral shape, talltable_zodipy.py): it equals ZodiPy to 0.01–0.03% at every exposure.
+Week 13 binning (realdata/talltable_bins.py: server-side median per exposure over a 0.23° HEALPix level-8 patch):
+measured = a·ours + b with a = 1.02 (NEP, 1020 exp.), 0.93 (SEP, 808), 1.09 (30° above ecliptic, 27), 1.03 (ecliptic
+λ 45°, 19) and b = +0.076/+0.113/+0.075/+0.165 MJy/sr. After subtracting each series' median over time, the time-variable
+part matches: amplitude measured vs ours 0.148/0.144, 0.063/0.061, 0.356/0.320, 0.348/0.348 MJy/sr; residual
+scatter 0.005–0.010 MJy/sr (1–2.5%). Kelsall's TIME variation is right to ~0–10%; real sky = Kelsall + ~0.08–0.17 MJy/sr
+offset that is larger on the ecliptic (so not only a fixed extragalactic background). Figures
+figures/11042026_talltable_{nep,L8_nep,L8_sep,L8_b30l210,L8_ecl045}_ours.png. More tasks from the Nov 3 meeting coming from the user. Other options: best-epoch selection with a
 validation window whose orbital phase repeats (code exists: val_tranges + keep_best); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).

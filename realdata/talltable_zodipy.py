@@ -4,6 +4,7 @@ each exposure's wavelength with ZodiPy's spectral shape: ours(lambda) = ours(5.0
 Observer = Earth (SPHEREx is ~7000 km away; negligible), as in realdata/extract_frames.py.
 
     python -I realdata/talltable_zodipy.py data/spherex_real/tt_nep_per_image.csv [RA Dec]   (zodipy env)
+    (also takes the binned tables of realdata/talltable_bins.py, with the patch centre's RA Dec)
     → adds columns zodipy_lam, zodipy_5um → <input>_zodipy.csv
 """
 import csv, sys
@@ -16,6 +17,9 @@ import zodipy
 src = sys.argv[1]
 RA0, DEC0 = (float(sys.argv[2]), float(sys.argv[3])) if len(sys.argv) > 3 else (270.0, 66.560708)
 rows = list(csv.DictReader(open(src)))
+for r in rows:                     # the binned tables (realdata/talltable_bins.py) have t_beg/t_end and "wavelength"
+    r.setdefault("t_mid_mjd", f"{0.5 * (float(r['t_beg']) + float(r['t_end'])):.6f}")
+    r.setdefault("wavelength_median", r.get("wavelength", ""))
 mjd = np.array([float(r["t_mid_mjd"]) for r in rows]); lam = np.array([float(r["wavelength_median"]) for r in rows])
 
 
