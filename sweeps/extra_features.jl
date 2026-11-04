@@ -191,10 +191,19 @@ const FEATURE_SETS = Dict(
 # R² = 1.000 for n·δ̂, but only 0.41 for n·M̂), through n·S − n·E (Float32 keeps that difference to ~4e-5 relative).
 inject_gE() = clamp.((1 .- Fd_raw[:, findfirst(==("n·δ̂"), dot_names_all)]) ./ 0.24, 0, 1) .^ 2
 inject_gM() = exp.(-acosd.(clamp.(Fd_raw[:, findfirst(==("n·M̂"), dot_names_all)], -1, 1)) ./ 30)
+# Round 45 (Nov 4, the mentor: "with + without Earth cloud"): ENV["ZODI_NOCLOUD"] = "1" removes Kelsall's Earth-trailing
+# cloud from the target (y − the emission file's emission_earth_trailing_feature; median 2.4% of y, max 9%).
+const NOCLOUD = get(ENV, "ZODI_NOCLOUD", "0") == "1"
+if NOCLOUD && !@isdefined(Y_WITHCLOUD)
+    global Y_WITHCLOUD = copy(y)
+    y .-= h5open(f -> read(f["emission_earth_trailing_feature"]), emission_file)
+    println("ZODI_NOCLOUD: Earth-trailing cloud removed from y (mean $(mean(Y_WITHCLOUD .- y)) MJy/sr)"); flush(stdout)
+end
 const INJECT_A = parse(Float64, get(ENV, "ZODI_INJECT", "0"))
 if INJECT_A > 0 && !@isdefined(Y_CLEAN)
     global Y_CLEAN = copy(y)
     global Y_INJ = INJECT_A * mean(Y_CLEAN) .* (inject_gE() .+ inject_gM())
     y .+= Y_INJ
-    println(stderr, "ZODI_INJECT = $INJECT_A: fake Earthshine + moonlight added to y (mean $(mean(Y_INJ)), max $(maximum(Y_INJ)) MJy/sr)")
+    println("ZODI_INJECT = $INJECT_A: fake Earthshine + moonlight added to y (mean $(mean(Y_INJ)), max $(maximum(Y_INJ)) MJy/sr)")
+    flush(stdout)
 end
