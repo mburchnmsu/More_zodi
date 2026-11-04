@@ -85,8 +85,13 @@ panels = [(lbl, e) for ((_, lbl), e) in zip(FAMS, E)]
 length(E) == 2 && push!(panels, ("with − without", E[2] .- E[1]))
 fig = Figure(size=(900 * length(panels) + 250, 1150)); hm = nothing
 function frame_labels!(ax, lon0, names)
-    for (l, txt) in names
-        x, y0 = moll_fwd(mod(l - lon0 + 180, 360) - 180, 0); text!(ax, x, y0 + 0.06; text=txt, color=:white, fontsize=13, align=(:center, :bottom))
+    for (l, txt) in names                                       # a label at the map edge is drawn on both edges, inset
+        d = mod(l - lon0 + 180, 360) - 180
+        for dd in (abs(d) > 170 ? (-168.0, 168.0) : (d,))
+            x, y0 = moll_fwd(dd, 0)
+            text!(ax, x, y0 + 0.05; text=txt, color=:white, fontsize=15, font=:bold, strokecolor=:black, strokewidth=2,
+                  align=(:center, :bottom))
+        end
     end
 end
 for (r, (fttl, lon, lon0)) in enumerate(frames), (c, (pttl, e)) in enumerate(panels)
