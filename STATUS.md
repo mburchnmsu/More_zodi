@@ -201,7 +201,11 @@ seeds (sweeps/configs_v45.jl), jobs 692277–692282, submitted 11:03 Nov 4. Clou
 Week 13 notes: Discovery job start-up is only 2–3 min (job start → epoch 1) since round 40; the ~16 min compile was
 a one-time event after setup, so the mentor's compile-once tip already holds there (use it on Colibrí). Discovery's
 normal partition also has GPU nodes (A100/V100/T4). Real data: the NYU "tall table" (web service first; the full ~111 TB
-is coming to the HPC). More tasks from the Nov 3 meeting coming from the user. Other options: best-epoch selection with a
+is coming to the HPC). First query works (client in ~/envs/talltable on Discovery; healpy has no Windows build):
+realdata/talltable_pole.py, north ecliptic pole 4.9–5.0 μm → 811 exposures (May 2025 – Sep 2026). It matches our
+qr3 cutouts (flux −0.4%, zodi −0.02%) but not our older qr2 cutouts (−7% flux, +13% zodi): the tall table has the
+newer calibration, so earlier qr2-based real-data numbers (e.g. SPHEREx zodi vs ZodiPy) need redoing with it.
+Figure figures/11042026_talltable_nep.png (realdata/compare_talltable_nep.jl). More tasks from the Nov 3 meeting coming from the user. Other options: best-epoch selection with a
 validation window whose orbital phase repeats (code exists: val_tranges + keep_best); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).
