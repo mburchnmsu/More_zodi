@@ -153,6 +153,10 @@ const FEATURE_SETS = Dict(
     # parallax version (arch = :bandplx): + SPHEREx's heliocentric position components for the line-of-sight crossing
     :sunseason_learnband_plx => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE",
                                  "n·x", "n·y", "n·z", "S·x", "S·y", "S·z"],
+    # round 43 (Nov 3, mentor): the best model + the Earth-centric terms n·δ̂, n·M̂ (round 33's null test, now on the
+    # parallax band layer); the band layer's 6 inputs stay last
+    :sunseason_learnband_plx_earthc => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE", "n·δ̂", "n·M̂",
+                                        "n·x", "n·y", "n·z", "S·x", "S·y", "S·z"],
     # round 26 (mentor's Earth test): the poster model WITHOUT the Earth dot products (n·E, n·vE, n·x⊕, n·y⊕); clock kept.
     # Note: SPHEREx is ~5e-5 AU from Earth, so n·S ≈ n·E and n·vS ≈ n·vE still carry Earth's geometry.
     :sunseason_noEarth => ["n·S", "n·z", "n·vS", "sinλE", "cosλE"],
