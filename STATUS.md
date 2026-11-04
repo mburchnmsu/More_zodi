@@ -182,7 +182,10 @@ Nothing blocking.
 Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters from the data (done: round 30–32).
 
 ## Next up
-Nothing running. Waiting on Dr. Saydjari's feedback from the Nov 3 meeting. Options: best-epoch selection with a
+**Running:** round 43 (Dr. Saydjari, Nov 3): best model (cos×exp 1000) + Earth-centric inputs n·δ̂, n·M̂, 6 shifts × 5
+seeds (sweeps/configs_v43.jl), Discovery jobs 692009–692014, submitted Nov 3. Then sweeps/earth2d.jl: the 2-D residual
+map as Mollweide maps (Earth-motion and ecliptic frames), with vs without the Earth-centric inputs. More tasks from the
+meeting coming from the user in a day or two. Other options: best-epoch selection with a
 validation window whose orbital phase repeats (code exists: val_tranges + keep_best); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).
