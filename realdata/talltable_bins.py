@@ -49,9 +49,12 @@ for spec in specs:
             dt = time.time() - t0
             break
         except Exception as e:                        # anything else (time/memory limit, …): report, go on to the next patch
-            if "503" not in str(e) or attempt == 11:
-                print(f"{name}: FAILED after {time.time() - t0:.0f} s: {str(e)[:300]}", flush=True); break
-            print(f"  {name}: server busy, retry {attempt + 1} in 60 s", flush=True); time.sleep(60)
+            msg = str(e)
+            down = any(s in msg for s in ("invalidated", "502", "504", "Connection"))   # server restarting: wait longer
+            if not (down or "503" in msg) or attempt == 11:
+                print(f"{name}: FAILED after {time.time() - t0:.0f} s: {msg[:300]}", flush=True); break
+            wait = 600 if down else 60
+            print(f"  {name}: server {'down' if down else 'busy'}, retry {attempt + 1} in {wait} s", flush=True); time.sleep(wait)
     if t is None:
         continue
     out = OUT / f"ttbin_L{level}_{name}.csv"
