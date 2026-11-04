@@ -153,6 +153,11 @@ const FEATURE_SETS = Dict(
     # parallax version (arch = :bandplx): + SPHEREx's heliocentric position components for the line-of-sight crossing
     :sunseason_learnband_plx => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE",
                                  "n·x", "n·y", "n·z", "S·x", "S·y", "S·z"],
+    # round 44 (Nov 4): the best model WITHOUT n·S. n·δ̂ = (n·S − n·E)/|δ| (R² 0.9998 from the MLP's 9 inputs); without
+    # n·S only 0.25 linear / 0.69 quadratic remains (the band layer's S·x,S·y,S·z never reach the MLP), so this model truly
+    # lacks the Earth-limb direction
+    :sunseason_learnband_plx_noS => ["n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE",
+                                     "n·x", "n·y", "n·z", "S·x", "S·y", "S·z"],
     # round 43 (Nov 3, mentor): the best model + the Earth-centric terms n·δ̂, n·M̂ (round 33's null test, now on the
     # parallax band layer); the band layer's 6 inputs stay last
     :sunseason_learnband_plx_earthc => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE", "n·δ̂", "n·M̂",
@@ -183,7 +188,7 @@ const FEATURE_SETS = Dict(
 #                                        limb SPHEREx makes (n·δ̂ ≈ 0.76; data range 0.71–1, mean gE 0.13)
 #   gM = exp(−θ_Moon / 30°)             "moonlight": θ_Moon = angle from the pointing to the Moon (≥ 27.7°; mean gM 0.08)
 # Note: n·δ̂ = (n·S − n·E)/|δ| with |δ| ≈ const, so the base inputs already carry it (a polynomial fit of them gives
-# R² = 1.000 for n·δ̂, but only 0.41 for n·M̂) — in Float32 only through a near-cancelling difference, though.
+# R² = 1.000 for n·δ̂, but only 0.41 for n·M̂), through n·S − n·E (Float32 keeps that difference to ~4e-5 relative).
 inject_gE() = clamp.((1 .- Fd_raw[:, findfirst(==("n·δ̂"), dot_names_all)]) ./ 0.24, 0, 1) .^ 2
 inject_gM() = exp.(-acosd.(clamp.(Fd_raw[:, findfirst(==("n·M̂"), dot_names_all)], -1, 1)) ./ 30)
 const INJECT_A = parse(Float64, get(ENV, "ZODI_INJECT", "0"))
