@@ -192,8 +192,9 @@ Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters
 **Running:** round 44, positive control for the Earth-centric inputs (user's choice, Nov 4): fake Earthshine
 (gE from n·δ̂) + moonlight (gM from the Moon angle) added to the target at A = 1e-2 and 1e-3 of mean y (ZODI_INJECT,
 sweeps/extra_features.jl); best model with vs without n·δ̂, n·M̂, shift 0 × 3 seeds (sweeps/configs_v44.jl), Discovery
-jobs 692185–692186. Found while designing it: n·δ̂ = (n·S − n·E)/|δ| is already a function of the base inputs (poly
-R² 1.000), n·M̂ is not (0.41). More tasks from the Nov 3 meeting coming from the user. Other options: best-epoch selection with a
+jobs 692185–692186. Found while designing it: n·δ̂ = (n·S − n·E)/|δ| is already a function of the base inputs (R²
+0.9998 from the MLP's 9 inputs), n·M̂ is not (0.41). Without n·S: 0.25 linear / 0.69 quadratic. So round 44b adds a
+third model without n·S (sweeps/configs_v44b.jl, jobs 692203–692204, user's choice). More tasks from the Nov 3 meeting coming from the user. Other options: best-epoch selection with a
 validation window whose orbital phase repeats (code exists: val_tranges + keep_best); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).
