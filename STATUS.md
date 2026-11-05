@@ -189,12 +189,26 @@ Nothing blocking.
 Decided 2026-10-19: no fixed Kelsall dust-band inputs; learn the band parameters from the data (done: round 30–32).
 
 ## Next up
-**Running:** round 44, positive control for the Earth-centric inputs (user's choice, Nov 4): fake Earthshine
+**Done: rounds 44 / 44b**, positive control for the Earth-centric inputs (user's choice, Nov 4): fake Earthshine
 (gE from n·δ̂) + moonlight (gM from the Moon angle) added to the target at A = 1e-2 and 1e-3 of mean y (ZODI_INJECT,
-sweeps/extra_features.jl); best model with vs without n·δ̂, n·M̂, shift 0 × 3 seeds (sweeps/configs_v44.jl), Discovery
-jobs 692185–692186. Found while designing it: n·δ̂ = (n·S − n·E)/|δ| is already a function of the base inputs (R²
-0.9998 from the MLP's 9 inputs), n·M̂ is not (0.41). Without n·S: 0.25 linear / 0.69 quadratic. So round 44b adds a
-third model without n·S (sweeps/configs_v44b.jl, jobs 692203–692204, user's choice).
+sweeps/extra_features.jl); base model vs with n·δ̂, n·M̂ (configs_v44.jl) vs base without n·S (configs_v44b.jl), shift 0
+× 3 seeds. Why noS: n·δ̂ = (n·S − n·E)/|δ| is a function of the base inputs (R² 0.9998), n·M̂ is not (0.41).
+sweeps/report44.jl fits (network − clean Kelsall) = cE·injected Earthshine + cM·injected moonlight + c0 on the withheld
+interpolation months (1 = fully learned, 0 = missed):
+
+| A | model | cE | cM | rms left (% of y; injected 0.364 / 0.036) |
+|---|---|---|---|---|
+| 1e-2 | base | 0.98 | −0.16 | 0.159 |
+| 1e-2 | with n·δ̂, n·M̂ | **1.00** | **1.00** | **0.021** |
+| 1e-2 | base without n·S | 0.97 | −0.09 | 0.152 |
+| 1e-3 | base | 0.91 | −0.06 | 0.024 |
+| 1e-3 | with n·δ̂, n·M̂ | 1.04 | 1.02 | 0.021 |
+| 1e-3 | base without n·S | 0.90 | −0.06 | 0.024 |
+
+The test works: with a real Earth-centric signal, the Earth-centric inputs learn it exactly (test MSE 40–60× lower at
+1e-2), so round 43's null means there is no such signal to find in the simulated sky. Moonlight is out of reach without
+n·M̂. Earthshine is learned ~90–100% even without n·δ̂, and also without n·S, so the leak is not only through n·S (the
+remaining inputs and the band layer still recover the Earth direction). Figure figures/11042026_r44_injection.png.
 **Running:** round 45, the mentor's "with + without Earth cloud" (Week 13): best model (cos×exp 1000) on the sky without
 Kelsall's Earth-trailing cloud (ZODI_NOCLOUD; the emission file stores the cloud, so no ZodiPy rerun), 6 shifts × 5
 seeds (sweeps/configs_v45.jl), jobs 692277–692282, submitted 11:03 Nov 4. Cloud on = rounds 37–38.
