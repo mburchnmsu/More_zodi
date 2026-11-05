@@ -228,7 +228,11 @@ measured = a·ours + b with a = 1.02 (NEP, 1020 exp.), 0.93 (SEP, 808), 1.09 (30
 part matches: amplitude measured vs ours 0.148/0.144, 0.063/0.061, 0.356/0.320, 0.348/0.348 MJy/sr; residual
 scatter 0.005–0.010 MJy/sr (1–2.5%). Kelsall's TIME variation is right to ~0–10%; real sky = Kelsall + ~0.08–0.17 MJy/sr
 offset that is larger on the ecliptic (so not only a fixed extragalactic background). Figures
-figures/11042026_talltable_{nep,L8_nep,L8_sep,L8_b30l210,L8_ecl045}_ours.png. More tasks from the Nov 3 meeting coming from the user. Other options: best-epoch selection with a
+figures/11042026_talltable_{nep,L8_nep,L8_sep,L8_b30l210,L8_ecl045}_ours.png.
+**Blocked: the tall-table web service** has been down since ~15:40 Nov 4 ("database has been invalidated…", original
+error "Invalid bitpacking mode"; still down at 19:24 after 22 tries, 10 min apart, job 692355). It needs a restart by
+its maintainers. Ready to go once it is back: 0.92° (level-6) test, then the 48-patch offset map
+(`sbatch pipeline/cluster/talltable_bins.sbatch 6 grid 1`, then talltable_zodipy.py + realdata/talltable_offsetmap.jl). More tasks from the Nov 3 meeting coming from the user. Other options: best-epoch selection with a
 validation window whose orbital phase repeats (code exists: val_tranges + keep_best); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).
