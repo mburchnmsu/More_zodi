@@ -64,4 +64,42 @@ with − without, per exposure: mean +0.0003%, rms 0.006% (half the typical erro
 * So on simulated data the network finds no spurious Earth- or Moon-related signal, consistent with round 33. On real
   SPHEREx data, where Earthshine and moonlight can leak into the images, these are the inputs that would pick them up.
 """,
+
+"markdown" => raw"""
+## 3. Positive control: inject a known Earth/Moon signal (rounds 44 / 44b, `sweeps/report44.jl`)
+A null result only means something if the test *can* find a signal. So we added a fake **Earthshine** (gE, bright where
+the line of sight points along n·δ̂, the Earth–spacecraft direction) and a fake **moonlight** (gM = exp(−θMoon/30°)) to
+the training target, at A = 1% and 0.1% of the mean sky, then trained three models (shift 0, seeds 42–44):
+* **base**, the best model as is (no Earth-centric inputs);
+* **with n·δ̂, n·M̂**, the round-43 model;
+* **base without n·S**. n·δ̂ = (n·S − n·E)/|δ| can be rebuilt from the base inputs (R² 0.9998), so we removed n·S to try
+  to cut that leak.
+
+On the withheld months, we fit network − clean Kelsall = cE·(injected Earthshine) + cM·(injected moonlight) + c0. A fit of
+1 means the signal is fully learned, 0 means it is missed.
+
+| A | model | cE | cM | rms left over (% of y) |
+|---|---|---|---|---|
+| 1% | base | 0.98 | −0.16 | 0.159 (injected 0.364) |
+| 1% | with n·δ̂, n·M̂ | **1.00** | **1.00** | **0.021** |
+| 1% | base without n·S | 0.97 | −0.09 | 0.152 |
+| 0.1% | base | 0.91 | −0.06 | 0.024 (injected 0.036) |
+| 0.1% | with n·δ̂, n·M̂ | 1.04 | 1.02 | 0.021 |
+| 0.1% | base without n·S | 0.90 | −0.06 | 0.024 |
+""",
+
+"code" => raw"""
+showpng("11042026_r44_injection.png")
+""",
+
+"markdown" => raw"""
+* **The test works.** When there is a real Earth/Moon signal, the model with the Earth-centric inputs learns all of it
+  (test MSE 40–60× lower than base at 1%). Round 43's null therefore means the simulated sky has no such signal.
+* **Moonlight can only be learned with n·M̂.** Without it, the moonlight is missed (cM ≈ 0) and the leftover error is
+  7× larger.
+* **Earthshine is learned ~90–100% even without n·δ̂.** It is still learned with n·S removed, so the leak doesn't run only
+  through n·S: the other inputs and the band layer recover the Earth direction anyway.
+* The figure plots the sum of both signals, so the base models still follow the line roughly (their Earthshine is
+  learned). The fitted cE/cM in the table separate the two.
+""",
 ]
