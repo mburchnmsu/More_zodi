@@ -209,9 +209,12 @@ The test works: with a real Earth-centric signal, the Earth-centric inputs learn
 1e-2), so round 43's null means there is no such signal to find in the simulated sky. Moonlight is out of reach without
 n·M̂. Earthshine is learned ~90–100% even without n·δ̂, and also without n·S, so the leak is not only through n·S (the
 remaining inputs and the band layer still recover the Earth direction). Figure figures/11042026_r44_injection.png.
-**Running:** round 45, the mentor's "with + without Earth cloud" (Week 13): best model (cos×exp 1000) on the sky without
+**Done: round 45**, the mentor's "with + without Earth cloud" (Week 13): best model (cos×exp 1000) on the sky without
 Kelsall's Earth-trailing cloud (ZODI_NOCLOUD; the emission file stores the cloud, so no ZodiPy rerun), 6 shifts × 5
-seeds (sweeps/configs_v45.jl), jobs 692277–692282, submitted 11:03 Nov 4. Cloud on = rounds 37–38.
+seeds (sweeps/configs_v45.jl). Cloud on = rounds 37–38. sweeps/report45.jl: mean ensemble MSE OFF 1.46 vs ON 1.52 ×10⁻⁸
+(within seed spread), same sky maps (median 0.0129 vs 0.0130%, ecliptic 0.0183 vs 0.0181%). ON − OFF reproduces Kelsall's
+cloud with slope 1.0000; rms leftover 0.012% (|β|<15°) / 0.006% (whole sky) vs cloud rms 5.0 / 3.6%. The network learns
+the cloud fully and it costs nothing. Figure figures/11042026_r45_cloud_onoff.png; notebook 11042026 §4.
 Week 13 notes: Discovery job start-up is only 2–3 min (job start → epoch 1) since round 40; the ~16 min compile was
 a one-time event after setup, so the mentor's compile-once tip already holds there (use it on Colibrí). Discovery's
 normal partition also has GPU nodes (A100/V100/T4). Real data: the NYU "tall table" (web service first; the full ~111 TB

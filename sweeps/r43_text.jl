@@ -102,4 +102,45 @@ showpng("11042026_r44_injection.png")
 * The figure plots the sum of both signals, so the base models still follow the line roughly (their Earthshine is
   learned). The fitted cE/cM in the table separate the two.
 """,
+
+"markdown" => raw"""
+## 4. The trailing cloud on and off (round 45, `sweeps/report45.jl`)
+The mentor's Week 13 request. The best model (parallax band layer, cos×exp 1000, 6 shifts × 5 seeds) is trained twice:
+* **cloud ON**: the full Kelsall sky (rounds 37–38);
+* **cloud OFF**: the same sky with Kelsall's Earth-trailing cloud taken out (`ZODI_NOCLOUD=1`; the emission file stores the
+  cloud, median 2.4% of the sky, max 9%).
+
+Each family is scored against its own target. The difference of the two ensembles' predictions, ON − OFF, is what the
+networks think the cloud is, and it can be compared directly with Kelsall's cloud.
+""",
+
+"code" => raw"""
+showpng("11042026_r45_cloud_onoff.png")
+""",
+
+"markdown" => raw"""
+| | cloud ON | cloud OFF |
+|---|---|---|
+| ensemble test MSE, shifts 0/10/20/30/40/50 (×10⁻⁸) | 1.38 1.46 1.70 1.57 1.50 1.53 | 1.28 1.41 1.73 1.47 1.47 1.42 |
+| mean over shifts | 1.52 | **1.46** |
+| sky map: median / p95 | 0.0130% / 0.038% | 0.0129% / 0.037% |
+| within 2° of the ecliptic | 0.0181% | 0.0183% |
+
+ON − OFF compared with Kelsall's cloud (fit ON − OFF = slope · cloud + intercept, both as % of the sky):
+
+| | slope | intercept | rms of (ON − OFF − cloud) | rms of the cloud |
+|---|---|---|---|---|
+| \|β\| < 15° | 1.0000 | −0.00003% | 0.012% | 5.0% |
+| whole sky | 1.0001 | −0.0003% | 0.006% | 3.6% |
+
+* **The cloud costs the model almost nothing.** Without it, the test MSE is 4% lower (1.46 vs 1.52), within the usual
+  seed-to-seed spread. The sky maps and the ecliptic error are the same.
+* **The networks learn the cloud exactly.** ON − OFF reproduces Kelsall's cloud with slope 1.0000. What is left over is
+  0.006–0.012% of the sky, which is about 0.2% of the cloud itself and the same size as the model's normal error.
+* The leftover map (last column) is white, apart from a few cells on the ecliptic. Those are where the ordinary model
+  errors of the two families don't cancel, not a cloud-shaped pattern.
+* So on simulated data the model absorbs the cloud fully, without being told it exists. That suggests it could also learn
+  an Earth-trailing structure on real data that differs from Kelsall's, as long as the inputs describe it (Earth's orbital
+  phase and position).
+""",
 ]
