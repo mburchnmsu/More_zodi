@@ -85,8 +85,22 @@ Best model (parallax band layer, cos×exp 1000, 6 splits × 5 seeds) [notebooks 
 4. Not helpful: AdamW weight decay (marginal) [round 41]; best-epoch selection on a validation month (failed: the
    validation window removed the only training data for a 90-day stretch of Earth's orbit) [round 42].
 
-### 4.3 Input ablation [pending: round 46]
-Each MLP input (or pair) and the band layer removed one at a time; splits 0 and 30 × 3 seeds.
+### 4.3 Input ablation [11072026]
+Each MLP input (or pair) and the band layer removed one at a time; splits 0 and 30 × 3 seeds:
+
+| removed | test MSE ÷ full model | ecliptic (\|β\| < 2°) | whole-sky median |
+|---|---|---|---|
+| nothing | 1.00 | 0.0189% | 0.0133% |
+| n·z | **2090** | 0.098% | 0.080% |
+| sin/cos λ⊕ | **1062** | 0.305% | 0.151% |
+| band layer | **1.29** | **0.0289%** | 0.0135% |
+| n·E / n·x⊕,n·y⊕ / n·S / n·vS / n·vE | 1.01 / 0.98 / 0.95 / 0.93 / 0.93 | 0.0179–0.0191% | 0.0129–0.0135% |
+
+* n·z is the only input that carries the **sign** of the ecliptic latitude, and Kelsall's tilted cloud is not
+  north–south symmetric. Earth's orbital phase is what lets the model follow the year.
+* The band layer is what brings the ecliptic error down.
+* The other inputs come in near-duplicate pairs (SPHEREx is ~5×10⁻⁵ AU from Earth: n·S ≈ n·E, n·vS ≈ n·vE), so removing
+  one changes nothing beyond seed noise (~±9%).
 
 ### 4.4 Checks on the Earth-related terms
 * **Earth-centric null test** [11042026 §1–2]. Adding the directions to Earth (n·δ̂, δ = S − E) and to the Moon (n·M̂)

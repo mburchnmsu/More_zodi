@@ -232,10 +232,13 @@ part matches: amplitude measured vs ours 0.148/0.144, 0.063/0.061, 0.356/0.320, 
 scatter 0.005–0.010 MJy/sr (1–2.5%). Kelsall's TIME variation is right to ~0–10%; real sky = Kelsall + ~0.08–0.17 MJy/sr
 offset that is larger on the ecliptic (so not only a fixed extragalactic background). Figures
 figures/11042026_talltable_{nep,L8_nep,L8_sep,L8_b30l210,L8_ecl045}_ours.png.
-**Running: round 46**, one-at-a-time ablation (user's choice, Nov 6, while the tall table is down): the best model minus
-one MLP input or pair (n·S, n·z, n·E, n·vS, n·vE, n·x⊕+n·y⊕, sin/cos λ⊕) or minus the band layer (plain MLP), shifts 0
-and 30 × seeds 42–44 = 48 runs (sweeps/configs_v46.jl), Discovery jobs 693547–693554 (6 trainings each, 20 h limit),
-submitted 12:07 Nov 6. Full model = rounds 37–38 at the same shifts/seeds.
+**Done: round 46**, one-at-a-time ablation (user's choice, Nov 6, while the tall table is down; notebook 11072026): the
+best model minus one MLP input or pair, or minus the band layer, shifts 0 and 30 × seeds 42–44 = 48 runs
+(sweeps/configs_v46.jl, jobs 693547–693554, 7.4–11.9 h; report sweeps/report46.jl, figure sweeps/plot46.jl →
+figures/11072026_r46_ablation.png). Ensemble MSE ÷ full model: **n·z 2090×, sin/cos λ⊕ 1062×, band layer 1.29×**
+(ecliptic 0.0189% → 0.0289%), n·E 1.01, n·x⊕/n·y⊕ 0.98, n·S 0.95, n·vS 0.93, n·vE 0.93 (seed noise: 3- vs 5-seed full
+model differ by up to 9%). n·z carries the sign of the latitude (the rest give only |n·z|); n·S≈n·E, n·vS≈n·vE, n·E≈|E|n·x⊕
+are redundant pairs.
 **Blocked: the tall-table web service** has been down since ~15:40 Nov 4 ("database has been invalidated…", original
 error "Invalid bitpacking mode"; still down at 19:24 after 22 tries, 10 min apart, job 692355). It needs a restart by
 its maintainers (still down Nov 5 12:27; the user is telling Dr. Saydjari). Discovery job 692861
