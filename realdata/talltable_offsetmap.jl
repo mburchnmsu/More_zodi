@@ -5,8 +5,11 @@
 # spread over time, the robust fit measured = a·ours + b. Our model: the 30 networks of rounds 37–38 (cos×exp 1000),
 # geometry from the nearest simulated exposure, moved to each exposure's wavelength with ZodiPy's spectral shape — exactly
 # as realdata/talltable_ours.jl, but loading the networks once.
-#     julia --project=. realdata/talltable_offsetmap.jl LEVEL G [tag]   → data/spherex_real/ttbin_L<LEVEL>_grid<G>_offsets.csv,
-#                                                                          figures/<tag>_offsetmap_L<LEVEL>_grid<G>.png
+#     julia --project=. realdata/talltable_offsetmap.jl LEVEL G [tag [wtag]]
+#         → data/spherex_real/ttbin_L<LEVEL>_grid<G><wtag>_offsets.csv, figures/<tag>_offsetmap_L<LEVEL>_grid<G><wtag>.png, and per
+#           patch ttbin_L<LEVEL>_<name><wtag>_ours.csv: every exposure with our model next to the measured flux, the SPHEREx zodi
+#           column and ZodiPy (the mentor's "replace the ZodiPy column with ours"). wtag: a wavelength window of
+#           realdata/talltable_bins.py (TT_LAM), e.g. _w1.25; default the 4.9–5.1 μm files.
 ENV["ZODI_DATA"] = "z500"; ENV["ZODI_HELIO"] = "1"
 using LinearAlgebra; BLAS.set_num_threads(2)
 redirect_stdout(devnull) do
@@ -17,6 +20,7 @@ redirect_stdout(devnull) do
 end
 using DelimitedFiles, Serialization, CairoMakie
 LEVEL, G = parse(Int, ARGS[1]), parse(Int, ARGS[2]); tag = length(ARGS) >= 3 ? ARGS[3] : "talltable"
+wtag = length(ARGS) >= 4 ? ARGS[4] : ""
 D = joinpath(@__DIR__, "..", "data", "spherex_real")
 C, ch = readdlm(joinpath(D, "ttbin_L$(LEVEL)_grid$(G)_centres.csv"), ',', header=true)
 names_, RA, DEC = String.(C[:, 1]), Float64.(C[:, 2]), Float64.(C[:, 3])
@@ -55,11 +59,18 @@ end
 
 rows = []
 for (i, nm) in enumerate(names_)
-    file = joinpath(D, "ttbin_L$(LEVEL)_$(nm)_zodipy.csv"); isfile(file) || continue
+    file = joinpath(D, "ttbin_L$(LEVEL)_$(nm)$(wtag)_zodipy.csv"); isfile(file) || continue
     T, h = readdlm(file, ',', header=true); h = vec(h); size(T, 1) == 0 && continue
     col(c) = Float64.(T[:, findfirst(==(c), h)])
     mjd, flux, zcol, zl, z5 = col("t_mid_mjd"), col("flux_median"), col("zodi_median"), col("zodipy_lam"), col("zodipy_5um")
     o5, dtm = ours5(mjd, RA[i], DEC[i]); ours = o5 .* zl ./ z5
+    open(joinpath(D, "ttbin_L$(LEVEL)_$(nm)$(wtag)_ours.csv"), "w") do f
+        println(f, "imageid,t_mid_mjd,wavelength,flux_median,zodi_spherex,zodipy_lam,ours_lam,ours_5um,zodipy_5um,dt_match_min")
+        for k in eachindex(mjd)
+            @printf(f, "%s,%.6f,%.4f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.2f\n", string(T[k, findfirst(==("imageid"), h)]), mjd[k],
+                    col("wavelength")[k], flux[k], zcol[k], zl[k], ours[k], o5[k], z5[k], dtm[k])
+        end
+    end
     q = icrs(RA[i], DEC[i]); β = asind(ecl(q)[3]); g = RG * q; b = asind(g[3]); l = mod(atand(g[2], g[1]), 360)
     λ = mod(atand(ecl(q)[2], ecl(q)[1]), 360)
     b1 = median(flux .- ours); spreadt = quantile(ours, 0.9) - quantile(ours, 0.1)
@@ -69,7 +80,7 @@ for (i, nm) in enumerate(names_)
                   ours_vs_zodipy=median(100 .* (o5 .- z5) ./ z5), dt_max=maximum(dtm)))
 end
 @printf("%d of %d patches with data\n", length(rows), length(names_))
-out = joinpath(D, "ttbin_L$(LEVEL)_grid$(G)_offsets.csv")
+out = joinpath(D, "ttbin_L$(LEVEL)_grid$(G)$(wtag)_offsets.csv")
 open(out, "w") do f
     ks = keys(rows[1]); println(f, join(ks, ","))
     for r in rows; println(f, join((v isa AbstractFloat ? @sprintf("%.6g", v) : string(v) for v in values(r)), ",")); end
@@ -99,7 +110,8 @@ for (ax, x) in ((ax3, abs.(get(:β))), (ax4, abs.(get(:b))))
     scatter!(ax, x, get(:b1_spheres), color=:orange, markersize=9, label="SPHEREx zodi model")
 end
 axislegend(ax3, position=:rt)
-Label(fig[0, 1:3], "Tall table, 4.9–5.0 μm: how much brighter the real sky is than the zodi models (one 0.$(LEVEL == 8 ? "23" : "92")° patch per grid point)",
+lamlbl = isempty(wtag) ? "4.9–5.0 μm" : "$(wtag[3:end]) μm window"
+Label(fig[0, 1:3], "Tall table, $lamlbl: how much brighter the real sky is than the zodi models (one 0.$(LEVEL == 8 ? "23" : "92")° patch per grid point)",
       font=:bold, fontsize=21)
-save(joinpath(@__DIR__, "..", "figures", "$(tag)_offsetmap_L$(LEVEL)_grid$(G).png"), fig, px_per_unit=1.5)
+save(joinpath(@__DIR__, "..", "figures", "$(tag)_offsetmap_L$(LEVEL)_grid$(G)$(wtag).png"), fig, px_per_unit=1.5)
 println("ok")

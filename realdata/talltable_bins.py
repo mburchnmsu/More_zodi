@@ -20,6 +20,9 @@ from talltable.client import fetch_arrow_stream
 
 OUT = Path(__file__).resolve().parent.parent / "data" / "spherex_real"
 LAM_LO, LAM_HI = 4.9, 5.1          # microns (data stop at ~5.01)
+WTAG = ""                          # TT_LAM=lo:hi picks another wavelength window; its files get the suffix _w<lo>
+if os.environ.get("TT_LAM"):
+    LAM_LO, LAM_HI = map(float, os.environ["TT_LAM"].split(":")); WTAG = f"_w{LAM_LO:g}"
 LOCAL = os.environ.get("TALLTABLE_LOCAL") == "1"
 if LOCAL:
     import duckdb
@@ -37,7 +40,7 @@ if specs and specs[0] == "grid":
         f.write("name,ra,dec\n"); f.writelines(s.replace(":", ",") + "\n" for s in specs)
 for spec in specs:
     name, ra, dec = spec.split(":"); ra, dec = float(ra), float(dec)
-    if (OUT / f"ttbin_L{level}_{name}.csv").exists():
+    if (OUT / f"ttbin_L{level}_{name}{WTAG}.csv").exists():
         print(f"{name}: already done"); continue
     pix = int(hp.ang2pix(2 ** level, ra, dec, nest=True, lonlat=True))
     q = PixelQuery(web=not LOCAL).ipix([pix], level).wavelength(LAM_LO, LAM_HI).with_wavelengths().with_image()
@@ -73,7 +76,7 @@ for spec in specs:
             print(f"  {name}: server {'down' if down else 'busy'}, retry {attempt + 1} in {wait} s", flush=True); time.sleep(wait)
     if t is None:
         continue
-    out = OUT / f"ttbin_L{level}_{name}.csv"
+    out = OUT / f"ttbin_L{level}_{name}{WTAG}.csv"
     cols = t.column_names; data = [t[c].to_pylist() for c in cols]
     with open(out, "w") as f:
         f.write(",".join(cols) + "\n")

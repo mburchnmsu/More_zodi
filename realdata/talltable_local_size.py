@@ -19,7 +19,9 @@ from talltable.partition import find_partitions_ipix, part_to_level_index
 level, G = int(sys.argv[1]), int(sys.argv[2])
 all_parts = set(int(s) for s in (DB / "parts.txt").read_text().split())
 ra_c, dec_c = hp.pix2ang(2 ** G, range(12 * 4 ** G), nest=True, lonlat=True)
-specs = [(f"g{G}_{i:03d}", r, d) for i, (r, d) in enumerate(zip(ra_c, dec_c))]
+# rounded exactly as talltable_bins.py writes them: a level-G centre is a corner of 4 level-LEVEL pixels, so the rounding
+# decides which one is used
+specs = [(f"g{G}_{i:03d}", float(f"{r:.5f}"), float(f"{d:.5f}")) for i, (r, d) in enumerate(zip(ra_c, dec_c))]
 if sys.argv[3:] == ["tests"]:            # the two test patches too (the pole alone is 64 level-9 partitions, ~150 GB)
     specs += [("b30l210", 218.487, 16.649), ("nep", 270.0, 66.560708)]
 size, need, total = {}, {}, 0
