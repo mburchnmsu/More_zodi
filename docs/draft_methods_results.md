@@ -1,6 +1,6 @@
 # A neural-network emulator of the zodiacal light for SPHEREx — methods and results (draft)
 
-*Working draft, Nov 6 2026. Mark Burch (NMSU), advisor Dr. Andrew Saydjari. Built from the project log (STATUS.md) and
+*Working draft, Nov 8 2026. Mark Burch (NMSU), advisor Dr. Andrew Saydjari. Built from the project log (STATUS.md) and
 the dated notebooks; every number below traces to a notebook or report script named in brackets. Sections marked
 **[pending]** wait on running work.*
 
@@ -139,14 +139,31 @@ Per exposure, the tall table's median over a 0.23° HEALPix patch at 4.9–5.0 �
   is not only a uniform extragalactic background.
 * SPHEREx's pipeline zodi layer fits with a = 0.93–0.96 and b = 0.05–0.13 MJy/sr.
 
-### 5.3 Where the offset comes from [pending: tall-table service]
-The next step maps the offset over 48 patches across the sky. If it follows ecliptic latitude, it is zodiacal light that
-Kelsall misses. If it follows Galactic latitude, it is a fixed sky component. The query and analysis scripts are ready.
-The tall-table web service has been down since Nov 4 (a server-side database error).
+### 5.3 Where the offset comes from [11082026; `realdata/talltable_offsetmap.jl`, `realdata/offset_fit.jl`]
+With the web service down, the tall table's partitions were downloaded from Flatiron's file server and queried locally
+(same SQL). Per patch (48 patches of 0.92°, one per level-1 HEALPix centre), offset = median over exposures of
+(measured − ours). Near the Galactic plane (|b| < 10°) it reaches 0.2–1.45 MJy/sr: that is the Galaxy. For the 34
+patches with |b| > 15°, the offset is fitted as c0 + c1·Kelsall + c2·csc|b|:
+
+| window (μm) | 1.3 | 1.65 | 2.25 | 2.85 | 3.45 | 4.1 | 4.55 | 4.95 |
+|---|---|---|---|---|---|---|---|---|
+| c1 (with c2) | 0.05 | 0.13 | 0.14 | 0.11 | 0.27 | 0.18 | 0.14 | 0.19 |
+| c2 (MJy/sr) | 0.015 | 0.014 | 0.009 | 0.007 | 0.008 | 0.007 | 0.006 | 0.008 |
+| R² | 0.54 | 0.76 | 0.73 | 0.67 | 0.77 | 0.64 | 0.58 | 0.77 |
+
+(uncertainty in c1 ±0.02–0.03.)
+* **The offset is mostly zodi that Kelsall misses.** From 1.6 μm up, the real zodi is ~11–27% brighter than Kelsall. At
+  5 μm a Galactic-only model explains none of the offset (R² 0.00), while c0 + c1·Kelsall explains 74%. The time
+  variation within each patch agrees: the per-patch fitted scale is a = 1.05–1.31.
+* **A Galactic csc|b| term appears below ~3 μm** and grows toward short wavelengths, as unmasked starlight would.
+* **SPHEREx's own zodi model leaves no proportional part** (c1 −0.07 to 0.00), only a constant 0.025–0.055 MJy/sr. Its
+  pipeline zodi already includes the scale-up.
+* So the main missing term is a ~10–25% scale-up of the zodi, not a fixed l, b map. A finer grid (192 patches) is
+  running to map the ratio across the sky.
 
 ## 6. Status and next steps
-* Ablation table (round 46, running).
-* Offset map over the sky (waiting on the tall table).
+* Offset map at grid 2 (192 patches, 8 wavelengths; running): the zodi scale-up as a map, and a check of the 3.45 μm point.
+* A learnable zodi scale (and a constant) when the emulator is refit to SPHEREx data.
 * Per-band radial profiles (inner cutoff + ~1/R falloff) instead of one effective distance per band, aimed at the
   remaining ecliptic error.
 * Refitting the emulator to SPHEREx data (with star masking) once the full tall table is on the HPC. This is the step

@@ -239,11 +239,20 @@ figures/11072026_r46_ablation.png). Ensemble MSE ÷ full model: **n·z 2090×, s
 (ecliptic 0.0189% → 0.0289%), n·E 1.01, n·x⊕/n·y⊕ 0.98, n·S 0.95, n·vS 0.93, n·vE 0.93 (seed noise: 3- vs 5-seed full
 model differ by up to 9%). n·z carries the sign of the latitude (the rest give only |n·z|); n·S≈n·E, n·vS≈n·vE, n·E≈|E|n·x⊕
 are redundant pairs.
-**Blocked: the tall-table web service** has been down since ~15:40 Nov 4 ("database has been invalidated…", original
-error "Invalid bitpacking mode"; still down at 19:24 after 22 tries, 10 min apart, job 692355). It needs a restart by
-its maintainers (still down Nov 5 12:27; the user is telling Dr. Saydjari). Discovery job 692861
-(pipeline/cluster/talltable_wait.sbatch) pings it hourly for up to 3 days and then runs the queries below by itself: 0.92° (level-6) test, then the 48-patch offset map
-(`sbatch pipeline/cluster/talltable_bins.sbatch 6 grid 1`, then talltable_zodipy.py + realdata/talltable_offsetmap.jl). More tasks from the Nov 3 meeting coming from the user. Other options: best-epoch selection with a
+**Done: the offset map (Week 13 mean-sky question), Nov 8, notebook 11082026.** The tall-table web service is still
+down (database invalidated since Nov 4; wait job 692861 gave up after 72 hourly tries). Workaround, OK'd by Dr. Saydjari:
+download the partitions from the public Flatiron file server to /fs1/scratch/mburch6/talltable and run the same SQL
+locally in DuckDB (`pipeline/cluster/talltable_download.sbatch G [lo:hi ...]`, `TALLTABLE_LOCAL=1`, `TT_LAM=lo:hi`;
+`realdata/talltable_local_size.py` sizes a grid). Grid 1 = 48 level-6 patches, 84.5 GB, ~90 MB/s, ~2 s per patch query.
+Then ZodiPy per patch (talltable_zodipy.py, zodipy env), `realdata/talltable_offsetmap.jl 6 1 <tag> [wtag]` (also writes
+per-exposure `_ours.csv`: our model next to flux / SPHEREx zodi / ZodiPy = "replace the ZodiPy column"), and
+`realdata/offset_fit.jl <tag>` (c0 + c1·Kelsall + c2·csc|b| fit over |b| > 15°, spectrum figure). Results: near the plane
+(|b| < 10°) offset 0.2–1.45 MJy/sr (Galaxy). Off the plane at 5 μm: offset = 0.033 + 0.19·Kelsall (R² 0.74; Galactic-only
+R² 0.00). At 1.6–5 μm c1 = 0.11–0.27 (with the csc|b| term; 1.3 μm 0.05), csc|b| term 0.006–0.015 MJy/sr growing to short λ
+(starlight, no masking). Per-patch time fits a = 1.05–1.31. SPHEREx zodi model: c1 ≈ 0 (−0.07…0), constant 0.025–0.055.
+Figures figures/11082026_offsetmap_L6_grid1[_w*].png, 11082026_offset_spectrum_L6_grid1.png; draft §5.3 filled.
+**Running overnight: job 695791**, grid 2 (192 patches, 228 partitions, 389 GB) at 4.9–5.1 μm + 7 windows. Next: fetch,
+ZodiPy, offset maps, offset_fit for grid 2 (map of c1 across the sky; check the 3.45 μm peak). Other options: best-epoch selection with a
 validation window whose orbital phase repeats (code exists: val_tranges + keep_best); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).

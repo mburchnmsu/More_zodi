@@ -67,7 +67,7 @@ for (i, nm) in enumerate(names_)
     open(joinpath(D, "ttbin_L$(LEVEL)_$(nm)$(wtag)_ours.csv"), "w") do f
         println(f, "imageid,t_mid_mjd,wavelength,flux_median,zodi_spherex,zodipy_lam,ours_lam,ours_5um,zodipy_5um,dt_match_min")
         for k in eachindex(mjd)
-            @printf(f, "%s,%.6f,%.4f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.2f\n", string(T[k, findfirst(==("imageid"), h)]), mjd[k],
+            @printf(f, "%s,%.6f,%.4f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.2f\n", (x = T[k, findfirst(==("imageid"), h)]; x isa Real ? string(round(Int, x)) : string(x)), mjd[k],
                     col("wavelength")[k], flux[k], zcol[k], zl[k], ours[k], o5[k], z5[k], dtm[k])
         end
     end
