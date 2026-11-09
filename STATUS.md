@@ -262,8 +262,8 @@ with 2–4× smaller errors: c1 (with csc|b|) = 0.07, 0.14, 0.12, 0.12, **0.31 �
 0.19 ± 0.01 at 1.3…4.95 μm; at 5 μm offset = 0.036 + 0.181·Kelsall (R² 0.65). SPHEREx zodi model: c1 −0.06…+0.01, constant
 0.026–0.056. R² lower below 4 μm (0.15–0.36; more star/Galaxy-dominated patches, no masking). Components (B, over time):
 cloud too faint at every λ (+0.04 to +0.32); feature weaker at 4.1 and 5 μm (−0.67 ± 0.09, −0.63 ± 0.07) but +0.48 at
-1.65 μm (still a hint); bands now consistent with zero; ring +1.0 ± 0.2 at 3.45 μm. Scratch copy (~470 GB) can be deleted
-when the user decides. Next: slide content for the mentor meeting; then other options: best-epoch selection with a
+1.65 μm (still a hint); bands now consistent with zero; ring +1.0 ± 0.2 at 3.45 μm. Scratch copy (~470 GB, /fs1/scratch/mburch6/talltable)
+kept for now (user, Nov 8) in case new tasks use it; scratch purges after 120 days. Next: slide content for the mentor meeting; then other options: best-epoch selection with a
 validation window whose orbital phase repeats (code exists: val_tranges + keep_best); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).
