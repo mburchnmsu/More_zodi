@@ -143,7 +143,52 @@ println(join(h, "  ")); for i in 1:5; println(join(T[i, :], "  ")); end
 """,
 
 "markdown" => raw"""
-## 5. Caveats and what runs overnight
+## 5. Which part of Kelsall is too faint? (evening addition)
+ZodiPy also gives Kelsall's six components (smooth cloud, dust bands 1–3, circumsolar ring, Earth-trailing feature) at each
+exposure (`realdata/talltable_zodipy_comps.py`). Fit: measured − Kelsall = constant + Σ k·component, with 4 groups (cloud,
+bands, ring, feature), so k is the fraction by which that component is too faint (`realdata/offset_comps.jl`). Two
+independent ways:
+* **(A) across the sky:** per-patch medians, 34 patches with |b| > 15°, one constant.
+* **(B) over time:** one constant per patch, which absorbs any fixed sky (stars, Galaxy, extragalactic light). The k come
+  from how the components change over the year; all 48 patches are pooled.
+
+Errors are from resampling the patches (bootstrap). Off the plane, the smooth cloud is 93.5% of Kelsall at 5 μm, the
+ring 2.8%, the feature 2.2% and the bands 0.5%.
+
+At 4.9–5.1 μm:
+
+| component | (A) across the sky | (B) over time | (B) with SPHEREx's zodi model as the "sky" |
+|---|---|---|---|
+| smooth cloud | +0.14 ± 0.04 | +0.055 ± 0.010 | +0.119 ± 0.006 |
+| dust bands | +2.2 ± 1.2 | +2.3 ± 1.2 | +1.3 ± 0.8 |
+| ring | +0.45 ± 0.76 | −0.08 ± 0.28 | −0.03 ± 0.19 |
+| trailing feature | −0.24 ± 0.44 | **−0.79 ± 0.10** | −0.30 ± 0.09 |
+""",
+
+"code" => raw"""
+showpng("11082026_offset_comps_L6_grid1.png")
+""",
+
+"code" => raw"""
+showpng("11082026_offset_comps_spectrum_L6_grid1.png")
+""",
+
+"markdown" => raw"""
+* **The smooth cloud is too faint at every wavelength** in (B): k = +0.04 to +0.35, largest at 1.6 μm. One scale for all of
+  Kelsall gives +0.06 to +0.33. This is the robust result, and it is the same scale-up as in §3.
+* **SPHEREx's own zodi model shows the same pattern** relative to Kelsall (orange: cloud +0.09 to +0.28). Their model was
+  fitted to their data, so the two agree that Kelsall's cloud is too faint.
+* **The trailing feature: only a hint.** It is weaker than Kelsall in all four thermal windows (3.4–5 μm, k −0.29 to −0.79),
+  but the values scatter more than their errors, and the scattered-light windows are mixed (−0.35 to +0.63). SPHEREx sees
+  each patch about twice a year, once looking ahead of Earth and once behind, so (B) mostly measures how lopsided the sky
+  is between the two. Not yet a measurement.
+* **The bands come out brighter than Kelsall in most windows**, but each by only 1–2σ. The ring is not constrained.
+* (A) has much larger errors than (B) because, across the sky, the constant, the Galaxy and the zodi are hard to tell apart.
+* The 192-patch grid (overnight) gives 4× the patches for the feature and the bands.
+""",
+
+"markdown" => raw"""
+## 6. Caveats and what runs overnight
 * No star masking (the user's rule for now). Medians over 2–5 million pixels per exposure resist single stars, but not
   the smooth sum of faint stars; that sum is the csc|b| term.
 * Only 34 patches are off the plane, and the zodi brightness and |β| are strongly tied across them. So c1 says "scales
@@ -151,6 +196,6 @@ println(join(h, "  ")); for i in 1:5; println(join(T[i, :], "  ")); end
 * The time match uses the nearest simulated exposure (≤ 1 min), and the observer is Earth for ZodiPy, as before.
 * **Overnight (Discovery job 695791):** the same at grid 2, i.e. 192 patches ~15° apart (228 partitions, 389 GB), all 8
   windows. That gives 4× the patches for the c1 spectrum, enough to map the offset ratio across the sky, and a check on
-  the 3.45 μm point.
+  the 3.45 μm point. Then, on the ThinkPad: ZodiPy, offset maps and the component fits (§5) for the 192 patches.
 """,
 ]

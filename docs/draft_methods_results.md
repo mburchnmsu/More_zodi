@@ -158,6 +158,11 @@ patches with |b| > 15°, the offset is fitted as c0 + c1·Kelsall + c2·csc|b|:
 * **A Galactic csc|b| term appears below ~3 μm** and grows toward short wavelengths, as unmasked starlight would.
 * **SPHEREx's own zodi model leaves no proportional part** (c1 −0.07 to 0.00), only a constant 0.025–0.055 MJy/sr. Its
   pipeline zodi already includes the scale-up.
+* **By component** (Kelsall's components from ZodiPy; measured − Kelsall = const + Σ k·component; per-patch constants,
+  so the k come from the yearly changes) [`realdata/offset_comps.jl`]: the smooth cloud is too faint at every
+  wavelength (k = +0.04 to +0.35), and SPHEREx's own zodi model differs from Kelsall the same way. The Earth-trailing
+  feature comes out weaker at 3.4–5 μm (k −0.3 to −0.8) but not consistently at shorter wavelengths. The bands come out
+  brighter at 1–2σ. The ring is not constrained.
 * So the main missing term is a ~10–25% scale-up of the zodi, not a fixed l, b map. A finer grid (192 patches) is
   running to map the ratio across the sky.
 

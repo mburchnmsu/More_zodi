@@ -251,8 +251,14 @@ per-exposure `_ours.csv`: our model next to flux / SPHEREx zodi / ZodiPy = "repl
 R² 0.00). At 1.6–5 μm c1 = 0.11–0.27 (with the csc|b| term; 1.3 μm 0.05), csc|b| term 0.006–0.015 MJy/sr growing to short λ
 (starlight, no masking). Per-patch time fits a = 1.05–1.31. SPHEREx zodi model: c1 ≈ 0 (−0.07…0), constant 0.025–0.055.
 Figures figures/11082026_offsetmap_L6_grid1[_w*].png, 11082026_offset_spectrum_L6_grid1.png; draft §5.3 filled.
-**Running overnight: job 695791**, grid 2 (192 patches, 228 partitions, 389 GB) at 4.9–5.1 μm + 7 windows. Next: fetch,
-ZodiPy, offset maps, offset_fit for grid 2 (map of c1 across the sky; check the 3.45 μm peak). Other options: best-epoch selection with a
+Evening (user's pick for a small ThinkPad project): **Kelsall components vs the data**
+(realdata/talltable_zodipy_comps.py → offset_comps.jl → plot_comps_spectrum.jl; notebook 11082026 §5). measured − Kelsall =
+const + Σ k·component; (A) across the sky, (B) per-patch constants and yearly changes. Smooth cloud too faint at every λ
+(B: +0.04 to +0.35); SPHEREx's zodi model vs Kelsall shows the same (+0.09 to +0.28). Trailing feature weaker at 3.4–5 μm
+(B: −0.29 to −0.79, scatter > errors), mixed below 3 μm (a hint only). Bands brighter at 1–2σ. Ring unconstrained.
+**Running overnight: job 695791**, grid 2 (192 patches, 228 partitions, 389 GB) at 4.9–5.1 μm + 7 windows. A ThinkPad
+chain then fetches, runs ZodiPy, the offset maps and offset_fit (tag 11092026), and after that the component fits for grid 2.
+Next: notebook 11092026 from those (map of c1 across the sky; the 3.45 μm peak; feature and bands with 4× the patches). Other options: best-epoch selection with a
 validation window whose orbital phase repeats (code exists: val_tranges + keep_best); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).
