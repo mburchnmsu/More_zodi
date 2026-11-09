@@ -40,7 +40,7 @@ end
 * ThinkPad: ZodiPy at every exposure (~18 min per window), offset maps and fits (done 20:15), then Kelsall's six
   components at every exposure and the component fits (done 22:10).
 * Ours vs ZodiPy at 5 μm over all 192 patches: ≤ 0.050% (median per patch), so "ours" = Kelsall below.
-* (The 5 μm map title says "4.9–5.0 μm"; the window is 4.9–5.1 μm. The label is fixed in the script for future runs.)
+* "4.9–5.1 μm" is the query window; SPHEREx data stop at ~5.01 μm, so in practice it is 4.9–5.0 μm (both labels appear).
 """,
 
 "markdown" => raw"""
@@ -161,7 +161,50 @@ end
 """,
 
 "markdown" => raw"""
-## 5. Caveats and next steps
+## 5. 2-D residual maps (late evening): with vs without the trailing cloud, and the real sky
+The Week 13 card asked for 2-D residuals "with + without Earth cloud". Round 43 did this with vs without the Earth-centric
+*inputs*; here it is with vs without Kelsall's **Earth-trailing cloud** (round-45 models, no new training;
+`sweeps/cloud2d.jl`, same layout as round 43), then the same kind of map on the **real sky** at 4.9–5.1 μm
+(`realdata/realsky2d.jl`).
+""",
+
+"code" => raw"""
+showpng("11092026_cloud2d_moll.png")
+""",
+
+"markdown" => raw"""
+* Both models are equally good against their own targets: median |residual| 0.0130% vs 0.0129%, 95th percentile
+  0.0379% vs 0.0372%, within 2° of the ecliptic 0.0181% vs 0.0183%.
+* without − with: median 0.0027%, 95th percentile 0.0121%; behind Earth +0.0002%, ahead +0.0001%. The only structure is a
+  short streak on the ecliptic (ordinary model error that does not cancel), nothing cloud-shaped.
+""",
+
+"code" => raw"""
+showpng("11092026_realsky2d_moll_L6_grid2.png")
+""",
+
+"markdown" => raw"""
+Real sky: 144 patches with |b| > 15°, 7061 exposures. Each exposure's residual minus its patch's median over time (a fixed sky
+drops out), in % of our model. Top: Earth-motion frame (6° cells). SPHEREx sees each patch about twice a year, once ahead of
+Earth and once behind, so only those two bands are covered. Bottom: per patch, residual when seen behind − when seen ahead.
+
+| | behind Earth (φ 150–210°, \|β\| < 30°) | ahead (φ 330–30°) | per patch behind − ahead (median) |
+|---|---|---|---|
+| measured − ours (Kelsall) | −2.0 ± 0.1% | +1.8 ± 0.1% | −3.5% |
+| measured − SPHEREx zodi model | −0.3 ± 0.1% | +0.2 ± 0.1% | +0.9% |
+| SPHEREx model − ours | −1.3 ± 0.1% | +1.7 ± 0.1% | −3.7% |
+
+* **The real sky is ~3.5% fainter behind Earth (relative to ahead) than Kelsall predicts.** Kelsall's trailing feature is
+  ~2.6% of the sky here, so this is the same sign and size as the component fit's "feature weaker than Kelsall" (§4).
+* **SPHEREx's own zodi model has the same correction built in** (right column: −3.7%), and the data minus their model is
+  close to flat (+0.9%).
+* Caveat: the ahead and behind views of a patch are ~6 months apart, so this asymmetry also contains any seasonal error in
+  Kelsall (Earth's distance from the Sun, its height above the cloud's mid-plane), not only the trailing feature. The
+  per-patch map (bottom left) is not uniform: blue over most of the sky, red in part of the south.
+""",
+
+"markdown" => raw"""
+## 6. Caveats and next steps
 * No star masking (user's rule for now). The csc|b| term and the lower R² below 4 μm are where it would matter.
 * Each patch is seen at only a few elongations per year, so (B) mostly compares leading vs trailing views; the feature
   and the cloud are hard to separate this way (fit correlation −0.5).
