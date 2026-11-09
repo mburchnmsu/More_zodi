@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-11-04, DESKTOP-BBASC81
+Updated: 2026-11-08, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -256,9 +256,14 @@ Evening (user's pick for a small ThinkPad project): **Kelsall components vs the 
 const + Σ k·component; (A) across the sky, (B) per-patch constants and yearly changes. Smooth cloud too faint at every λ
 (B: +0.04 to +0.35); SPHEREx's zodi model vs Kelsall shows the same (+0.09 to +0.28). Trailing feature weaker at 3.4–5 μm
 (B: −0.29 to −0.79, scatter > errors), mixed below 3 μm (a hint only). Bands brighter at 1–2σ. Ring unconstrained.
-**Running overnight: job 695791**, grid 2 (192 patches, 228 partitions, 389 GB) at 4.9–5.1 μm + 7 windows. A ThinkPad
-chain then fetches, runs ZodiPy, the offset maps and offset_fit (tag 11092026), and after that the component fits for grid 2.
-Next: notebook 11092026 from those (map of c1 across the sky; the 3.45 μm peak; feature and bands with 4× the patches). Other options: best-epoch selection with a
+**Done: grid 2 (Nov 8 overnight, notebook 11092026).** Job 695791 (192 patches, 228 partitions, 389 GB, 8 windows) + the
+ThinkPad chain (ZodiPy, offset maps, offset_fit, component fits; tag 11092026). 144 patches off the plane. Confirms grid 1
+with 2–4× smaller errors: c1 (with csc|b|) = 0.07, 0.14, 0.12, 0.12, **0.31 ± 0.03 (3.45 μm peak is real)**, 0.17, 0.14,
+0.19 ± 0.01 at 1.3…4.95 μm; at 5 μm offset = 0.036 + 0.181·Kelsall (R² 0.65). SPHEREx zodi model: c1 −0.06…+0.01, constant
+0.026–0.056. R² lower below 4 μm (0.15–0.36; more star/Galaxy-dominated patches, no masking). Components (B, over time):
+cloud too faint at every λ (+0.04 to +0.32); feature weaker at 4.1 and 5 μm (−0.67 ± 0.09, −0.63 ± 0.07) but +0.48 at
+1.65 μm (still a hint); bands now consistent with zero; ring +1.0 ± 0.2 at 3.45 μm. Scratch copy (~470 GB) can be deleted
+when the user decides. Next: slide content for the mentor meeting; then other options: best-epoch selection with a
 validation window whose orbital phase repeats (code exists: val_tranges + keep_best); per-band radial profile (inner cutoff + ~1/R falloff, as in ZodiPy) instead of one
 effective R; one-at-a-time ablation table; Earth-centric terms + star masking on real SPHEREx data (masking only when the
 user says so).

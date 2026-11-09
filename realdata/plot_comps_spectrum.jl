@@ -9,7 +9,7 @@ files = sort(files, by=lamof); lam = lamof.(files)
 tabs = [readdlm(joinpath(D, f), ',', header=true) for f in files]
 get(c, row) = [Float64(t[1][row, findfirst(==(c), vec(t[2]))]) for t in tabs]
 set_theme!(merge(Theme(fontsize=17), theme_black()))
-fig = Figure(size=(1900, 560))
+fig = Figure(size=(1900, 600))
 for (j, (row, ttl)) in enumerate(((1, "smooth cloud"), (2, "dust bands"), (3, "ring"), (4, "trailing feature")))
     ax = Axis(fig[1, j], title=ttl, xlabel="wavelength (μm)", ylabel=j == 1 ? "k (fraction too faint)" : "")
     for (c, e, col, dx, lbl) in (("kA", "kA_err", :white, -0.05, "(A) across the sky"), ("kB", "kB_err", :deepskyblue, 0.0, "(B) over time"),
@@ -17,9 +17,9 @@ for (j, (row, ttl)) in enumerate(((1, "smooth cloud"), (2, "dust bands"), (3, "r
         errorbars!(ax, lam .+ dx, get(c, row), get(e, row), color=col); scatter!(ax, lam .+ dx, get(c, row), color=col, markersize=11, label=lbl)
     end
     hlines!(ax, [0], color=(:grey, 0.6))
-    j == 1 && axislegend(ax, position=:rb, labelsize=13)
     j > 1 && ylims!(ax, -2.5, 3.5)
 end
+Legend(fig[2, 1:4], fig.content[1], orientation=:horizontal, framevisible=false, labelsize=15)
 Label(fig[0, 1:4], "Which Kelsall component is too faint? measured − Kelsall = const + Σ k · component, at each wavelength ($(size(tabs[1][1], 1) - 1) components, grid $G)",
       font=:bold, fontsize=19)
 save(joinpath(@__DIR__, "..", "figures", "$(tag)_offset_comps_spectrum_L$(LEVEL)_grid$(G).png"), fig, px_per_unit=1.5)

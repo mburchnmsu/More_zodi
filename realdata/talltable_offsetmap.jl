@@ -110,7 +110,7 @@ for (ax, x) in ((ax3, abs.(get(:β))), (ax4, abs.(get(:b))))
     scatter!(ax, x, get(:b1_spheres), color=:orange, markersize=9, label="SPHEREx zodi model")
 end
 axislegend(ax3, position=:rt)
-lamlbl = isempty(wtag) ? "4.9–5.0 μm" : "$(wtag[3:end]) μm window"
+lamlbl = isempty(wtag) ? "4.9–5.1 μm" : "$(wtag[3:end]) μm window"
 Label(fig[0, 1:3], "Tall table, $lamlbl: how much brighter the real sky is than the zodi models (one 0.$(LEVEL == 8 ? "23" : "92")° patch per grid point)",
       font=:bold, fontsize=21)
 save(joinpath(@__DIR__, "..", "figures", "$(tag)_offsetmap_L$(LEVEL)_grid$(G)$(wtag).png"), fig, px_per_unit=1.5)
