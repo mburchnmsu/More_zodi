@@ -104,15 +104,36 @@ material is kept in `docs/slides_other_wavelengths.md` for later. Numbers come f
 - **Speaker notes:** Over time: cloud +0.06 ± 0.005, trailing feature −0.63 ± 0.07; bands and ring consistent with zero.
   The cloud is 94% of Kelsall off the plane, so it carries most of the gap.
 
+### Slide 10: Table slide
+- **Title:** How well do we reproduce the tall table?
+- **Table (5 μm, 144 patches with |b| > 15°, 7061 exposures; from `realdata/repro_table.jl`):**
+
+| Quantity | Tall table (measured) | Our model | SPHEREx zodi model |
+|---|---|---|---|
+| Median sky brightness (MJy/sr) | 0.625 | 0.488 | 0.570 |
+| Model / measured (median) | 1 | 0.80 | 0.94 |
+| Offset, measured − model (MJy/sr) | — | 0.127 | 0.040 |
+| Offset vs model brightness (fit) | — | 0.036 + 0.181·model | 0.035 + 0.010·model |
+| R² of that fit | — | 0.65 | 0.02 |
+| Scatter left after the fit (MJy/sr) | — | 0.017 | 0.012 |
+| Brightness range over time, model / measured | 1 | 0.92 | 1.02 |
+| Time residual rms, each patch minus its median (MJy/sr) | — | 0.017 | 0.011 |
+| Measured − model, behind minus ahead of Earth | — | −3.5% | +0.9% |
+
+- **Caption:** SPHEREx's model is closer on every row; ours carries Kelsall's ~20% shortfall.
+- **Speaker notes:** Our model matches ZodiPy (Kelsall) to a median 0.016% on these exposures, so every gap here is
+  Kelsall vs the real sky, not the emulator. Brightness range = max − min within each patch over time; the time residual
+  has each patch's own median removed, so a fixed offset drops out.
+
 ---
 
 ## Open questions (one slide each, title only)
 
-### Slide 10
+### Slide 11
 - **Title:** Add a zodi scale + constant, or train on SPHEREx's model?
 
-### Slide 11
+### Slide 12
 - **Title:** Is it time to mask stars?
 
-### Slide 12
+### Slide 13
 - **Title:** Can we trust the trailing feature result?
