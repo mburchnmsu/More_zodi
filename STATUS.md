@@ -31,7 +31,13 @@ Task results so far (Nov 13; slide text in docs/slides_week14.md):
   - SPHEREx zodi: 1.02% (rms 2.03%) vs Kelsall × a 0.96% (1.45%): no gain; the network has no wavelength input and
     SPHEREx zodi / Kelsall moves −1.4% per 0.05 μm (a wavelength-only fit gives 0.65%).
   - Measured sky, |b| > 15°: 3.2% (13.8%) vs SPHEREx zodi + b 1.9% (4.1%): overfits stars and residual sky.
-  - Proposed next (needs approval): wavelength as an input. Task 6 waits for the SPHEREx data location on Colibrí.
+  - **Wavelength input (approved and run Nov 14, Colibrí job 232):** SPHEREx zodi reproduced to **0.20%** (rms 0.28%)
+    on held-out patches, vs 0.62% for the best wavelength-only correction (Kelsall × binned f(λ)). Slide 9.
+  - **Star mask (approved Nov 14; Discovery 700324, Colibrí 243):** drop MP_SOURCE pixels (the tall table's default
+    query already drops artifact flags). 59% of pixels kept (73% off the plane, 13% on it). Measured sky, |b| > 15°:
+    network + λ 2.3% (12.2%) vs SPHEREx zodi + b 1.7% (3.2%): masking helps all models by 10–30%, but the network still
+    has a few badly wrong patches. Next ideas: robust loss, measured / Kelsall target, drop low-clean rows. Slide 10.
+  - Task 6 waits for the SPHEREx data location on Colibrí.
 
 ## Best model
 500 days, heliocentric inputs (default for ZODI_DATA="z500" since Oct 21): n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕

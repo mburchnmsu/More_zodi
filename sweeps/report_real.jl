@@ -103,7 +103,7 @@ end
 
 if haskey(cv, "zodi5")
     set_theme!(merge(Theme(fontsize=18), theme_black()))
-    pm(v) = [median(filter(isfinite, v[patch .== q])) for q in 0:191]
+    pm(v) = [(w = filter(isfinite, v[patch .== q]); isempty(w) ? NaN : median(w)) for q in 0:191]   # NaN: fully masked patch
     lonlat = [(mod(median(ra[patch .== q]) + 180, 360) - 180, median(dec[patch .== q])) for q in 0:191]
     xy = [Point2f(moll_fwd(l, b)...) for (l, b) in lonlat]
     a1 = median(zodi5 ./ z5)

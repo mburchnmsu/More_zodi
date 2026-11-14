@@ -128,3 +128,41 @@ Rule from the Week 14 card: every figure slide says what the plot is and the con
   - The network has no wavelength input, so it can't learn that. A wavelength-only linear fit takes the spread from
     0.96% to 0.65% (median) and 1.45% to 1.00% (rms).
   - Next step (needs approval): add wavelength as an input, or train in narrower wavelength bins.
+  - **Done Nov 14 → slide 9.**
+
+### Slide 9: Table slide
+- **Title:** With wavelength as an input, the network matches SPHEREx's zodi to 0.2%
+- **Table (5 μm, all 192 patches held out in turn, 5-fold cross-validation):**
+
+| Model of SPHEREx's zodi column | Median \|Δ\| | rms |
+|---|---|---|
+| Kelsall × 1.164 | 0.96% | 1.45% |
+| Kelsall × f(λ) (median ratio in 0.005 μm bins) | 0.62% | 0.95% |
+| Network, no wavelength input | 1.02% | 2.03% |
+| **Network + wavelength input** | **0.20%** | **0.28%** |
+
+- **What the table is:** How closely each model reproduces SPHEREx's zodi column on patches it was not trained on.
+- **Conclusion:** One extra input (the pixel's wavelength within 4.9–5.01 μm) makes the network 5× better and 3× better
+  than the best simple correction, so it learns how SPHEREx's model differs from Kelsall with both wavelength and geometry.
+- **Speaker notes:**
+  - Per-patch medians: 0.04% (map: `figures/11142026_real_maps.png`, bottom left, uniformly white).
+  - 10 runs (2 seeds × 5 folds), ~25 min each on Colibrí (job 232). Every fold gives 0.195–0.210%.
+  - The wavelength enters before the band layer's 6 inputs; nothing else changed (+64 weights).
+
+### Slide 10: Figure slide
+- **Title:** Does star masking help on the measured sky?
+- **Figure:** `figures/11142026_real_maps.png` (bottom right)
+- **What the plot is:** Per-patch median residual of the network trained on the star-masked measured sky with the
+  wavelength input, each patch predicted while held out.
+- **Conclusion:** Masking helps everything by 10–30%, but the network (2.3%) still doesn't beat SPHEREx's zodi + a
+  constant (1.7%) off the plane: its errors are a few patches it gets badly wrong, mostly near the Galactic plane.
+- **Speaker notes:**
+  - Mask: the tall table's default query already drops artifact flags; we also drop MP_SOURCE (bit 21, pixels on catalog
+    sources). Kept: 59% of pixels (73% at |b| > 15°, 13% on the plane); 7489 of 197,523 rows lose all pixels.
+  - |b| > 15°, median |Δ| (rms): network 3.2% (13.8%) unmasked → 3.0% (18.7%) masked → **2.3% (12.2%)** masked +
+    wavelength; SPHEREx zodi + b 1.9% (4.1%) → 1.7% (3.2%); Kelsall × a 2.7% → 2.3%.
+  - 8% of the network's rows miss by > 10% (baseline: 1.2%). One patch is ~2× off while SPHEREx zodi + b is within 3%;
+    the same network trained on SPHEREx's zodi has no trouble there, so the noisy target (not the inputs) causes it.
+  - Rows with < 30% clean pixels are noisier for every model (network 5.2%, baseline 3.5%).
+  - Possible next steps: a robust loss (e.g. relative L1) or training on measured / Kelsall, and dropping rows with
+    few clean pixels.

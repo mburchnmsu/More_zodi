@@ -19,6 +19,9 @@ CELLS = Pair{String,String}[
 * **Training on real data (task 7):** 192 patches are enough to learn Kelsall (0.026% on held-out patches), but on
   SPHEREx's zodi the network ties a single scale factor (1.02% vs 0.96%), and on the measured sky it overfits
   (3.2% vs 1.9% for SPHEREx zodi + constant, off the plane).
+* **Follow-ups (section 6):** with the pixel's wavelength as an input, the network reproduces SPHEREx's zodi to
+  **0.20%** (3× better than the best wavelength correction). Star masking (dropping MP_SOURCE pixels) helps every model on
+  the measured sky by 10–30%, but the network (2.3%) still trails SPHEREx zodi + constant (1.7%) off the plane.
 """,
 
 "code" => raw"""
@@ -120,12 +123,32 @@ showpng("11142026_real_maps.png")
 """,
 
 "markdown" => raw"""
-* Left vs middle: the network removes the smooth ecliptic pattern of Kelsall × 1.164 but adds 1–3% misses in single
-  patches; per-patch medians tie (0.43% vs 0.44%).
-* Right: the measured-sky misses are scattered patch by patch (±10% scale), not tied to geometry.
+* Top row: the network without wavelength removes the smooth ecliptic pattern of Kelsall × 1.164 but adds 1–3% misses in
+  single patches; per-patch medians tie (0.43% vs 0.44%).
+* Bottom row: see section 6.
 
-### Next (needs approval)
-Add wavelength as an input (or train in narrower wavelength bins) and rerun the zodi5 cross-validation.
+## 6. Wavelength as an input, and the star mask (Nov 14, later)
+The user approved both. **Wavelength:** the row's wavelength (4.9–5.01 μm) is one more input, placed before the band
+layer's 6 inputs (`zodi5L`; Colibrí job 232, 10 runs). **Star mask:** the tall table's default query already drops the
+artifact flags; Discovery job 700324 re-extracted the medians without MP_SOURCE pixels (bit 21, pixels on catalog
+sources; `TTX_MASK=1 realdata/talltable_extract.py`, `realdata/ttx_mask_merge.py`). 59% of pixels kept (73% at
+|b| > 15°, 13% on the plane). Then `flux5m` and `flux5mL` (masked, without / with wavelength; job 243, 20 runs).
+The report above already includes them (all 5 folds); summary:
+
+| Target, held out | Network | Network + λ | Best baseline |
+|---|---|---|---|
+| SPHEREx zodi | 1.02% (2.03%) | **0.20% (0.28%)** | Kelsall × f(λ) 0.62% (0.95%) |
+| Measured sky, \|b\| > 15°, unmasked | 3.2% (13.8%) | — | SPHEREx zodi + b 1.9% (4.1%) |
+| Measured sky, \|b\| > 15°, star-masked | 3.0% (18.7%) | 2.3% (12.2%) | SPHEREx zodi + b 1.7% (3.2%) |
+
+* **With the wavelength input the network reproduces SPHEREx's zodi to 0.20%**, 3× better than the best wavelength-only
+  correction: it learns how SPHEREx's model differs from Kelsall with both wavelength and geometry. Per-patch medians
+  0.04% (bottom-left map).
+* **The star mask helps every model by 10–30%** on the measured sky, but the network still doesn't beat SPHEREx's zodi + a
+  constant. Its misses are a few patches it gets badly wrong (8% of rows off by > 10%, vs 1.2% for the baseline), mostly
+  near the Galactic plane (bottom-right map; the black patch is fully masked). The same inputs work for SPHEREx's zodi,
+  so the noisy target is the problem. Possible next: a robust loss, training on measured / Kelsall, dropping rows with
+  few clean pixels.
 """,
 
 ]
