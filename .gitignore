@@ -24,3 +24,4 @@ __pycache__/
 
 # Slurm job logs on the cluster
 logs/
+data/tt_train/
