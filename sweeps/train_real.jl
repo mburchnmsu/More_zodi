@@ -12,7 +12,9 @@
 #               before the band layer's 6 inputs (Week 14: SPHEREx zodi / Kelsall changes −1.4% per 0.05 μm)
 #     HOLDOUT = k: test set = every k-th patch (default 5 → 39 of 192 patches held out across the sky)
 #     FOLD    = f in 0:k−1: test set = patches with index % k == f (default 0), so k runs cover every patch once
-#   → sweeps/results_real/real_<TARGET>_e<EPOCHS>_s<SEED>[_f<FOLD>].jls (+ predictions on every row in a CSV beside it)
+#     LOSS    = mse (default) | huber: Huber loss on the relative error (δ = 2%), less pulled by stars and noisy rows
+#     MINCLEAN = c (flux5m only, default 0): drop rows with fewer than a fraction c of their pixels left by the star mask
+#   → sweeps/results_real/real_<TARGET>[_hub][_c<100c>]_e<EPOCHS>_s<SEED>[_f<FOLD>].jls (+ predictions in a CSV beside it)
 #   A run whose result file already exists is skipped, so a resubmitted (e.g. preempted) array only redoes missing runs.
 ENV["ZODI_DATA"] = "z500"; ENV["ZODI_HELIO"] = "1"
 using LinearAlgebra; BLAS.set_num_threads(parse(Int, get(ENV, "OPENBLAS_NUM_THREADS", "2")))
@@ -25,7 +27,11 @@ include(joinpath(ROOT, "sweeps", "configs_v24.jl"))
 using DelimitedFiles, Serialization, Printf, Statistics
 TARGET, EPOCHS, SEED = ARGS[1], parse(Int, ARGS[2]), parse(Int, ARGS[3]); HOLD = length(ARGS) >= 4 ? parse(Int, ARGS[4]) : 5
 FOLD = length(ARGS) >= 5 ? parse(Int, ARGS[5]) : 0
-name = "real_$(TARGET)_e$(EPOCHS)_s$(SEED)" * (HOLD == 5 ? "" : "_h$HOLD") * (FOLD == 0 ? "" : "_f$FOLD")
+# LOSS = mse (default) | huber (relative-error Huber, δ = 2%); MINCLEAN = c: flux5m rows need ≥ c of their pixels unmasked
+LOSS = length(ARGS) >= 6 ? ARGS[6] : "mse"; MINCLEAN = length(ARGS) >= 7 ? parse(Float64, ARGS[7]) : 0.0
+@assert LOSS in ("mse", "huber")
+tag = (LOSS == "huber" ? "_hub" : "") * (MINCLEAN > 0 ? "_c$(round(Int, 100MINCLEAN))" : "")
+name = "real_$(TARGET)$(tag)_e$(EPOCHS)_s$(SEED)" * (HOLD == 5 ? "" : "_h$HOLD") * (FOLD == 0 ? "" : "_f$FOLD")
 outdir = joinpath(ROOT, "sweeps", "results_real"); mkpath(outdir)
 isfile(joinpath(outdir, "$name.jls")) && (println("$name: already done"); exit(0))
 D = joinpath(ROOT, "data", "tt_train")
@@ -41,11 +47,12 @@ if TG == "flux5m"   # join the star-masked medians on (patch, imageid, subpix)
     cm(n) = M[:, findfirst(==(n), hm)]
     key(p, i, s) = (string(p), string(i), Int(s))
     mp, mi, ms, mc, mf = cm("patch"), cm("imageid"), cm("subpix"), cm("n_clean"), cm("flux_med_clean")   # columns hoisted:
-    tp, ti, ts = c("patch"), c("imageid"), c("subpix")                                                  # c() copies
+    mn = cm("n_pix"); tp, ti, ts = c("patch"), c("imageid"), c("subpix")                                # c() copies
     idx = Dict(key(mp[k], mi[k], ms[k]) => k for k in axes(M, 1))
     km = [get(idx, key(tp[k], ti[k], ts[k]), 0) for k in axes(T, 1)]
-    fm = [k == 0 || mc[k] == 0 ? NaN : Float64(mf[k]) for k in km]
-    @printf("star mask: %d of %d rows matched, %d with no clean pixels\n", count(>(0), km), length(km), count(isnan, fm))
+    fm = [k == 0 || mc[k] == 0 || mc[k] < MINCLEAN * mn[k] ? NaN : Float64(mf[k]) for k in km]
+    @printf("star mask: %d of %d rows matched, %d dropped (no clean pixels, or clean fraction < %.2f)\n",
+            count(>(0), km), length(km), count(isnan, fm), MINCLEAN)
 end
 yreal = TG == "zodi5" ? zcol .* z5 ./ zl : TG == "flux5" ? flux .* z5 ./ zl : TG == "kel5" ? z5 :
         TG == "flux5m" ? fm .* z5 ./ zl : error("TARGET?")
@@ -61,7 +68,7 @@ pk = patch[ok]; te = findall(pk .% HOLD .== FOLD); tr = findall(pk .% HOLD .!= F
 splits["real patches"] = (tr, te)
 @printf("split: %d train rows (%d patches), %d test rows (%d patches)\n", length(tr), length(unique(pk[tr])), length(te), length(unique(pk[te])))
 kw = (; R24..., epochs=EPOCHS, arch=:bandplx, schedule=:cosexpw, lr_max=2e-3, sched_kw=(; decay=3.0, warm=0.05),
-      split_name="real patches", seed=SEED, progress_every=25)
+      split_name="real patches", seed=SEED, progress_every=25, target=(LOSS == "huber" ? :relhuber : :linear))
 r = train_mb(feats; label=name, Base.structdiff(kw, NamedTuple{(:features,)})...)
 tmp = joinpath(outdir, "$name.jls.part"); serialize(tmp, r); mv(tmp, joinpath(outdir, "$name.jls"); force=true)
 cols = [findfirst(==(nm), dot_names_all) for nm in r.feature_names]

@@ -15,10 +15,10 @@ export PATH="$HOME/.juliaup/bin:$PATH" GKSwstype=100 OPENBLAS_NUM_THREADS=2
 # the number of submitted jobs per user, so a long list is packed into fewer tasks)
 K=${PER_TASK:-1}
 for L in $(seq $(( (SLURM_ARRAY_TASK_ID - 1) * K + 1 )) $(( SLURM_ARRAY_TASK_ID * K ))); do
-    TARGET= FOLD=
-    read -r TARGET EPOCHS SEED HOLD FOLD < <(sed -n "${L}p" "$1") || true   # last line may lack a newline
+    TARGET= FOLD= EXTRA=
+    read -r TARGET EPOCHS SEED HOLD FOLD EXTRA < <(sed -n "${L}p" "$1") || true   # last line may lack a newline
     [ -n "${FOLD:-}" ] || { echo "no list line $L in $1"; continue; }
-    echo "host $(hostname), $(date), run: $TARGET $EPOCHS $SEED $HOLD $FOLD"
-    julia --project=. -t $SLURM_CPUS_PER_TASK sweeps/train_real.jl $TARGET $EPOCHS $SEED $HOLD $FOLD
+    echo "host $(hostname), $(date), run: $TARGET $EPOCHS $SEED $HOLD $FOLD $EXTRA"
+    julia --project=. -t $SLURM_CPUS_PER_TASK sweeps/train_real.jl $TARGET $EPOCHS $SEED $HOLD $FOLD $EXTRA   # EXTRA: [LOSS [MINCLEAN]]
 done
 echo "done $(date)"

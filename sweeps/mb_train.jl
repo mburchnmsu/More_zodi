@@ -82,7 +82,7 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
                   split_name="80/20 Chronological", sched_kw=(;), label="", verbose=true,
                   val_days=nothing, weight_decay=0.0, target=:linear, mix_alpha=0.25, eval_every=1,
                   evals_per_epoch=0, eval_sub=50_000, keep_snaps=true, band_init=nothing, progress_every=0, adamw=0.0,
-                  val_tranges=nothing, keep_best=false)
+                  val_tranges=nothing, keep_best=false, huber_delta=0.02)
     # val_tranges = [(t0, t1), ...]: training exposures with t0 ≤ t_rel < t1 are held out as a validation set (whole time
     # windows, so the validation loss tests filling a gap in time, like the test windows). keep_best = true: after
     # training, restore the weights of the epoch with the lowest validation loss (best_epoch, te_best in the result).
@@ -138,7 +138,11 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
                                  ZODI_HELIO "bandplx: last 6 features must be n·x n·y n·z S·x S·y S·z, heliocentric inputs"
     target === :softplus && (model = Chain(model, z -> softplus.(z)))
     n_params = sum(length, Flux.trainables(model))
-    lossfn = target === :relmse ? ((m, xb, yb) -> mean(abs2, (m(xb) .- yb) ./ yb)) :
+    # :relhuber (Week 14, real data): Huber loss on the relative error, quadratic below huber_delta and linear above, so
+    # rows with stars or noisy medians pull far less than in the MSE; the network still outputs MJy/sr
+    hδ = Float32(huber_delta)
+    lossfn = target === :relhuber ? ((m, xb, yb) -> (r = abs.((m(xb) .- yb) ./ yb); mean(ifelse.(r .< hδ, 0.5f0 .* r .^ 2, hδ .* (r .- 0.5f0 * hδ))))) :
+             target === :relmse ? ((m, xb, yb) -> mean(abs2, (m(xb) .- yb) ./ yb)) :
              target === :mixlog ? ((m, xb, yb) -> (z = m(xb); Flux.mse(exp.(z), yb) + Float32(mix_alpha) * Flux.mse(z, log.(yb)))) :
                                   ((m, xb, yb) -> Flux.mse(m(xb), yb))
     # weight decay applied after the Adam step (decoupled): each step shrinks weights by weight_decay
