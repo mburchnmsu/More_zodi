@@ -27,7 +27,10 @@ for i in idx:
     name = f"g{G}_{i:03d}"; out = OUT / f"ttx_L{LEVEL}_g{G}_sub{SUB}_{name}.parquet"
     if out.exists():
         print(f"{name}: already done", flush=True); continue
-    pix = int(hp.ang2pix(2 ** LEVEL, ra_c[i], dec_c[i], nest=True, lonlat=True))
+    # rounded exactly as talltable_bins.py / talltable_local_size.py: a level-G centre is a corner of 4 level-6 pixels,
+    # so the rounding decides which one (and which downloaded partition) is used
+    ra, dec = float(f"{ra_c[i]:.5f}"), float(f"{dec_c[i]:.5f}")
+    pix = int(hp.ang2pix(2 ** LEVEL, ra, dec, nest=True, lonlat=True))
     q = PixelQuery(web=False).ipix([pix], LEVEL).wavelength(LAM_LO, LAM_HI).with_wavelengths().with_image()
     parts = q.partitions(); inner = q._local_sql(parts)
     missing = [p for p in parts if not (DB_DIR / "pixels" / f"part={p}" / "compacted.parquet").exists()]
