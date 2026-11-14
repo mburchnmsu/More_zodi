@@ -12,6 +12,11 @@ ecliptic 0.0285% → 0.0247%). **Round 37: cos×exp at 1000 epochs beats one-cyc
 cos×exp 2000 gives the best sky map** (median 0.0129%, ecliptic 0.0163%) but overfits again on shifts 30/40. Rounds 40–41: AdamW λ = 1e-4 is a marginal
 gain (ecliptic 0.0161%); round 42's best-epoch selection failed (its validation window leaves a 90-day orbital hole). First real SPHEREx data: the north ecliptic pole at 5 μm (notebook 10292026). **Poster: final (presented 2026-10-23).**
 
+## Week 14 (from 2026-11-13)
+Mentor's Week 14 cards received; plan sent to the hub, waiting on the user's go-ahead (no compute started). Running
+record of analysis choices: **docs/choices_log.md** (the card asks us to keep track of them). New slide rule: each figure
+slide says what the plot is and the conclusion.
+
 ## Best model
 500 days, heliocentric inputs (default for ZODI_DATA="z500" since Oct 21): n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕
 (no n·J) + S·x S·y S·z for the parallax band layer (sweeps/band_layer.jl, arch :bandplx: 3 Kelsall-shaped bands with
