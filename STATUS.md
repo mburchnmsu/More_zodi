@@ -16,6 +16,14 @@ gain (ecliptic 0.0161%); round 42's best-epoch selection failed (its validation 
 Mentor's Week 14 cards received; plan sent to the hub, waiting on the user's go-ahead (no compute started). Running
 record of analysis choices: **docs/choices_log.md** (the card asks us to keep track of them). New slide rule: each figure
 slide says what the plot is and the conclusion.
+Task results so far (Nov 13; slide text in docs/slides_week14.md):
+- **Grey bands:** they are sky SPHEREx never sees (it points ~90–115° from the Sun).
+- **"Jump" near MJD 61,200:** not a release step. The tall table has none. It is 3× denser NEP visits on Apr 29–Jun 18,
+  2026, many at the noisy 4.98–5.01 μm edge (realdata/nep_burst.jl).
+- **SPHEREx's zodi column:** Kelsall × 1.165, with only 1–2% geometric terms (realdata/spherex_vs_kelsall.jl).
+- **The leak:** the Week 13 −3.5% (−5% near the ecliptic) behind − ahead signal is mostly Kelsall's 18% scale error
+  leaking through median subtraction, because "behind" is seen at elongation 109° vs 93° for "ahead". After scaling,
+  −0.7 ± 0.4% remains (−2.6% in a joint fit), so a v_e term of 1–3% may remain (realdata/residual_leak.jl).
 
 ## Best model
 500 days, heliocentric inputs (default for ZODI_DATA="z500" since Oct 21): n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕
