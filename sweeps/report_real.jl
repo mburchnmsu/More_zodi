@@ -32,7 +32,7 @@ if isfile(mfile)   # star-masked measured sky, joined as in train_real.jl
     km = [get(idx, key(tp[k], ti[k], ts[k]), 0) for k in axes(T, 1)]
     fm = [k == 0 || mc[k] == 0 ? NaN : Float64(mf[k]) for k in km]
     fclean = [k == 0 ? NaN : mc[k] / mn[k] for k in km]
-    targets["flux5m"] = targets["flux5mL"] = fm .* z5 ./ zl
+    for tg in ("flux5m", "flux5mL", "flux5mL_c50", "flux5mL_hub_c50"); targets[tg] = fm .* z5 ./ zl; end   # _c50: rows ≥ 50% clean only (the network's rows); _hub: Huber loss
     @printf("star mask: %.1f%% of pixels kept (row median %.1f%%); |b| > 15°: %.1f%%, |b| < 15°: %.1f%%\n",
             100sum(mc) / sum(mn), 100median(filter(isfinite, fclean)),
             100median(filter(isfinite, fclean[hiB])), 100median(filter(isfinite, fclean[.!hiB])))
@@ -76,7 +76,7 @@ end
 
 # cross-validated held-out predictions for every patch (folds 0–4)
 cv = Dict{String, Vector{Float64}}()
-for tg in ("zodi5", "zodi5L", "flux5", "flux5m", "flux5mL")
+for tg in ("zodi5", "zodi5L", "flux5", "flux5m", "flux5mL", "flux5mL_c50", "flux5mL_hub_c50")
     haskey(targets, tg) || continue
     p = fill(NaN, length(z5)); nf = 0
     pb = [fill(NaN, length(z5)) for _ in BNAMES]   # the same baselines, each fit on that fold's training patches (all rows)
@@ -88,17 +88,23 @@ for tg in ("zodi5", "zodi5L", "flux5", "flux5m", "flux5mL")
     end
     nf == 5 || (nf > 0 && println("$tg: only $nf/5 folds — skipped"); continue)
     cv[tg] = p
-    for (lab, m) in (("all rows", trues(length(p))), ("|b| > 15°", hiB))
-        @printf("\n%s cross-validated over all 192 patches, %s:\n", tg, lab)
+    for (lab, m) in (("all rows", isfinite.(p)), ("|b| > 15°", hiB .& isfinite.(p)))   # baselines on the network's rows
+        @printf("\n%s cross-validated over all 192 patches, %s (%d rows):\n", tg, lab, sum(m))
         report("NETWORK", p[m], targets[tg][m])
         for j in eachindex(BNAMES); report(BNAMES[j], pb[j][m], targets[tg][m]); end
     end
 end
 # masked vs unmasked measured sky on the same rows
 if haskey(cv, "flux5") && haskey(cv, "flux5m")
-    k = isfinite.(targets["flux5m"]) .& hiB
-    println("\nmeasured sky, |b| > 15°, rows with clean pixels: each network against its own target")
-    for tg in ("flux5", "flux5m", "flux5mL"); haskey(cv, tg) && report(tg, cv[tg][k], targets[tg][k]); end
+    fl = filter(tg -> haskey(cv, tg), ["flux5", "flux5m", "flux5mL", "flux5mL_c50", "flux5mL_hub_c50"])
+    k = hiB .& reduce(.&, [isfinite.(cv[tg]) for tg in fl])
+    @printf("\nmeasured sky, |b| > 15°, the %d rows every network predicts: each network against its own target\n", sum(k))
+    for tg in fl; report(tg, cv[tg][k], targets[tg][k]); end
+    report("SPHEREx zodi + b (masked)", zodi5[k] .+ median(targets["flux5m"][k] .- zodi5[k]), targets["flux5m"][k])
+    t = targets["flux5m"]
+    for tg in fl[2:end]
+        d = rel(cv[tg], t); @printf("    %-24s rows off by > 10%%: %.2f%%\n", tg, 100mean(abs.(d[k]) .> 10))
+    end
 end
 
 if haskey(cv, "zodi5")
@@ -110,8 +116,10 @@ if haskey(cv, "zodi5")
     panels = [("Kelsall × $(round(a1, digits=3)) − SPHEREx zodi", pm(rel(z5 .* a1, zodi5)), 3.0),
               ("network (held out) − SPHEREx zodi", pm(rel(cv["zodi5"], zodi5)), 3.0)]
     haskey(cv, "zodi5L") && push!(panels, ("network + wavelength input − SPHEREx zodi", pm(rel(cv["zodi5L"], zodi5)), 3.0))
-    fsky = haskey(cv, "flux5mL") ? "flux5mL" : haskey(cv, "flux5m") ? "flux5m" : haskey(cv, "flux5") ? "flux5" : nothing
-    fsky === nothing || push!(panels, ("network on measured sky ($fsky) − measured", pm(rel(cv[fsky], targets[fsky])), 10.0))
+    fsky = haskey(cv, "flux5mL_hub_c50") ? "flux5mL_hub_c50" : haskey(cv, "flux5mL") ? "flux5mL" : haskey(cv, "flux5m") ? "flux5m" : haskey(cv, "flux5") ? "flux5" : nothing
+    fname = Dict("flux5mL_hub_c50" => "star-masked sky, ≥ 50% clean, Huber", "flux5mL" => "star-masked sky",
+                 "flux5m" => "star-masked sky, no λ", "flux5" => "measured sky")
+    fsky === nothing || push!(panels, ("network on $(get(fname, fsky, fsky)) − measured", pm(rel(cv[fsky], targets[fsky])), 10.0))
     fig = Figure()
     for (j, (ttl, v, lim)) in enumerate(panels)
         r_, c_ = fldmod1(j, 2)

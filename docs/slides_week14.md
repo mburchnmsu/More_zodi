@@ -165,4 +165,27 @@ Rule from the Week 14 card: every figure slide says what the plot is and the con
     the same network trained on SPHEREx's zodi has no trouble there, so the noisy target (not the inputs) causes it.
   - Rows with < 30% clean pixels are noisier for every model (network 5.2%, baseline 3.5%).
   - Possible next steps: a robust loss (e.g. relative L1) or training on measured / Kelsall, and dropping rows with
-    few clean pixels.
+    few clean pixels. **Done Nov 14 → slide 11.**
+
+### Slide 11: Table slide
+- **Title:** With clean rows and a robust loss, the network beats SPHEREx's zodi model on the measured sky
+- **Table (5 μm, star-masked measured sky, |b| > 15°, rows with ≥ 50% of pixels unmasked, all patches held out in turn;
+  the same 141,387 rows for every line):**
+
+| Model | Median \|Δ\| | rms | Rows off by > 10% |
+|---|---|---|---|
+| Network + λ (all masked rows, MSE loss) | 2.16% | 8.85% | 6.5% |
+| Network + λ, trained on ≥ 50%-clean rows | 1.29% | 4.46% | 2.2% |
+| **Network + λ, ≥ 50%-clean rows, relative Huber loss** | **1.20%** | **2.77%** | **0.8%** |
+| SPHEREx zodi + constant (fit on training patches) | 1.44% | 2.63% | — |
+| Kelsall × f(λ) | 1.82% | 3.39% | — |
+
+- **What the table is:** How closely each model predicts the measured, star-masked sky on patches it never saw.
+- **Conclusion:** Training only on rows that keep at least half their pixels removes most of the bad patches, and a
+  loss that is gentle on outliers removes the rest: the network now predicts the measured sky better than SPHEREx's own
+  zodi model plus a constant.
+- **Speaker notes:**
+  - Relative Huber loss: quadratic below 2% relative error, linear above (δ = 0.02).
+  - The ≥ 50% cut keeps 143,751 of 197,523 rows; it removes most of the Galactic plane (13% of plane pixels survive the
+    mask), so this result is for the sky away from the plane.
+  - 20 runs (2 arms × 2 seeds × 5 folds) on Colibrí, job 254.

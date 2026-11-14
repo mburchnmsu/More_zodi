@@ -146,9 +146,26 @@ The report above already includes them (all 5 folds); summary:
   0.04% (bottom-left map).
 * **The star mask helps every model by 10–30%** on the measured sky, but the network still doesn't beat SPHEREx's zodi + a
   constant. Its misses are a few patches it gets badly wrong (8% of rows off by > 10%, vs 1.2% for the baseline), mostly
-  near the Galactic plane (bottom-right map; the black patch is fully masked). The same inputs work for SPHEREx's zodi,
-  so the noisy target is the problem. Possible next: a robust loss, training on measured / Kelsall, dropping rows with
-  few clean pixels.
+  near the Galactic plane. The same inputs work for SPHEREx's zodi, so the noisy target is the problem.
+
+## 7. A robust loss and clean rows only (Nov 14, afternoon)
+The user picked two fixes: a relative Huber loss (quadratic below 2% relative error, linear above; `target=:relhuber`
+in `sweeps/mb_train.jl`) and training only on rows that keep ≥ 50% of their pixels after the star mask
+(`train_real.jl ... huber 0.5`). Colibrí job 254: flux5mL with both, and with the cut only (MSE), 2 seeds × 5 folds each.
+
+Star-masked measured sky, |b| > 15°, rows ≥ 50% clean (the same 141,387 rows for every line):
+
+| Model | Median \|Δ\| | rms | Rows off by > 10% |
+|---|---|---|---|
+| Network + λ (all masked rows, MSE) | 2.16% | 8.85% | 6.5% |
+| Network + λ, ≥ 50%-clean rows (MSE) | 1.29% | 4.46% | 2.2% |
+| **Network + λ, ≥ 50%-clean rows, Huber** | **1.20%** | **2.77%** | **0.8%** |
+| SPHEREx zodi + constant | 1.44% | 2.63% | — |
+
+* **The network now predicts the measured sky better than SPHEREx's zodi model plus a constant** (median), with about
+  the same rms. The clean-row cut gives most of the gain; the Huber loss removes most of the remaining outliers.
+* The cut drops 27% of rows, mostly on the Galactic plane, so this holds for the sky away from the plane.
+* Bottom-right map: the Huber + cut network (blank patches have no rows left).
 """,
 
 ]

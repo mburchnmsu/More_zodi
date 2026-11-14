@@ -36,7 +36,12 @@ Task results so far (Nov 13; slide text in docs/slides_week14.md):
   - **Star mask (approved Nov 14; Discovery 700324, Colibrí 243):** drop MP_SOURCE pixels (the tall table's default
     query already drops artifact flags). 59% of pixels kept (73% off the plane, 13% on it). Measured sky, |b| > 15°:
     network + λ 2.3% (12.2%) vs SPHEREx zodi + b 1.7% (3.2%): masking helps all models by 10–30%, but the network still
-    has a few badly wrong patches. Next ideas: robust loss, measured / Kelsall target, drop low-clean rows. Slide 10.
+    has a few badly wrong patches. Slide 10.
+  - **Robust loss + clean rows (approved and run Nov 14, Colibrí job 254):** relative Huber loss (δ 2%) and training only
+    on rows ≥ 50% clean. Measured sky, |b| > 15°, same rows: network **1.20% (rms 2.77%)** vs SPHEREx zodi + b 1.44%
+    (2.63%); rows off by > 10%: 6.5% → 0.8%. The network now beats SPHEREx's model + constant on the median. Slide 11.
+  - **Flag census (in progress, Discovery 700408–700415):** per-bit counts, flagged objects cross-matched with Gaia DR3 /
+    AllWISE, single-exposure events (cosmic rays, satellite streaks, asteroid check with SkyBoT).
   - Task 6 waits for the SPHEREx data location on Colibrí.
 
 ## Best model
