@@ -12,7 +12,7 @@ import numpy as np
 G, SUB = int(sys.argv[1]), int(sys.argv[2])
 D = Path(__file__).resolve().parent.parent / "data" / "tt_train"
 files = sorted(D.glob(f"ttx_L6_g{G}_sub{SUB}_g{G}_*.parquet"))
-t = duckdb.sql(f"SELECT regexp_extract(filename, 'g{G}_[0-9]+(?=\\.parquet)') AS patch, imageid, subpix, "
+t = duckdb.sql(f"SELECT regexp_extract(filename, '(g{G}_[0-9]+)\\.parquet$', 1) AS patch, imageid, subpix, "
                "0.5 * (t_beg + t_end) AS t_mid_mjd, wavelength, n_pix, flux_median, zodi_median, flux_q25, flux_q75 "
                f"FROM read_parquet({[str(f) for f in files]}, filename=true) ORDER BY patch, t_mid_mjd, subpix").fetchnumpy()
 ra, dec = hp.pix2ang(2 ** SUB, t["subpix"].astype(np.int64), nest=True, lonlat=True)
