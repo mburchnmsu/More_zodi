@@ -18,9 +18,17 @@ n = len(mjd); print(f"{n} rows", flush=True)
 
 
 def zp(wl, m):
+    # ZodiPy interpolates Earth's position on an hourly grid from the FIRST to the LAST obstime given (not min to max),
+    # so the times must be sorted, or rows outside that span get an extrapolated (wrong) Earth position
     model = zodipy.Model(x=wl * u.micron, name="dirbe", ephemeris="de432s")
-    c = SkyCoord(ra[m] * u.deg, dec[m] * u.deg, frame="icrs", obstime=Time(mjd[m], format="mjd", scale="utc"))
-    return model.evaluate(c, obspos="earth").value
+    i = np.flatnonzero(m); i = i[np.argsort(mjd[i], kind="stable")]
+    out = np.empty(len(i))
+    if len(i) == 1 or mjd[i[0]] == mjd[i[-1]]:                  # one time: ZodiPy needs a scalar obstime
+        c = SkyCoord(ra[i] * u.deg, dec[i] * u.deg, frame="icrs", obstime=Time(mjd[i[0]], format="mjd", scale="utc"))
+    else:
+        c = SkyCoord(ra[i] * u.deg, dec[i] * u.deg, frame="icrs", obstime=Time(mjd[i], format="mjd", scale="utc"))
+    res = np.empty(len(mjd)); res[i] = model.evaluate(c, obspos="earth").value
+    return res[m]
 
 
 t0 = time.time()
