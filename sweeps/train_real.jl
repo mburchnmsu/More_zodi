@@ -40,9 +40,11 @@ if TG == "flux5m"   # join the star-masked medians on (patch, imageid, subpix)
     M, hm = readdlm(joinpath(D, "ttx_L6_g2_sub9_mask.csv"), ',', header=true); hm = vec(hm)
     cm(n) = M[:, findfirst(==(n), hm)]
     key(p, i, s) = (string(p), string(i), Int(s))
-    idx = Dict(key(cm("patch")[k], cm("imageid")[k], cm("subpix")[k]) => k for k in axes(M, 1))
-    km = [get(idx, key(c("patch")[k], c("imageid")[k], c("subpix")[k]), 0) for k in axes(T, 1)]
-    fm = [k == 0 || cm("n_clean")[k] == 0 ? NaN : Float64(cm("flux_med_clean")[k]) for k in km]
+    mp, mi, ms, mc, mf = cm("patch"), cm("imageid"), cm("subpix"), cm("n_clean"), cm("flux_med_clean")   # columns hoisted:
+    tp, ti, ts = c("patch"), c("imageid"), c("subpix")                                                  # c() copies
+    idx = Dict(key(mp[k], mi[k], ms[k]) => k for k in axes(M, 1))
+    km = [get(idx, key(tp[k], ti[k], ts[k]), 0) for k in axes(T, 1)]
+    fm = [k == 0 || mc[k] == 0 ? NaN : Float64(mf[k]) for k in km]
     @printf("star mask: %d of %d rows matched, %d with no clean pixels\n", count(>(0), km), length(km), count(isnan, fm))
 end
 yreal = TG == "zodi5" ? zcol .* z5 ./ zl : TG == "flux5" ? flux .* z5 ./ zl : TG == "kel5" ? z5 :
