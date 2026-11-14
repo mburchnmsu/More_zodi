@@ -45,7 +45,7 @@ for i in idx:
     t0 = time.time(); con = duckdb.connect()
     try:
         con.execute(f"COPY ({sql}) TO '{out}.tmp' (FORMAT PARQUET)")
-        n = con.execute(f"SELECT count(*) FROM '{out}.tmp'").fetchone()[0]
+        n = con.execute(f"SELECT count(*) FROM read_parquet('{out}.tmp')").fetchone()[0]
     finally:
         con.close()
     os.replace(f"{out}.tmp", out); rows_all += n
