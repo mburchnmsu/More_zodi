@@ -11,7 +11,8 @@
 #SBATCH --output=logs/%x_%A_%a.out
 set -euo pipefail
 export PATH="$HOME/.juliaup/bin:$PATH" GKSwstype=100 OPENBLAS_NUM_THREADS=2
-read -r TARGET EPOCHS SEED HOLD FOLD < <(sed -n "${SLURM_ARRAY_TASK_ID}p" "$1")
+read -r TARGET EPOCHS SEED HOLD FOLD < <(sed -n "${SLURM_ARRAY_TASK_ID}p" "$1") || true   # last line may lack a newline
+[ -n "${FOLD:-}" ] || { echo "bad list line ${SLURM_ARRAY_TASK_ID} in $1"; exit 1; }
 echo "host $(hostname), $(date), run: $TARGET $EPOCHS $SEED $HOLD $FOLD"
 julia --project=. -t $SLURM_CPUS_PER_TASK sweeps/train_real.jl $TARGET $EPOCHS $SEED $HOLD $FOLD
 echo "done $(date)"
