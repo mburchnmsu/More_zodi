@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-11-08, DESKTOP-BBASC81
+Updated: 2026-11-14, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -13,7 +13,7 @@ cos×exp 2000 gives the best sky map** (median 0.0129%, ecliptic 0.0163%) but ov
 gain (ecliptic 0.0161%); round 42's best-epoch selection failed (its validation window leaves a 90-day orbital hole). First real SPHEREx data: the north ecliptic pole at 5 μm (notebook 10292026). **Poster: final (presented 2026-10-23).**
 
 ## Week 14 (from 2026-11-13)
-Mentor's Week 14 cards received; plan sent to the hub, waiting on the user's go-ahead (no compute started). Running
+Mentor's Week 14 cards received; tasks 1, 2, 4, 7 and 8 done (task 3 left to the user, task 6 pending data). Running
 record of analysis choices: **docs/choices_log.md** (the card asks us to keep track of them). New slide rule: each figure
 slide says what the plot is and the conclusion.
 Task results so far (Nov 13; slide text in docs/slides_week14.md):
@@ -24,6 +24,14 @@ Task results so far (Nov 13; slide text in docs/slides_week14.md):
 - **The leak:** the Week 13 −3.5% (−5% near the ecliptic) behind − ahead signal is mostly Kelsall's 18% scale error
   leaking through median subtraction, because "behind" is seen at elongation 109° vs 93° for "ahead". After scaling,
   −0.7 ± 0.4% remains (−2.6% in a joint fit), so a v_e term of 1–3% may remain (realdata/residual_leak.jl).
+- **Task 7, the emulator on real data (Nov 14; notebook 11142026, slides 6–8):** 197,523 rows (exposure × level-9
+  sub-pixel, 192 patches, 4.9–5.0 μm) from the tall table on Discovery; 31 runs on Colibrí (jobs 211, 222), 5-fold patch
+  cross-validation (sweeps/train_real.jl, sweeps/report_real.jl). Held-out median |Δ|:
+  - ZodiPy control: 0.026% (our simulation-trained emulator: 0.011%), so 192 patches are enough to learn Kelsall.
+  - SPHEREx zodi: 1.02% (rms 2.03%) vs Kelsall × a 0.96% (1.45%): no gain; the network has no wavelength input and
+    SPHEREx zodi / Kelsall moves −1.4% per 0.05 μm (a wavelength-only fit gives 0.65%).
+  - Measured sky, |b| > 15°: 3.2% (13.8%) vs SPHEREx zodi + b 1.9% (4.1%): overfits stars and residual sky.
+  - Proposed next (needs approval): wavelength as an input. Task 6 waits for the SPHEREx data location on Colibrí.
 
 ## Best model
 500 days, heliocentric inputs (default for ZODI_DATA="z500" since Oct 21): n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕

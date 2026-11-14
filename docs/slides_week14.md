@@ -83,3 +83,48 @@ Rule from the Week 14 card: every figure slide says what the plot is and the con
 - **Conclusion:** The −5% was mostly the leak. A trailing-cloud term of 1–3% may remain, but our grid-2 data can't pin it
   down.
 - **Speaker notes:** The cuts (no 4.98–5.01 μm edge, no NEP-burst dates) change these by ≤ 0.4%.
+
+### Slide 6: Table slide
+- **Title:** Can the emulator learn the real sky?
+- **Table (5 μm, 197,523 rows = exposure × level-9 sub-pixel in 192 patches; each patch predicted by networks that
+  never saw it, 5-fold cross-validation):**
+
+| Trained on | Network, median \|Δ\| (rms) | Best simple baseline (fit on training patches), median \|Δ\| (rms) |
+|---|---|---|
+| ZodiPy (Kelsall), control (fold 0) | 0.026% (0.069%) | our simulation-trained emulator: 0.011% (0.017%) |
+| SPHEREx's zodi column | 1.02% (2.03%) | Kelsall × 1.164: 0.96% (1.45%) |
+| Measured sky, \|b\| > 15° | 3.2% (13.8%) | SPHEREx zodi + 0.044 MJy/sr: 1.9% (4.1%) |
+
+- **What the table is:** Our emulator's architecture trained on the tall-table pixels instead of simulations, compared
+  with one- or two-number baselines.
+- **Conclusion:** 192 patches are enough to learn Kelsall itself, but on real targets the network does not beat a single
+  scale factor (SPHEREx zodi) and overfits stars and residual sky (measured sky).
+- **Speaker notes:**
+  - Same architecture and training as the best simulation model (parallax band layer, sun-season inputs, cos×exp
+    schedule, 1000 epochs); 5 seeds on fold 0, 2 seeds on folds 1–4; 31 runs on Colibrí, ~23 min each.
+  - Targets are brought to 5.0 μm with Kelsall's own colour (× z(5 μm)/z(λ)), so the network sees no wavelength.
+  - The measured-sky network fits its training patches to 1.2% but its held-out patches only to 4% (stars, galaxies,
+    no masking yet).
+  - Inputs come from our simulation feature set at the nearest simulated exposure (median 1 min apart); our emulator
+    reproduces ZodiPy on these real rows to 0.016% (median).
+
+### Slide 7: Figure slide
+- **Title:** Where does the network miss?
+- **Figure:** `figures/11142026_real_maps.png`
+- **What the plot is:** Per-patch median residual for each patch's held-out prediction: the network trained on SPHEREx's
+  zodi (left), a single Kelsall scale factor (middle), and the network trained on the measured sky (right).
+- **Conclusion:** The network removes the smooth pattern left by Kelsall × 1.164 (the S-shaped ecliptic band), but adds
+  1–3% errors in individual patches, so overall it ties.
+- **Speaker notes:**
+  - Per-patch medians: 0.43% (network) vs 0.44% (scale factor); the per-row rms is larger for the network (2.0 vs 1.45%).
+  - On the measured sky (right, ±10% scale) the misses are scattered patch by patch, not along the ecliptic: they are
+    sky the network can't know about from geometry.
+
+### Slide 8: Text slide
+- **Title:** Why can't it beat a scale factor on SPHEREx's zodi?
+- **Points:**
+  - Most of what is left in SPHEREx zodi / Kelsall is wavelength: −1.4% per 0.05 μm, over a 0.04 μm spread within the
+    4.9–5.0 μm window.
+  - The network has no wavelength input, so it can't learn that. A wavelength-only linear fit takes the spread from
+    0.96% to 0.65% (median) and 1.45% to 1.00% (rms).
+  - Next step (needs approval): add wavelength as an input, or train in narrower wavelength bins.
