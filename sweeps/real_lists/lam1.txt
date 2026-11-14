@@ -1,0 +1,10 @@
+zodi5L 1000 42 5 0
+zodi5L 1000 42 5 1
+zodi5L 1000 42 5 2
+zodi5L 1000 42 5 3
+zodi5L 1000 42 5 4
+zodi5L 1000 43 5 0
+zodi5L 1000 43 5 1
+zodi5L 1000 43 5 2
+zodi5L 1000 43 5 3
+zodi5L 1000 43 5 4

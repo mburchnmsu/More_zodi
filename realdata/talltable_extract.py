@@ -4,6 +4,11 @@ layer), median wavelength, pixel count, time. Runs DuckDB on the local partition
 
     ~/envs/talltable/bin/python realdata/talltable_extract.py G SUB [first last]
       → data/tt_train/ttx_L6_g<G>_sub<SUB>_<name>.parquet, one file per patch (patches already on disk are skipped)
+    TTX_MASK=1 ... → data/tt_train/ttxm_L6_g<G>_sub<SUB>_<name>.parquet: the same (imageid, subpix) groups with the star
+      mask applied, joined to the first set on the ThinkPad (realdata/ttx_mask_merge.py)
+
+Masking: PixelQuery's default flag filter already drops every flagged pixel except MP_SOURCE (bit 21, pixels on catalog
+sources). The masked medians also drop the SOURCE pixels; n_src counts them per group.
 """
 import os, sys, time
 from pathlib import Path
@@ -22,9 +27,12 @@ idx = range(len(ra_c))
 if len(sys.argv) >= 5:
     idx = range(int(sys.argv[3]), min(int(sys.argv[4]) + 1, len(ra_c)))
 shift = 2 * (22 - SUB)                                                # hphigh is HEALPix level 22, nested
+MASK = os.environ.get("TTX_MASK", "0") == "1"
+SRC = 1 << 21                                                         # MP_SOURCE
+CLEAN = f"FILTER (WHERE (flags & {SRC}) = 0)"
 t_all = time.time(); rows_all = 0
 for i in idx:
-    name = f"g{G}_{i:03d}"; out = OUT / f"ttx_L{LEVEL}_g{G}_sub{SUB}_{name}.parquet"
+    name = f"g{G}_{i:03d}"; out = OUT / f"ttx{'m' if MASK else ''}_L{LEVEL}_g{G}_sub{SUB}_{name}.parquet"
     if out.exists():
         print(f"{name}: already done", flush=True); continue
     # rounded exactly as talltable_bins.py / talltable_local_size.py: a level-G centre is a corner of 4 level-6 pixels,
@@ -38,10 +46,18 @@ for i in idx:
         print(f"{name}: partitions not downloaded: {missing}", flush=True); continue
     assert "i.filepath" in inner and "hphigh" in inner, "inner SQL lacks i.filepath or hphigh"
     inner = inner.replace("i.filepath", "i.filepath, i.t_beg, i.t_end", 1)
-    sql = (f"SELECT imageid, (hphigh >> {shift}) AS subpix, min(t_beg) AS t_beg, min(t_end) AS t_end, count(*) AS n_pix, "
-           "median(wavelength) AS wavelength, median(flux) AS flux_median, median(zodi) AS zodi_median, "
-           "quantile_cont(flux, 0.25) AS flux_q25, quantile_cont(flux, 0.75) AS flux_q75 "
-           f"FROM ({inner}) GROUP BY imageid, subpix ORDER BY t_beg, subpix")
+    if MASK:
+        assert "p.flags" in inner and f"~({SRC})" in inner, "inner SQL no longer keeps exactly the SOURCE-flagged pixels"
+        sql = (f"SELECT imageid, (hphigh >> {shift}) AS subpix, min(t_beg) AS t_beg, count(*) AS n_pix, "
+               f"count(*) {CLEAN} AS n_clean, median(flux) {CLEAN} AS flux_med_clean, median(zodi) {CLEAN} AS zodi_med_clean, "
+               f"median(wavelength) {CLEAN} AS wavelength_clean, "
+               f"quantile_cont(flux, 0.25) {CLEAN} AS flux_q25_clean, quantile_cont(flux, 0.75) {CLEAN} AS flux_q75_clean "
+               f"FROM ({inner}) GROUP BY imageid, subpix ORDER BY t_beg, subpix")
+    else:
+        sql = (f"SELECT imageid, (hphigh >> {shift}) AS subpix, min(t_beg) AS t_beg, min(t_end) AS t_end, count(*) AS n_pix, "
+               "median(wavelength) AS wavelength, median(flux) AS flux_median, median(zodi) AS zodi_median, "
+               "quantile_cont(flux, 0.25) AS flux_q25, quantile_cont(flux, 0.75) AS flux_q75 "
+               f"FROM ({inner}) GROUP BY imageid, subpix ORDER BY t_beg, subpix")
     t0 = time.time(); con = duckdb.connect()
     try:
         con.execute(f"COPY ({sql}) TO '{out}.tmp' (FORMAT PARQUET)")
