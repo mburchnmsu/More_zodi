@@ -22,6 +22,11 @@ CELLS = Pair{String,String}[
 * **Follow-ups (section 6):** with the pixel's wavelength as an input, the network reproduces SPHEREx's zodi to
   **0.20%** (3× better than the best wavelength correction). Star masking (dropping MP_SOURCE pixels) helps every model on
   the measured sky by 10–30%, but the network (2.3%) still trails SPHEREx zodi + constant (1.7%) off the plane.
+* **Robust loss and clean rows (section 7):** with a relative Huber loss and only rows ≥ 50% unmasked, the network beats
+  SPHEREx zodi + constant on the measured sky off the plane (median 1.20% vs 1.44%).
+* **Flag census (section 8):** 41% of pixel samples are on catalogued sources, 3.7% carry other flags. Of the flagged
+  objects, 60% are Gaia stars and 6% galaxies or quasars; 11% of exposures have a satellite streak; bright known
+  asteroids are detected and flagged TRANSIENT/OUTLIER.
 """,
 
 "code" => raw"""
@@ -166,6 +171,53 @@ Star-masked measured sky, |b| > 15°, rows ≥ 50% clean (the same 141,387 rows 
   the same rms. The clean-row cut gives most of the gain; the Huber loss removes most of the remaining outliers.
 * The cut drops 27% of rows, mostly on the Galactic plane, so this holds for the sky away from the plane.
 * Bottom-right map: the Huber + cut network (blank patches have no rows left).
+
+## 8. What do the flags mark? (Nov 14, evening)
+The user asked how many flags there are and how many flagged things are stars, galaxies, and satellites or asteroids.
+Discovery jobs 700408–700415 read every pixel of the 192 patches at 4.9–5.1 μm with the flag filter removed
+(`realdata/talltable_flags.py`): per-bit counts; static objects = level-15 cells (≈ one 6″ pixel) flagged SOURCE in at
+least half of their exposures, joined into groups; single-exposure events = TRANSIENT/OUTLIER pixels plus unflagged
+pixels > 5σ above their cell's median. On the ThinkPad (`realdata/flags_xmatch.py`), objects in every 8th patch off the
+plane were matched within 6″ to Gaia DR3 and AllWISE, and known asteroids were looked up with IMCCE SkyBoT. Choices and
+fixes: see the choices log (Nov 14, "Flag census").
+
+**Pixel flags (682 million pixel samples):** 56.5% carry no flag; 40.9% are SOURCE (on a catalogued source); 3.65%
+carry any other flag, mostly OUTLIER 1.5%, TRANSIENT 1.1%, SUR_ERROR 0.7%, NONFUNC 0.4%. Bit 28, which the FITS header
+doesn't name, is set on 1.4%.
+
+**Flagged static objects:** 184,370 groups (~1200 per patch, median 40″ across). Sample of 24,891 in 21 patches:
+
+| Class | Objects | Share |
+|---|---|---|
+| Star (Gaia parallax or proper motion > 5σ) | 13,749 | 55.2% |
+| Star (Gaia point source, no significant motion) | 1,205 | 4.8% |
+| Galaxy (AllWISE extended or Gaia galaxy probability > 0.5) | 849 | 3.4% |
+| Quasar / AGN (Gaia quasar probability > 0.5, or WISE W1 − W2 ≥ 0.8) | 589 | 2.4% |
+| Seen only by WISE (likely faint galaxies or dusty stars) | 3,069 | 12.3% |
+| No match within 6″ | 5,430 | 21.8% |
+
+**Single-exposure events:** 11.5 million (1284 per patch-exposure):
+
+| Class | Events | Share |
+|---|---|---|
+| Flagged by the pipeline (TRANSIENT/OUTLIER): cosmic rays, detector, and moving objects | 10,224,263 | 89.1% |
+| On a static source (variable stars, residuals) | 1,246,663 | 10.9% |
+| Satellite streak (≥ 8 pixels, axis ratio ≥ 5) | 2,109 | 0.02% |
+| Unflagged point brightening (sky transient candidate) | 5,440 | 0.05% |
+
+* **Stars dominate:** 60% of the flagged objects are Gaia stars, 6% are galaxies or quasars. The unmatched 22% are smaller
+  (median 17 cells vs 40) and fainter than the matched ones: faint sources and fragments of bigger groups.
+* **Satellites:** 1028 of 8939 patch-exposures (11%) have a streak; median 1.7′ long inside the patch, longest 64′. No
+  meteors: SPHEREx orbits above the atmosphere.
+* **Asteroids:** of the known asteroids SkyBoT puts inside 254 exposures near the ecliptic, the bright ones (V < 18) sit on
+  an event 30 of 37 times, against 12 expected by chance (the same test 2′ away). The pipeline flags them TRANSIENT or
+  OUTLIER, so they land in the first class above, not among the transient candidates (none of which is a known
+  asteroid). Fainter asteroids (5514 with V > 18) are barely detected: 1759 on an event against 1608 by chance.
+""",
+
+"code" => raw"""
+f = joinpath(R, "data", "tt_flags", "flag_census.txt")   # written by realdata/flags_xmatch.py (git-ignored data)
+isfile(f) ? print(read(f, String)) : println("data/tt_flags/flag_census.txt not present (run realdata/flags_xmatch.py)")
 """,
 
 ]

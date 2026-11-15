@@ -40,8 +40,13 @@ Task results so far (Nov 13; slide text in docs/slides_week14.md):
   - **Robust loss + clean rows (approved and run Nov 14, Colibrí job 254):** relative Huber loss (δ 2%) and training only
     on rows ≥ 50% clean. Measured sky, |b| > 15°, same rows: network **1.20% (rms 2.77%)** vs SPHEREx zodi + b 1.44%
     (2.63%); rows off by > 10%: 6.5% → 0.8%. The network now beats SPHEREx's model + constant on the median. Slide 11.
-  - **Flag census (in progress, Discovery 700408–700415):** per-bit counts, flagged objects cross-matched with Gaia DR3 /
-    AllWISE, single-exposure events (cosmic rays, satellite streaks, asteroid check with SkyBoT).
+  - **Flag census (done Nov 14; Discovery 700408–700415, realdata/talltable_flags.py + flags_xmatch.py; notebook
+    section 8, slide 12):** 682 M pixel samples: 56.5% unflagged, 40.9% SOURCE, 3.65% other flags (OUTLIER 1.5%,
+    TRANSIENT 1.1%; undocumented bit 28 1.4%). 184,370 flagged objects; in a 24,891-object sample off the plane: Gaia
+    stars 60%, galaxies 3.4%, quasars/AGN 2.4%, WISE-only 12.3%, unmatched 21.8%. 11.5 M single-exposure events: 89%
+    pipeline-flagged (cosmic rays etc.), 2109 satellite streaks (in 11% of exposures), 5440 unflagged point
+    brightenings (none a known asteroid). Bright known asteroids (V < 18) are detected (30/37 vs 12 by chance) and
+    flagged TRANSIENT/OUTLIER. Open: what bit 28 is.
   - Task 6 waits for the SPHEREx data location on Colibrí.
 
 ## Best model

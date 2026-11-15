@@ -59,7 +59,7 @@ def components(cells, groups=None):
 def shape(ra, dec):
     """Size of a group of cell centres: length of the major axis and axis ratio, in arcsec."""
     if len(ra) < 2: return 0.0, 1.0
-    x = (ra - ra.mean() + 180) % 360 - 180; x = x * np.cos(np.radians(dec.mean())) * 3600; y = (dec - dec.mean()) * 3600
+    x = (ra - ra[0] + 180) % 360 - 180; x = (x - x.mean()) * np.cos(np.radians(dec.mean())) * 3600; y = (dec - dec.mean()) * 3600   # unwrap about ra[0]: safe across RA 0/360
     ev = np.linalg.eigvalsh(np.cov(np.vstack([x, y])) + 1e-6 * np.eye(2))
     return 4 * np.sqrt(ev[1]), float(np.sqrt(ev[1] / ev[0]))
 

@@ -189,3 +189,30 @@ Rule from the Week 14 card: every figure slide says what the plot is and the con
   - The ≥ 50% cut keeps 143,751 of 197,523 rows; it removes most of the Galactic plane (13% of plane pixels survive the
     mask), so this result is for the sky away from the plane.
   - 20 runs (2 arms × 2 seeds × 5 folds) on Colibrí, job 254.
+
+### Slide 12: Table slide
+- **Title:** What SPHEREx's flags mark: mostly stars, plus cosmic rays, satellites and asteroids
+- **Table (192 patches, 4.9–5.1 μm; objects matched in every 8th patch off the Galactic plane, 24,891 objects):**
+
+| Flagged static objects (SOURCE) | Share | Single-exposure events (11.5 million) | Share |
+|---|---|---|---|
+| Gaia star (parallax or motion) | 55.2% | Pipeline-flagged (cosmic rays, detector, moving objects) | 89.1% |
+| Gaia point source | 4.8% | On a static source | 10.9% |
+| Galaxy | 3.4% | Satellite streak | 0.02% (in 11% of exposures) |
+| Quasar / AGN | 2.4% | Unflagged point brightening | 0.05% |
+| WISE only | 12.3% | | |
+| No catalogue match within 6″ | 21.8% | | |
+
+- **What the table is:** How the pixels SPHEREx flags split into kinds of objects, from a cross-match with Gaia DR3 and
+  AllWISE and a search for single-exposure events.
+- **Conclusion:** The source flag is mostly stars (60%), with 6% galaxies and quasars. Satellites cross 11% of exposures,
+  and bright known asteroids are detected and flagged as transients by the pipeline.
+- **Speaker notes:**
+  - Pixel flags: 56.5% unflagged, 40.9% SOURCE, 3.65% any other flag (OUTLIER 1.5%, TRANSIENT 1.1%). Bit 28, not named in
+    the FITS header, is set on 1.4%.
+  - 184,370 flagged objects in total (~1200 per patch, median 40″). Unmatched ones are smaller and fainter than matched
+    ones: faint sources or fragments of large groups.
+  - Asteroids (IMCCE SkyBoT, 254 exposures near the ecliptic): V < 18, 30 of 37 sit on an event vs 12 by chance; V > 18,
+    1759 of 5514 vs 1608 by chance. None of the 5440 unflagged point brightenings is a known asteroid.
+  - Streaks: median 1.7′ inside a 0.9° patch, longest 64′. No meteors: SPHEREx orbits above the atmosphere.
+  - Catalogues came from the ESA Gaia archive (VizieR and IRSA were down); every download was checked against a row count.

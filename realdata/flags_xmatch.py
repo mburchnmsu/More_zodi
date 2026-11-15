@@ -24,7 +24,7 @@ import numpy as np
 import duckdb
 import astropy.units as u
 from astropy.coordinates import SkyCoord
-from astropy.table import Table
+from astropy.table import Table, vstack
 from astropy.time import Time
 
 D = Path(__file__).resolve().parent.parent / "data" / "tt_flags"
@@ -56,9 +56,13 @@ for k in ("cosmic ray / detector", "satellite streak", "sky transient candidate"
     m = ev["cls"] == k
     say(f"   {k:24s} {m.sum():9,d}  ({100 * m.mean():5.2f}%)  median size {np.median(ev['n_pix'][m]) if m.any() else 0:.0f} px")
 m = ev["cls"] == "satellite streak"
+# sizes > 8000″ (larger than a patch) come from a RA 0/360 wrap bug in the first census run's shape() (fixed since):
+# 44 events and 3 objects in the 4 patches that straddle RA 0, left out of the lengths
+ok = m & (ev["size_arcsec"] < 8000)
 if m.any():
     say(f"   streaks: {len(set(zip(ev['patch'][m], ev['imageid'][m])))} patch-exposures with a streak; median length "
-        f"{np.median(ev['size_arcsec'][m]) / 60:.1f}′, longest {ev['size_arcsec'][m].max() / 60:.0f}′")
+        f"{np.median(ev['size_arcsec'][ok]) / 60:.1f}′, 90% {np.quantile(ev['size_arcsec'][ok], 0.9) / 60:.0f}′, "
+        f"longest {ev['size_arcsec'][ok].max() / 60:.0f}′ ({(m & ~ok).sum()} wrap-affected left out)")
 
 # ---- B. objects in the sample
 obj = duckdb.sql(f"SELECT * FROM {pq('objects')} ORDER BY patch, obj").fetchnumpy()
@@ -70,6 +74,7 @@ pb = {p: np.median(np.abs(gb_obj[pnum == p])) for p in np.unique(pnum)}
 # sample: every EVERY-th patch, off the Galactic plane (a plane patch's Gaia cone holds ~10⁶ sources)
 samp = np.isin(pnum, [p for p in np.arange(0, 192, EVERY) if pb.get(p, 0) > 15])
 from astroquery.gaia import Gaia
+import socket; socket.setdefaulttimeout(300)   # a hung request becomes an error (and a retry) instead of waiting forever
 Gaia.ROW_LIMIT = -1
 GCOLS = ["ra", "dec", "phot_g_mean_mag", "parallax_over_error", "pmra", "pmdec", "pmra_error", "pmdec_error",
          "classprob_dsc_combmod_galaxy", "classprob_dsc_combmod_quasar"]
@@ -77,15 +82,32 @@ WCOLS = ["ra", "dec", "w1mpro", "w2mpro", "ext_flag"]
 cache = D / "catalogs"; cache.mkdir(exist_ok=True)
 def cone(table, cols, p, ra0, dec0, rad):
     """All catalogue rows in a cone around a patch (ESA Gaia archive TAP), cached to data/tt_flags/catalogs/."""
+    # The archive's async jobs failed often on Nov 14 and, when busy, returned partial results without an error. So the
+    # cone is fetched with synchronous queries (fast, but capped at 2000 rows): declination strips are halved until each
+    # holds < 2000 rows by COUNT(*), and every strip's download is checked against its count.
     f = cache / f"{table.replace('.', '_')}_g2_{p:03d}.ecsv"
-    if f.exists(): return Table.read(f)
-    q = (f"SELECT {', '.join(cols)} FROM {table} WHERE 1 = CONTAINS(POINT(ra, dec), CIRCLE({ra0}, {dec0}, {rad}))")
-    for attempt in range(3):
-        try:
-            t = Gaia.launch_job_async(q).get_results(); t.write(f, overwrite=True); return t
-        except Exception as e:
-            print(f"   {table} patch {p}: {str(e)[:80]} (retry {attempt + 1})", flush=True); time.sleep(10)
-    raise RuntimeError(f"{table} query failed for patch {p}")
+    if f.exists(): return Table.read(f)   # cached cones were checked when downloaded (and for empty regions, Nov 14)
+    where = f"WHERE 1 = CONTAINS(POINT(ra, dec), CIRCLE({ra0}, {dec0}, {rad}))"
+    def q(sql, tries=8):
+        for attempt in range(tries):
+            try: return Gaia.launch_job(sql).get_results()
+            except Exception as e:
+                print(f"   {table} patch {p}: {str(e)[:80]} (retry {attempt + 1})", flush=True); time.sleep(5 * (attempt + 1))
+        raise RuntimeError(f"{table} query failed for patch {p}")
+    def strip(lo, hi):
+        band = f" AND dec >= {lo!r} AND dec < {hi!r}"
+        n = int(q(f"SELECT COUNT(*) AS n FROM {table} {where}{band}")["n"][0])
+        if n >= 2000: return strip(lo, (lo + hi) / 2) + strip((lo + hi) / 2, hi)
+        if n == 0: return []
+        for attempt in range(4):
+            t = q(f"SELECT {', '.join(cols)} FROM {table} {where}{band}")
+            if len(t) == n: return [t]
+            print(f"   {table} patch {p}: got {len(t)} of {n} rows (retry {attempt + 1})", flush=True)
+        raise RuntimeError(f"{table} patch {p}: incomplete result")
+    n = int(q(f"SELECT COUNT(*) AS n FROM {table} {where}")["n"][0])
+    t = vstack(strip(float(dec0 - rad - 0.01), float(dec0 + rad + 0.01)))
+    assert len(t) == n, f"{table} patch {p}: strips give {len(t)} of {n} rows"
+    t.write(f, overwrite=True); return t
 def nearest(ra, dec, t, r_arcsec=6.0):
     """Index of the nearest catalogue row within r for each position (−1 if none)."""
     if len(t) == 0: return np.full(len(ra), -1)
@@ -145,27 +167,41 @@ say(f"\nD. {cand.sum():,} sky transient candidates in sample patches with |β| <
     f"{len(keys)} of their exposures (IMCCE SkyBoT, geocentre)")
 # For each known small body predicted inside an exposure's footprint (within 60″ of that exposure's events, which are
 # dense: ~10³ per patch-exposure), is there an event within 15″, and of which class?
-rec = {}; nin = {"V<16": 0, "16–18": 0, "V>18": 0}; nhit = dict.fromkeys(nin, 0); ncand_hit, nq, t0 = 0, 0, time.time()
+# Control: the same test at a position 2′ north of each body, i.e. how often ~10³ events per exposure put one within
+# 15″ of a random spot by chance.
+rec = {}; nin = {"V<16": 0, "16–18": 0, "V>18": 0}; nhit = dict.fromkeys(nin, 0); nctl = dict.fromkeys(nin, 0)
+ncand_hit, nq, t0 = 0, 0, time.time()
 vb = lambda v: "V<16" if v < 16 else ("16–18" if v < 18 else "V>18")
+sbc = cache / "skybot"; sbc.mkdir(exist_ok=True)
 for (p, img) in keys:
     m = (ev["patch"] == p) & (ev["imageid"] == img)
     e = SkyCoord(ev["ra"][m] * u.deg, ev["dec"][m] * u.deg)
     ra0 = np.degrees(np.angle(np.mean(np.exp(1j * np.radians(ev["ra"][m]))))) % 360
-    try:
-        nq += 1
-        sb = Skybot.cone_search(SkyCoord(ra0 * u.deg, np.mean(ev["dec"][m]) * u.deg), 0.75 * u.deg,
-                                Time(ev["t_beg"][m][0], format="mjd"), location="500")
-    except Exception:
-        continue                                          # SkyBoT raises when no known body is in the field
-    a = SkyCoord(sb["RA"].to(u.deg), sb["DEC"].to(u.deg))
+    f = sbc / f"{p}_{img}.ecsv"; fnone = sbc / f"{p}_{img}.none"
+    if fnone.exists(): continue
+    if f.exists(): sb = Table.read(f)
+    else:
+        try:
+            nq += 1
+            sb = Skybot.cone_search(SkyCoord(ra0 * u.deg, np.mean(ev["dec"][m]) * u.deg), 0.75 * u.deg,
+                                    Time(ev["t_beg"][m][0], format="mjd"), location="500")
+            sb = Table({"RA": sb["RA"].to(u.deg).value, "DEC": sb["DEC"].to(u.deg).value, "V": np.asarray(sb["V"], float)})
+            sb.write(f, overwrite=True)
+        except Exception as ex:                           # SkyBoT raises when no known body is in the field
+            if "No solar system object" in str(ex) or "No Solar System" in str(ex): fnone.touch()
+            continue
+    a = SkyCoord(np.asarray(sb["RA"]) * u.deg, np.asarray(sb["DEC"]) * u.deg)
     ia, sep, _ = a.match_to_catalog_sky(e)
+    _, sepc, _ = a.directional_offset_by(0 * u.deg, 2 * u.arcmin).match_to_catalog_sky(e)
     for k in range(len(a)):
         if sep[k].arcsec > 60: continue                   # outside what this exposure covered at 4.9–5.1 μm
-        b = vb(float(sb["V"][k])); nin[b] += 1
+        b = vb(float(sb["V"][k])); nin[b] += 1; nctl[b] += int(sepc[k].arcsec < 15)
         if sep[k].arcsec < 15:
             nhit[b] += 1; c = ev["cls"][m][ia[k]]; rec[c] = rec.get(c, 0) + 1
             ncand_hit += int(c == "sky transient candidate")
-say(f"   {nq} queries ({time.time() - t0:.0f} s). Known asteroids inside the footprint, and how many sit on an event (≤ 15″):")
-for b in nin: say(f"     {b:6s} {nin[b]:5d} in footprint, {nhit[b]:4d} on an event")
+say(f"   {nq} new queries ({time.time() - t0:.0f} s). Known asteroids inside the footprint, how many sit on an event "
+    f"(≤ 15″), and the chance rate (same test 2′ away):")
+for b in nin: say(f"     {b:6s} {nin[b]:5d} in footprint, {nhit[b]:4d} on an event, {nctl[b]:4d} by chance")
 say(f"   classes of those events: " + ", ".join(f"{k} {v}" for k, v in sorted(rec.items(), key=lambda x: -x[1])))
+say(f"   sky transient candidates that are a known asteroid: {ncand_hit}")
 (D / "flag_census.txt").write_text(out.getvalue(), encoding="utf-8")
