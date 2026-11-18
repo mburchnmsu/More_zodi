@@ -162,6 +162,16 @@ const FEATURE_SETS = Dict(
     # parallax band layer); the band layer's 6 inputs stay last
     :sunseason_learnband_plx_earthc => ["n·S", "n·z", "n·E", "n·vS", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE", "n·δ̂", "n·M̂",
                                         "n·x", "n·y", "n·z", "S·x", "S·y", "S·z"],
+    # round 47 (Nov 17, user): a "without Earth" model that really lacks the Earth-limb direction. The base inputs leak it
+    # (n·δ̂ is a linear function of n·S and n·E, R² 0.9996), so every SPHEREx-based input is replaced by the Earth-based one
+    # (observer moves by ~7000 km, ~5e-5 AU: negligible for zodi) and n·vS is dropped (its angle to n·vE is the orbital phase).
+    # Quadratic R² of n·δ̂ from this set: 0.71 (survey geometry, unavoidable) vs 0.9999 for the base set. The band layer's
+    # observer position is Earth's (E·x, E·y, z·E: "z·E" because z precedes E in make_vectors).
+    :earthonly_learnband_plx => ["n·E", "n·z", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE",
+                                 "n·x", "n·y", "n·z", "E·x", "E·y", "z·E"],
+    # ... and the same + the Earth-centric terms: the only difference between the two is n·δ̂, n·M̂
+    :earthonly_learnband_plx_earthc => ["n·E", "n·z", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE", "n·δ̂", "n·M̂",
+                                        "n·x", "n·y", "n·z", "E·x", "E·y", "z·E"],
     # round 26 (mentor's Earth test): the poster model WITHOUT the Earth dot products (n·E, n·vE, n·x⊕, n·y⊕); clock kept.
     # Note: SPHEREx is ~5e-5 AU from Earth, so n·S ≈ n·E and n·vS ≈ n·vE still carry Earth's geometry.
     :sunseason_noEarth => ["n·S", "n·z", "n·vS", "sinλE", "cosλE"],

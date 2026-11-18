@@ -134,8 +134,9 @@ function train_mb(feature_names; arch=:mlp, hidden=(64, 64, 32, 16), width=64, b
                                               init=something(band_init, KELSALL_BANDS)) :
             build_resmlp(size(X, 1), width, blocks, rng)
     arch === :bandmlp && @assert feature_names[end-2:end] == ["n·x", "n·y", "n·z"] "bandmlp: last 3 features must be n·x, n·y, n·z"
-    arch === :bandplx && @assert feature_names[end-5:end] == ["n·x", "n·y", "n·z", "S·x", "S·y", "S·z"] &&
-                                 ZODI_HELIO "bandplx: last 6 features must be n·x n·y n·z S·x S·y S·z, heliocentric inputs"
+    # (round 47: Earth's position E·x E·y z·E may stand in for SPHEREx's as the band layer's observer)
+    arch === :bandplx && @assert feature_names[end-5:end] in (["n·x", "n·y", "n·z", "S·x", "S·y", "S·z"], ["n·x", "n·y", "n·z", "E·x", "E·y", "z·E"]) &&
+                                 ZODI_HELIO "bandplx: last 6 features must be n·x n·y n·z S·x S·y S·z (or E·x E·y z·E), heliocentric inputs"
     target === :softplus && (model = Chain(model, z -> softplus.(z)))
     n_params = sum(length, Flux.trainables(model))
     # :relhuber (Week 14, real data): Huber loss on the relative error, quadratic below huber_delta and linear above, so
