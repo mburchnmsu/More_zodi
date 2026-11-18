@@ -172,6 +172,13 @@ const FEATURE_SETS = Dict(
     # ... and the same + the Earth-centric terms: the only difference between the two is n·δ̂, n·M̂
     :earthonly_learnband_plx_earthc => ["n·E", "n·z", "n·vE", "n·x⊕", "n·y⊕", "sinλE", "cosλE", "n·δ̂", "n·M̂",
                                         "n·x", "n·y", "n·z", "E·x", "E·y", "z·E"],
+    # round 48 (Nov 17, user): how much does the model NEED Earth? Learnable bands without parallax (arch = :bandmlp: the
+    # band layer reads only n·x n·y n·z, no observer position), so only the inputs differ between
+    #   :sunseason_learnband (all Earth/orbit inputs) → level 1: Sun angle only (n·S; nothing on where Earth is in its
+    #   orbit: no n·E n·vS n·vE n·x⊕ n·y⊕ sinλE cosλE) → level 2: pointing only (no Sun angle either). Survey geometry
+    #   still leaks some Earth phase (SPHEREx points ~90° from the Sun), which no input choice removes.
+    :learnband_sunonly   => ["n·S", "n·z", "n·x", "n·y", "n·z"],
+    :learnband_pointonly => ["n·x", "n·y", "n·z"],
     # round 26 (mentor's Earth test): the poster model WITHOUT the Earth dot products (n·E, n·vE, n·x⊕, n·y⊕); clock kept.
     # Note: SPHEREx is ~5e-5 AU from Earth, so n·S ≈ n·E and n·vS ≈ n·vE still carry Earth's geometry.
     :sunseason_noEarth => ["n·S", "n·z", "n·vS", "sinλE", "cosλE"],
