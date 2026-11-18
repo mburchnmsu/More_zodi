@@ -75,13 +75,28 @@ streaks = filter(e -> e.n >= 8 && e.ext >= 3 * sqrt(e.n), ev)
 @printf("elongated (≥ 8 px, extent ≥ 3√n): %d (satellite/asteroid-trail candidates) in frames %s\n", length(streaks),
         join(unique(Dates.format.(date.(mjd[[e.k for e in streaks]]), "yyyy-mm-dd")), ", "))
 # figure: reference + 5 frames spread in time (image in band, difference); frames whose whole field is at 4.9–5.1 μm
-full = filter(k -> npix[k] >= 0.9NG^2, use); pool = isempty(full) ? use : full
+full = filter(k -> npix[k] >= 0.9NG^2, use)
 @printf("frames with ≥ 90%% of the field usable: %d\n", length(full))
-sel = pool[unique(round.(Int, range(1, length(pool), length=min(5, length(pool)))))]
-# include the frame with the largest elongated event
-if !isempty(streaks)
-    kb = argmax(e -> e.n, streaks).k; kb in sel || (sel[3] = kb); sort!(sel, by=k -> mjd[k])
+# dates spread over the whole span (Nov 17, user: "a larger range of dates"): NSHOW target dates evenly spaced in time;
+# at each, the most complete frame within ±15 d (≥ 50% of the field), else the nearest such frame (a field visited only a
+# few times then shows one frame per visit, since repeated picks are dropped).
+NSHOW = parse(Int, get(ENV, "NSHOW", "8"))
+o = sort(filter(k -> npix[k] >= 0.5NG^2, use), by=k -> mjd[k])
+t0, t1 = extrema(mjd[o])
+sel = unique([(near = filter(k -> abs(mjd[k] - tt) <= 15, o); isempty(near) ? o[argmin(abs.(mjd[o] .- tt))] : near[argmax(npix[near])])
+              for tt in range(t0, t1, length=NSHOW)])
+sort!(sel, by=k -> mjd[k]); keep = [sel[1]]          # picks within 15 d of each other: keep the most complete one
+for k in sel[2:end]
+    mjd[k] - mjd[keep[end]] <= 15 ? (npix[k] > npix[keep[end]] && (keep[end] = k)) : push!(keep, k)
 end
+sel = keep
+# include the frame with the largest elongated event (replacing the frame nearest in time)
+if !isempty(streaks)
+    kb = argmax(e -> e.n, streaks).k
+    kb in sel || (sel[argmin(abs.(mjd[sel] .- mjd[kb]))] = kb)
+end
+sort!(sel, by=k -> mjd[k])
+@printf("shown: %s\n", join([Dates.format(date(mjd[k]), "yyyy-mm-dd") * @sprintf(" (%d%%)", round(Int, 100npix[k] / NG^2)) for k in sel], ", "))
 inb(k) = ifelse.(good[:, :, k], IMG[:, :, k], NaN32)
 allimg = filter(isfinite, reduce(vcat, vec(inb(k)) for k in sel)); lo, hi = quantile(allimg, 0.01), quantile(allimg, 0.99)
 dl = 4 * median(σ[use])
