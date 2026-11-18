@@ -18,8 +18,13 @@ using CairoMakie, HDF5, JLD2
 include(joinpath(@__DIR__, "plot_sky_common.jl"))
 tag = isempty(ARGS) ? "earth2d" : ARGS[1]
 only_without = get(ENV, "EARTH2D_ONLY_WITHOUT", "0") == "1"
-FAMS = [("z500h_bandplx_cosexp1k_shift", "without Earth-centric inputs"),
-        ("z500h_bandplx_earthc_cosexp1k_shift", "with Earth-centric inputs (n·δ̂, n·M̂)")][only_without ? (1:1) : (1:2)]
+# EARTH2D_SET=r47 (Nov 17): round 47's leak-free pair (Earth-only inputs, without / with n·δ̂, n·M̂; 2 seeds per shift)
+r47 = get(ENV, "EARTH2D_SET", "r43") == "r47"
+FAMS = (r47 ? [("z500h_bandplx_eonly_cosexp1k_shift", "without Earth (Earth-only inputs, no n·δ̂ leak)"),
+               ("z500h_bandplx_eonlyc_cosexp1k_shift", "with Earth-centric inputs (n·δ̂, n·M̂)")] :
+              [("z500h_bandplx_cosexp1k_shift", "without Earth-centric inputs"),
+               ("z500h_bandplx_earthc_cosexp1k_shift", "with Earth-centric inputs (n·δ̂, n·M̂)")])[only_without ? (1:1) : (1:2)]
+const NSEED = r47 ? 2 : 5
 β = Float64.(ecliptic_latitude_deg); aβ = abs.(β)
 
 """Out-of-sample % error on the interpolation windows of all 6 shifts (5-network ensemble, or one seed)."""
@@ -28,7 +33,7 @@ function oos(fam; seed=nothing)
     s = zeros(N); n = zeros(Int, N)
     seed === nothing && (PER[fam] = Float64[])
     for Δ in SHIFTS24
-        rs = runs16("$fam$Δ"); @assert length(rs) == 5 "$fam$Δ: $(length(rs)) runs"
+        rs = runs16("$fam$Δ"); @assert length(rs) == NSEED "$fam$Δ: $(length(rs)) runs"
         te = rs[1].te_idx
         p = seed === nothing ? ensemble_pred(rs) : rs[seed].ypred
         seed === nothing && push!(PER[fam], mean(abs2, p[te] .- y[te]))
@@ -62,7 +67,7 @@ end
 fitA(E, k) = (i = findall(k .& .!isnan.(E)); ([share[i] ones(length(i))] \ E[i])[1])
 
 # EARTH2D_PLOT_ONLY=1: reuse the residual maps cached by the last full run (figure tweaks only, no statistics)
-cache = joinpath(RESULTS_DIR, "earth2d_E$(length(FAMS)).jld2")
+cache = joinpath(RESULTS_DIR, "earth2d_E$(length(FAMS))$(r47 ? "_r47" : "").jld2")
 plot_only = get(ENV, "EARTH2D_PLOT_ONLY", "0") == "1"
 E = plot_only ? load(cache, "E") : [oos(f) for (f, _) in FAMS]
 plot_only || jldsave(cache; E)
@@ -73,7 +78,7 @@ for ((f, lbl), e) in zip(FAMS, plot_only ? () : E)
     @printf("  ensemble test MSE ×10⁻⁸, shifts %s: %s (mean %.2f)\n", join(SHIFTS24, "/"),
             join((@sprintf("%.2f", 1e8x) for x in PER[f]), " "), 1e8mean(PER[f]))
     for (kl, k) in (("|β| < 15°", aβ .< 15), ("whole sky", trues(N)))
-        as = [fitA(oos(f; seed=s), k) for s in 1:5]
+        as = [fitA(oos(f; seed=s), k) for s in 1:NSEED]
         @printf("  missing fraction of the trailing cloud (%s): %+.4f  (seed spread ± %.4f)\n", kl, fitA(e, k), std(as))
     end
     for (pl, k) in (("behind (φ 150–210°, |β|<15°)", (150 .<= φE .< 210) .& (aβ .< 15)),
@@ -116,7 +121,7 @@ for (r, (fttl, lon, lon0)) in enumerate(frames), (c, (pttl, e)) in enumerate(pan
     Label(fig[2r, c], @sprintf("mean %+.4f%%  ·  median |residual| %.4f%%", mean(e[ok]), median(abs.(e[ok]))), fontsize=15, tellwidth=false)
 end
 Colorbar(fig[1:3, length(panels) + 1], hm, label="mean residual, network − Kelsall (%)", height=Relative(0.7))
-Label(fig[0, 1:length(panels)], "2-D residuals on withheld months (interpolation windows, 6 splits × 5 seeds), 3° cells; grey = not covered",
+Label(fig[0, 1:length(panels)], "2-D residuals on withheld months (interpolation windows, 6 splits × $NSEED seeds), 3° cells; grey = not covered",
       font=:bold, fontsize=21)
 save(joinpath(@__DIR__, "..", "figures", "$(tag)_earth2d_moll.png"), fig, px_per_unit=1.5)
 println("ok")

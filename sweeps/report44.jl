@@ -16,6 +16,11 @@ tag = isempty(ARGS) ? "r44" : ARGS[1]
 m = mean(y); gE, gM = inject_gE(), inject_gM()
 MODELS = [("base", "base (no Earth-centric inputs)"), ("earthc", "with n·δ̂, n·M̂"), ("noS", "base without n·S (leak cut)")]
 AMPS = [(0.01, "0.01"), (0.001, "0.001")]
+# REPORT44_SET=r47 (Nov 17): round 47b's Earth-only pair (without / with n·δ̂, n·M̂) beside round 44's base, A = 1e-2 only
+if get(ENV, "REPORT44_SET", "r44") == "r47"
+    MODELS = [("base", "Week 13 'without' (base)"), ("eonly", "Earth-only inputs (new 'without')"), ("eonlyc", "Earth-only + n·δ̂, n·M̂ (new 'with')")]
+    AMPS = [(0.01, "0.01")]
+end
 
 res = Dict()
 @printf("%-8s %-7s %3s  %8s %8s %9s  %12s %12s  %s\n", "A", "model", "n", "cE", "cM", "c0 (%)", "rms inj (%)", "rms left (%)", "seed spread cE/cM")

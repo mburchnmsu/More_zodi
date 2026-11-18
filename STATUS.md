@@ -47,7 +47,17 @@ Task results so far (Nov 13; slide text in docs/slides_week14.md):
     pipeline-flagged (cosmic rays etc.), 2109 satellite streaks (in 11% of exposures), 5440 unflagged point
     brightenings (none a known asteroid). Bright known asteroids (V < 18) are detected (30/37 vs 12 by chance) and
     flagged TRANSIENT/OUTLIER. Open: what bit 28 is.
-  - Task 6 waits for the SPHEREx data location on Colibrí.
+  - **With/without Earth, redone (round 47, Colibrí 361–365, Nov 17):** the Week 13 "without" model could rebuild the
+    Earth-limb direction (n·δ̂ linear in n·S, n·E, R² 0.9996). Round 47 uses Earth-only inputs (quadratic R² 0.71 left,
+    from survey geometry). Simulated sky: with − without 0.008% rms (median 0.0136% → 0.0131%), so still no difference,
+    as expected (Kelsall has no Earthshine/moonlight). Fake-Earthshine control: the new "without" still learns 88% of it
+    (Week 13's: 98%), the "with" 100%; fake moonlight: 0% without, 100% with. A "without" test cannot rule out Earthshine;
+    the useful test is n·δ̂, n·M̂ on the real measured sky. Figures 11172026_r47_earth2d_moll.png, 11172026_r44_injection.png.
+  - **Difference imaging, first versions (Nov 17):** 6.9′ cells per patch (realdata/tt_diffimg*.jl) and pixel-level on
+    the real NEP/ecliptic cutouts (realdata/diffimg_frames.jl): stars cancel, 0.06 MJy/sr pixel noise, a satellite.
+  - **qr2 vs qr3 settled (Nov 17):** the tall table's qr2-date files differ from IRSA's public qr2 files pixel by pixel
+    (flux ×0.92–0.94, zodi ×1.12–1.13); qr3 identical. Trust the tall table.
+  - Task 6 (sky-wide difference imaging) waits for the data (40% copied to Colibrí as of Nov 17).
 
 ## Best model
 500 days, heliocentric inputs (default for ZODI_DATA="z500" since Oct 21): n·S n·z n·E n·vS n·vE n·x⊕ n·y⊕ sinλ⊕ cosλ⊕
