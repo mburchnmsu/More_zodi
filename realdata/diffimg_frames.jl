@@ -26,6 +26,14 @@ D = similar(S)
 for k in 1:nf
     d = S[:, :, k] .- REF[rel[k]]; m = nmed(vec(d)); D[:, :, k] .= d .- m
 end
+# the plain version (user's choice, Nov 17): raw image − the per-pixel median of the raw images (same release), minus the
+# frame's median; zodi is not removed, so its change across the field (wavelength varies across the detector) stays in
+Iraw = ifelse.(good, IMG, NaN32)
+REFP = Dict(r => [nmed(Iraw[i, j, rel .== r]) for i in 1:NG, j in 1:NG] for r in unique(rel))
+DP = similar(S)
+for k in 1:nf
+    d = Iraw[:, :, k] .- REFP[rel[k]]; DP[:, :, k] .= d .- nmed(vec(d))
+end
 npix = [count(isfinite, D[:, :, k]) for k in 1:nf]
 σ = [(w = filter(isfinite, vec(D[:, :, k])); length(w) > 200 ? 1.4826 * median(abs.(w .- median(w))) : NaN) for k in 1:nf]
 use = findall((npix .>= 1500) .& isfinite.(σ))
@@ -77,26 +85,36 @@ end
 inb(k) = ifelse.(good[:, :, k], IMG[:, :, k], NaN32)
 allimg = filter(isfinite, reduce(vcat, vec(inb(k)) for k in sel)); lo, hi = quantile(allimg, 0.01), quantile(allimg, 0.99)
 dl = 4 * median(σ[use])
+dlp = quantile(abs.(filter(isfinite, reduce(vcat, vec(DP[:, :, k]) for k in sel))), 0.99)
+mad(v) = (w = filter(isfinite, v); 1.4826 * median(abs.(w .- median(w))))
+σp = [mad(vec(DP[:, :, k])) for k in use]
+@printf("robust spread (1.4826 MAD) per frame, median over frames: image − median image %.4f MJy/sr; zodi removed %.4f\n",
+        median(σp), median(σ[use]))
 set_theme!(merge(Theme(fontsize=16), theme_black()))
 fig = Figure()
 ext = NG * 6.15 / 60
+panel(pos; kw...) = (a = Axis(pos; aspect=DataAspect(), width=260, height=260, titlesize=15, kw...); hidedecorations!(a); a)
 for (j, k) in enumerate(sel)
-    a1 = Axis(fig[1, j + 1], aspect=DataAspect(), width=260, height=260,
-              title=@sprintf("%s  %s", Dates.format(date(mjd[k]), "yyyy-mm-dd"), rel[k]), titlesize=15)
-    heatmap!(a1, inb(k), colormap=:inferno, colorrange=(lo, hi), nan_color=(:grey20, 1.0))
-    a2 = Axis(fig[2, j + 1], aspect=DataAspect(), width=260, height=260)
-    heatmap!(a2, D[:, :, k], colormap=Reverse(:RdBu_9), colorrange=(-dl, dl), nan_color=(:grey20, 1.0))
-    for a in (a1, a2); hidedecorations!(a); end
+    heatmap!(panel(fig[1, j + 1], title=@sprintf("%s  %s", Dates.format(date(mjd[k]), "yyyy-mm-dd"), rel[k])), inb(k),
+             colormap=:inferno, colorrange=(lo, hi), nan_color=(:grey20, 1.0))
+    heatmap!(panel(fig[2, j + 1]), DP[:, :, k], colormap=Reverse(:RdBu_9), colorrange=(-dlp, dlp), nan_color=(:grey20, 1.0))
+    heatmap!(panel(fig[3, j + 1]), D[:, :, k], colormap=Reverse(:RdBu_9), colorrange=(-dl, dl), nan_color=(:grey20, 1.0))
 end
-a0 = Axis(fig[1, 1], aspect=DataAspect(), width=260, height=260, title="reference: median of image − zodi (qr2)", titlesize=15)
+# column 1: the two median images that are subtracted
+P2 = filter(isfinite, vec(REFP["qr2"])); plo, phi = quantile(P2, 0.01), quantile(P2, 0.99)
+heatmap!(panel(fig[1, 1], title="median image (qr2)"), REFP["qr2"], colormap=:inferno, colorrange=(plo, phi), nan_color=(:grey20, 1.0))
 rlo, rhi = quantile(Sref, 0.01), quantile(Sref, 0.99)
-heatmap!(a0, REF["qr2"], colormap=:inferno, colorrange=(rlo, rhi), nan_color=(:grey20, 1.0)); hidedecorations!(a0)
-Colorbar(fig[1, 0], colormap=:inferno, colorrange=(rlo, rhi), label="reference (MJy/sr)", flipaxis=false)
-Label(fig[2, 1], "top: image (4.9–5.1 μm pixels)\nbottom: difference =\nimage − zodi − reference\n(grey: other wavelengths)", tellwidth=false, fontsize=15)
+heatmap!(panel(fig[3, 1], title="median of image − zodi (qr2)"), REF["qr2"], colormap=:inferno, colorrange=(rlo, rhi), nan_color=(:grey20, 1.0))
+Colorbar(fig[1, 0], colormap=:inferno, colorrange=(plo, phi), label="median image (MJy/sr)", flipaxis=false)
+Colorbar(fig[3, 0], colormap=:inferno, colorrange=(rlo, rhi), label="median of image − zodi", flipaxis=false)
+Label(fig[2, 1], "row 1: image (4.9–5.1 μm pixels)\nrow 2: image − median image\nrow 3: (image − zodi) −\n  median of (image − zodi)\neach difference minus its own\nmedian level; grey: other λ",
+      tellwidth=false, fontsize=15, justification=:left)
 Colorbar(fig[1, length(sel) + 2], colormap=:inferno, colorrange=(lo, hi), label="image (MJy/sr)")
-Colorbar(fig[2, length(sel) + 2], colormap=Reverse(:RdBu_9), colorrange=(-dl, dl), label="difference (MJy/sr)")
-Label(fig[0, :], @sprintf("Difference imaging of real SPHEREx frames: %s, %.0f′ field, north up, 6.15″ pixels; colour range ±4σ (σ = %.3f MJy/sr)",
-                          tgt == "nep" ? "north ecliptic pole" : tgt, ext, median(σ[use])), fontsize=18)
+Colorbar(fig[2, length(sel) + 2], colormap=Reverse(:RdBu_9), colorrange=(-dlp, dlp), label="image − median (MJy/sr)")
+Colorbar(fig[3, length(sel) + 2], colormap=Reverse(:RdBu_9), colorrange=(-dl, dl), label="zodi removed (MJy/sr)")
+name = Dict("nep" => "north ecliptic pole", "ecl045" => "the ecliptic at longitude 45°", "b30l210" => "30° above the ecliptic")
+Label(fig[0, :], @sprintf("Difference imaging of real SPHEREx frames: %s, %.0f′ field, north up, 6.15″ pixels; median images from the same release",
+                          get(name, tgt, tgt), ext), fontsize=18)
 resize_to_layout!(fig)
 save(joinpath(R, "figures", "11172026_$(tgt)_diffimg_montage.png"), fig, px_per_unit=1.5)
 println("-> figures/11172026_$(tgt)_diffimg_montage.png")
