@@ -19,12 +19,18 @@ include(joinpath(@__DIR__, "plot_sky_common.jl"))
 tag = isempty(ARGS) ? "earth2d" : ARGS[1]
 only_without = get(ENV, "EARTH2D_ONLY_WITHOUT", "0") == "1"
 # EARTH2D_SET=r47 (Nov 17): round 47's leak-free pair (Earth-only inputs, without / with n·δ̂, n·M̂; 2 seeds per shift)
-r47 = get(ENV, "EARTH2D_SET", "r43") == "r47"
-FAMS = (r47 ? [("z500h_bandplx_eonly_cosexp1k_shift", "without Earth (Earth-only inputs, no n·δ̂ leak)"),
+# EARTH2D_SET=r48 (Nov 17): round 48, how much the model needs Earth (all inputs / Sun angle only / pointing only)
+SET = get(ENV, "EARTH2D_SET", "r43"); r47 = SET == "r47"; r48 = SET == "r48"
+FAMS = r48 ? [("z500h_band_full_cosexp1k_shift", "all Earth inputs"),
+              ("z500h_band_sunonly_cosexp1k_shift", "no Earth position (Sun angle kept)"),
+              ("z500h_band_pointonly_cosexp1k_shift", "no Earth, no Sun (pointing only)")] :
+       (r47 ? [("z500h_bandplx_eonly_cosexp1k_shift", "without Earth (Earth-only inputs, no n·δ̂ leak)"),
                ("z500h_bandplx_eonlyc_cosexp1k_shift", "with Earth-centric inputs (n·δ̂, n·M̂)")] :
               [("z500h_bandplx_cosexp1k_shift", "without Earth-centric inputs"),
                ("z500h_bandplx_earthc_cosexp1k_shift", "with Earth-centric inputs (n·δ̂, n·M̂)")])[only_without ? (1:1) : (1:2)]
-const NSEED = r47 ? 2 : 5
+const NSEED = (r47 || r48) ? 2 : 5
+# colour range of the maps (%): removing Earth makes errors far larger than the ±0.03% of the other sets
+CR = parse(Float64, get(ENV, "EARTH2D_CR", r48 ? "0.3" : "0.03"))
 β = Float64.(ecliptic_latitude_deg); aβ = abs.(β)
 
 """Out-of-sample % error on the interpolation windows of all 6 shifts (5-network ensemble, or one seed)."""
@@ -67,7 +73,7 @@ end
 fitA(E, k) = (i = findall(k .& .!isnan.(E)); ([share[i] ones(length(i))] \ E[i])[1])
 
 # EARTH2D_PLOT_ONLY=1: reuse the residual maps cached by the last full run (figure tweaks only, no statistics)
-cache = joinpath(RESULTS_DIR, "earth2d_E$(length(FAMS))$(r47 ? "_r47" : "").jld2")
+cache = joinpath(RESULTS_DIR, "earth2d_E$(length(FAMS))$(SET == "r43" ? "" : "_$SET").jld2")
 plot_only = get(ENV, "EARTH2D_PLOT_ONLY", "0") == "1"
 E = plot_only ? load(cache, "E") : [oos(f) for (f, _) in FAMS]
 plot_only || jldsave(cache; E)
@@ -113,7 +119,7 @@ end
 for (r, (fttl, lon, lon0)) in enumerate(frames), (c, (pttl, e)) in enumerate(panels)
     ax = Axis(fig[2r - 1, c], aspect=DataAspect(), title="$pttl\n$fttl", titlesize=18); hidedecorations!(ax); hidespines!(ax)
     xs, ys, img = moll_raster(grid(e, lon; lon0))
-    global hm = heatmap!(ax, xs, ys, img, colormap=Reverse(:RdBu_9), colorrange=(-0.03, 0.03), nan_color=(:grey35, 1.0),
+    global hm = heatmap!(ax, xs, ys, img, colormap=Reverse(:RdBu_9), colorrange=(-CR, CR), nan_color=(:grey35, 1.0),
                          lowclip=Makie.to_colormap(Reverse(:RdBu_9))[1], highclip=Makie.to_colormap(Reverse(:RdBu_9))[end])
     graticule!(ax)
     r == 1 && frame_labels!(ax, lon0, ((0, "ahead"), (90, "Sun"), (180, "behind"), (270, "anti-Sun")))
