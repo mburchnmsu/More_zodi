@@ -37,7 +37,7 @@ function patchmaps(P, W; nshow=4, mincov=58)
 end
 """Raster of the cells (nearest centre, masked beyond 5′ of every centre)."""
 function raster(pm, vals)
-    xs = range(-38, 38, length=381); ys = range(-38, 38, length=381)
+    xs = range(-46, 46, length=461); ys = range(-46, 46, length=461)
     C = [pm.cen[s] for s in pm.subs]
     Z = fill(NaN, length(xs), length(ys)); inside = falses(length(xs), length(ys))
     for (i, x) in enumerate(xs), (j, y) in enumerate(ys)
@@ -69,7 +69,7 @@ for (p, pm) in enumerate(pms)
         heatmap!(ax, xs, ys, G, colormap=[:grey35, :grey35], colorrange=(0, 2))
         hz = heatmap!(ax, xs, ys, Z, colormap=Reverse(:RdBu_9), colorrange=(-lim, lim), nan_color=:transparent)
         r == 1 ? (hD = hz) : (hR = hz)
-        j == 1 && lines!(ax, [33, 26.1], [-35, -35], color=:white, linewidth=3)   # 6.9′ scale bar
+        j == 1 && lines!(ax, [42, 35.1], [-43, -43], color=:white, linewidth=3)   # 6.9′ scale bar
     end
     Colorbar(fig[2p - 1, ncol + 1], hD, label="minus median (MJy/sr)", height=Relative(0.85))
     Colorbar(fig[2p, ncol + 1], hR, label=@sprintf("after our model × %.2f", pm.a), height=Relative(0.85))
