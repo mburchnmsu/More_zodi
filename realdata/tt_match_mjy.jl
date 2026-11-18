@@ -50,6 +50,8 @@ function table(title, t, rowmask)
                 100median(abs.(d) ./ t[ok]))
     end
 end
-println("MJy/sr at each row's own wavelength (4.9–5.01 μm); bias = median(model − measured); |Δ| % = median |model − measured| / measured")
-table("star-masked measured sky, |b| > 15°, rows ≥ 50% clean (the network's rows)", fm, hiB .& (clean .>= 0.5))
-table("unmasked measured sky, |b| > 15°, same rows", flux, hiB .& (clean .>= 0.5))
+if abspath(PROGRAM_FILE) == @__FILE__   # tables only when run directly (realdata/tt_patch_values.jl includes this file)
+    println("MJy/sr at each row's own wavelength (4.9–5.01 μm); bias = median(model − measured); |Δ| % = median |model − measured| / measured")
+    table("star-masked measured sky, |b| > 15°, rows ≥ 50% clean (the network's rows)", fm, hiB .& (clean .>= 0.5))
+    table("unmasked measured sky, |b| > 15°, same rows", flux, hiB .& (clean .>= 0.5))
+end
