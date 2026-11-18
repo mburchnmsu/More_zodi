@@ -53,6 +53,11 @@ Task results so far (Nov 13; slide text in docs/slides_week14.md):
     as expected (Kelsall has no Earthshine/moonlight). Fake-Earthshine control: the new "without" still learns 88% of it
     (Week 13's: 98%), the "with" 100%; fake moonlight: 0% without, 100% with. A "without" test cannot rule out Earthshine;
     the useful test is n·δ̂, n·M̂ on the real measured sky. Figures 11172026_r47_earth2d_moll.png, 11172026_r44_injection.png.
+  - **Does the model need Earth? (round 48, Colibrí 366–371, Nov 17–18):** Earth's position removed from the inputs, same
+    network (learnable bands, no parallax), 6 shifts × 2 seeds. Median |error| on withheld months: all inputs 0.0132%
+    (p95 0.039%); no Earth position, Sun angle kept 2.51% (p95 14.1%, ~190×); pointing only 16.1% (p95 62.6%, ~1200×).
+    Pointing-only can't tell leading from trailing (behind Earth +17%, ahead −24%). Yardstick for adding Mars/Moon later
+    (Kelsall has neither, so those should be ~0 on simulated data). Figure 11182026_r48_earth2d_moll.png.
   - **Difference imaging, first versions (Nov 17):** 6.9′ cells per patch (realdata/tt_diffimg*.jl) and pixel-level on
     the real NEP/ecliptic cutouts (realdata/diffimg_frames.jl): stars cancel, 0.06 MJy/sr pixel noise, a satellite.
   - **qr2 vs qr3 settled (Nov 17):** the tall table's qr2-date files differ from IRSA's public qr2 files pixel by pixel

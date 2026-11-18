@@ -30,7 +30,7 @@ FAMS = r48 ? [("z500h_band_full_cosexp1k_shift", "all Earth inputs"),
                ("z500h_bandplx_earthc_cosexp1k_shift", "with Earth-centric inputs (n·δ̂, n·M̂)")])[only_without ? (1:1) : (1:2)]
 const NSEED = (r47 || r48) ? 2 : 5
 # colour range of the maps (%): removing Earth makes errors far larger than the ±0.03% of the other sets
-CR = parse(Float64, get(ENV, "EARTH2D_CR", r48 ? "0.3" : "0.03"))
+CR = parse(Float64, get(ENV, "EARTH2D_CR", r48 ? "10" : "0.03"))
 β = Float64.(ecliptic_latitude_deg); aβ = abs.(β)
 
 """Out-of-sample % error on the interpolation windows of all 6 shifts (5-network ensemble, or one seed)."""
