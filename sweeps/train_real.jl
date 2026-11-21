@@ -11,6 +11,9 @@
 #             + "L" suffix (zodi5L, flux5mL, ...): the row's wavelength (within 4.9–5.01 μm) is a network input, put
 #               before the band layer's 6 inputs (Week 14: SPHEREx zodi / Kelsall changes −1.4% per 0.05 μm)
 #     HOLDOUT = k: test set = every k-th patch (default 5 → 39 of 192 patches held out across the sky)
+#     SPLIT=months (env, Week 15): hold out TIME instead of sky: 30-day blocks of the data, test set = blocks with index
+#       % k == FOLD, so every patch is seen in training but the test months are not (a memorization test for the λ input:
+#       each sky spot is seen at several wavelengths at different times, so λ can stand in for time). Name gets "_tm".
 #     FOLD    = f in 0:k−1: test set = patches with index % k == f (default 0), so k runs cover every patch once
 #     LOSS    = mse (default) | huber: Huber loss on the relative error (δ = 2%), less pulled by stars and noisy rows
 #     MINCLEAN = c (flux5m only, default 0): drop rows with fewer than a fraction c of their pixels left by the star mask
@@ -30,7 +33,8 @@ FOLD = length(ARGS) >= 5 ? parse(Int, ARGS[5]) : 0
 # LOSS = mse (default) | huber (relative-error Huber, δ = 2%); MINCLEAN = c: flux5m rows need ≥ c of their pixels unmasked
 LOSS = length(ARGS) >= 6 ? ARGS[6] : "mse"; MINCLEAN = length(ARGS) >= 7 ? parse(Float64, ARGS[7]) : 0.0
 @assert LOSS in ("mse", "huber")
-tag = (LOSS == "huber" ? "_hub" : "") * (MINCLEAN > 0 ? "_c$(round(Int, 100MINCLEAN))" : "")
+SPLIT = get(ENV, "SPLIT", "patches"); @assert SPLIT in ("patches", "months")
+tag = (LOSS == "huber" ? "_hub" : "") * (MINCLEAN > 0 ? "_c$(round(Int, 100MINCLEAN))" : "") * (SPLIT == "months" ? "_tm" : "")
 name = "real_$(TARGET)$(tag)_e$(EPOCHS)_s$(SEED)" * (HOLD == 5 ? "" : "_h$HOLD") * (FOLD == 0 ? "" : "_f$FOLD")
 outdir = joinpath(ROOT, "sweeps", "results_real"); mkpath(outdir)
 isfile(joinpath(outdir, "$name.jls")) && (println("$name: already done"); exit(0))
@@ -64,9 +68,10 @@ ok = isfinite.(yreal) .& (yreal .> 0) .& vec(all(isfinite.(Fr), dims=2))
 @printf("%s: %d rows, %d usable; target median %.4f MJy/sr\n", TARGET, length(yreal), sum(ok), median(yreal[ok]))
 # replace the simulated-data globals used by train_mb
 global Fd_raw = Fr[ok, :]; global y = yreal[ok]; global N = length(y); global t_rel = mjd[ok] .- minimum(mjd[ok])
-pk = patch[ok]; te = findall(pk .% HOLD .== FOLD); tr = findall(pk .% HOLD .!= FOLD)
+pk = SPLIT == "months" ? floor.(Int, t_rel ./ 30) : patch[ok]       # 30-day block index, or the patch
+te = findall(pk .% HOLD .== FOLD); tr = findall(pk .% HOLD .!= FOLD)
 splits["real patches"] = (tr, te)
-@printf("split: %d train rows (%d patches), %d test rows (%d patches)\n", length(tr), length(unique(pk[tr])), length(te), length(unique(pk[te])))
+@printf("split: %d train rows (%d groups), %d test rows (%d groups: patches or 30-day blocks)\n", length(tr), length(unique(pk[tr])), length(te), length(unique(pk[te])))
 kw = (; R24..., epochs=EPOCHS, arch=:bandplx, schedule=:cosexpw, lr_max=2e-3, sched_kw=(; decay=3.0, warm=0.05),
       split_name="real patches", seed=SEED, progress_every=25, target=(LOSS == "huber" ? :relhuber : :linear))
 r = train_mb(feats; label=name, Base.structdiff(kw, NamedTuple{(:features,)})...)

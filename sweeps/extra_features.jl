@@ -179,6 +179,13 @@ const FEATURE_SETS = Dict(
     #   still leaks some Earth phase (SPHEREx points ~90° from the Sun), which no input choice removes.
     :learnband_sunonly   => ["n·S", "n·z", "n·x", "n·y", "n·z"],
     :learnband_pointonly => ["n·x", "n·y", "n·z"],
+    # round 49 (Week 15 card): "Try ẑ, pointing vector, sphex. No x̂, ŷ, V_earth, V_sph. Goal: not able to measure angle
+    # of direction." From the vectors ẑ, n̂ (pointing) and S (SPHEREx, heliocentric) the only quantities that do not change
+    # when the sky is rotated about the ecliptic pole are n·z, n·S, S·z, S·S (= |S|²): with only these the model cannot
+    # measure ecliptic longitude (neither the pointing's nor SPHEREx's). The literal arm keeps the pointing vector's
+    # components (so it knows the pointing's longitude, not SPHEREx's) + SPHEREx's height above the ecliptic.
+    :card_invariant => ["n·z", "n·S", "S·z", "S·S"],
+    :card_literal   => ["n·x", "n·y", "n·z", "S·z"],
     # round 26 (mentor's Earth test): the poster model WITHOUT the Earth dot products (n·E, n·vE, n·x⊕, n·y⊕); clock kept.
     # Note: SPHEREx is ~5e-5 AU from Earth, so n·S ≈ n·E and n·vS ≈ n·vE still carry Earth's geometry.
     :sunseason_noEarth => ["n·S", "n·z", "n·vS", "sinλE", "cosλE"],
