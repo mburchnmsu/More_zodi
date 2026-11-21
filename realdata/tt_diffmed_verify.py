@@ -1,7 +1,7 @@
 """Week 15: check realdata/tt_diffmed.py's output against an independent full read of the same partitions: total rows,
 rows at 4.9–5.1 μm, unflagged rows there, the sum of flux over them (forces the flux column to be read), and the per-
 exposure medians written by tt_diffmed.py (all exposures non-empty, values plausible).
-    $TALLTABLE_PYTHON -u realdata/tt_diffmed_verify.py OUTDIR part1 part2 ..."""
+    $TALLTABLE_PYTHON -u realdata/tt_diffmed_verify.py OUTDIR part1 part2 ...   (then a summary of every file in OUTDIR)"""
 import sys, time
 from pathlib import Path
 import duckdb
@@ -25,3 +25,9 @@ for p in sys.argv[2:]:
     print(f"   tt_diffmed output: {o[0]} exposures, {o[1]:,} pixels used (cells with ≥ 5 visits), {o[2]:,} kept after "
           f"clipping, {o[3]} empty; z_emp min/median/max {o[4]:.4f}/{o[5]:.4f}/{o[6]:.4f}, median ZODI {o[7]:.4f}, "
           f"median d {o[8]:+.5f}, median MAD {o[9]:.4f}", flush=True)
+# summary over every output file in OUTDIR
+s = con.execute(f"""SELECT count(DISTINCT partition), count(*), sum(n_kept), count(*) FILTER (WHERE z_emp IS NULL OR n_kept = 0),
+        quantile_cont(z_emp, [0.01, 0.5, 0.99]), quantile_cont(z_emp / med_zodi, [0.01, 0.5, 0.99]),
+        quantile_cont(med_d, [0.01, 0.5, 0.99]) FROM read_parquet('{OUT}/*.parquet')""").fetchone()
+print(f"all outputs: {s[0]} partitions, {s[1]:,} exposure rows, {s[2]:,} pixels kept, {s[3]} empty; z_emp 1/50/99%: {s[4]}; "
+      f"z_emp / ZODI: {s[5]}; median d: {s[6]}", flush=True)
