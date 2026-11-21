@@ -9,7 +9,7 @@
 Output: one small parquet per partition in OUT (default data/tt_diffmed): partition, imageid, n_pix, n_kept, med_zodi,
 med_flux, med_d, mad_d, z_emp, med_lam. Partitions already written are skipped, so a resubmitted array is safe.
     $TALLTABLE_PYTHON -u realdata/tt_diffmed.py TASK NTASKS        (partitions parts[TASK-1 :: NTASKS] of parts.txt)
-    TTD_PARTS=id1,id2 ... (only these partitions; the timing test)
+    TTD_PARTS=id1:id2:... (only these partitions; the timing test; "," also works outside sbatch --export)
 """
 import os, sys, time
 from pathlib import Path
@@ -21,7 +21,7 @@ LAM_LO, LAM_HI, MIN_N, LEVEL = 4.9, 5.1, 5, 15
 SHIFT = 2 * (22 - LEVEL)                                             # hphigh is HEALPix level 22, nested
 task, ntask = (int(sys.argv[1]), int(sys.argv[2])) if len(sys.argv) >= 3 else (1, 1)
 if os.environ.get("TTD_PARTS"):
-    parts = os.environ["TTD_PARTS"].split(",")
+    parts = os.environ["TTD_PARTS"].replace(":", ",").split(",")       # ":" too: sbatch --export splits on commas
 else:
     parts = [l.strip() for l in open(DB / "parts.txt") if l.strip()][task - 1::ntask]
 con = duckdb.connect(); con.execute(f"SET threads TO {os.environ.get('SLURM_CPUS_PER_TASK', '4')}")

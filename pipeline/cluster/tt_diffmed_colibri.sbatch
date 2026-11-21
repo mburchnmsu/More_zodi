@@ -1,7 +1,7 @@
 #!/bin/bash
 # Week 15 task 4: per-exposure medians of zodi-cleaned difference images from the full tall table (realdata/tt_diffmed.py).
 #     sbatch --array=1-N pipeline/cluster/tt_diffmed_colibri.sbatch N                 (task i does parts[i-1 :: N])
-#     sbatch --export=ALL,TTD_PARTS=id1,id2,... pipeline/cluster/tt_diffmed_colibri.sbatch   (timing test)
+#     sbatch --export=ALL,TTD_PARTS=id1:id2:... pipeline/cluster/tt_diffmed_colibri.sbatch   (timing test)
 #SBATCH --job-name=zodi-ttd
 #SBATCH --account=18-interstellar
 #SBATCH --partition=backfill
