@@ -32,7 +32,7 @@ if isfile(mfile)   # star-masked measured sky, joined as in train_real.jl
     km = [get(idx, key(tp[k], ti[k], ts[k]), 0) for k in axes(T, 1)]
     fm = [k == 0 || mc[k] == 0 ? NaN : Float64(mf[k]) for k in km]
     fclean = [k == 0 ? NaN : mc[k] / mn[k] for k in km]
-    for tg in ("flux5m", "flux5mL", "flux5mL_c50", "flux5mL_hub_c50"); targets[tg] = fm .* z5 ./ zl; end   # _c50: rows ≥ 50% clean only (the network's rows); _hub: Huber loss
+    for tg in ("flux5m", "flux5mL", "flux5mL_c50", "flux5mL_hub_c50", "flux5m_c50", "flux5m_hub_c50", "flux5mL_hub_c50_tm", "flux5m_hub_c50_tm"); targets[tg] = fm .* z5 ./ zl; end   # _c50: rows ≥ 50% clean only (the network's rows); _hub: Huber loss
     @printf("star mask: %.1f%% of pixels kept (row median %.1f%%); |b| > 15°: %.1f%%, |b| < 15°: %.1f%%\n",
             100sum(mc) / sum(mn), 100median(filter(isfinite, fclean)),
             100median(filter(isfinite, fclean[hiB])), 100median(filter(isfinite, fclean[.!hiB])))
@@ -76,7 +76,7 @@ end
 
 # cross-validated held-out predictions for every patch (folds 0–4)
 cv = Dict{String, Vector{Float64}}()
-for tg in ("zodi5", "zodi5L", "flux5", "flux5m", "flux5mL", "flux5mL_c50", "flux5mL_hub_c50")
+for tg in ("zodi5", "zodi5L", "flux5", "flux5m", "flux5mL", "flux5mL_c50", "flux5mL_hub_c50", "flux5m_c50", "flux5m_hub_c50", "flux5mL_hub_c50_tm", "flux5m_hub_c50_tm")
     haskey(targets, tg) || continue
     p = fill(NaN, length(z5)); nf = 0
     pb = [fill(NaN, length(z5)) for _ in BNAMES]   # the same baselines, each fit on that fold's training patches (all rows)
@@ -96,7 +96,7 @@ for tg in ("zodi5", "zodi5L", "flux5", "flux5m", "flux5mL", "flux5mL_c50", "flux
 end
 # masked vs unmasked measured sky on the same rows
 if haskey(cv, "flux5") && haskey(cv, "flux5m")
-    fl = filter(tg -> haskey(cv, tg), ["flux5", "flux5m", "flux5mL", "flux5mL_c50", "flux5mL_hub_c50"])
+    fl = filter(tg -> haskey(cv, tg), ["flux5", "flux5m", "flux5mL", "flux5mL_c50", "flux5mL_hub_c50", "flux5m_c50", "flux5m_hub_c50", "flux5mL_hub_c50_tm", "flux5m_hub_c50_tm"])
     k = hiB .& reduce(.&, [isfinite.(cv[tg]) for tg in fl])
     @printf("\nmeasured sky, |b| > 15°, the %d rows every network predicts: each network against its own target\n", sum(k))
     for tg in fl; report(tg, cv[tg][k], targets[tg][k]); end
