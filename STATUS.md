@@ -22,8 +22,12 @@ Mentor's Week 15 cards, relayed by the hub; plan approved by the user Nov 20. Th
 - **Task 2, parameter counts (done):** MLP 64-64-32-16 = 64n + 6849 for n inputs (each Dense = weights + biases).
   Best simulated model 7632 (band layer 15 + MLP 7617, n = 12); real-data best with λ 7696; round 48 bandmlp 7629 /
   7181 / 7053; poster MLP 7425.
-- **Task 3, card input test (round 49, trained, Colibrí 666–671; report pending):** plain MLP with n·z, n·S, S·z, |S|² (the
+- **Task 3, card input test (round 49, done Nov 21):** plain MLP with n·z, n·S, S·z, |S|² (the
   rotation-invariant reading: no ecliptic longitude) vs the literal reading (pointing vector + S·z) vs all inputs.
+  Median error on withheld months: all inputs 0.0135%; no angle 1.23% (p95 7.4%; behind Earth −1.0%, ahead +0.8%);
+  literal 7.8% (p95 38%; behind +8.9%, ahead −10.5%). So ~1% of the zodi sky depends on direction (Earth's longitude:
+  trailing cloud, cloud tilt/offset); without the Sun direction the literal model can't place the Sun and fails.
+  The no-angle runs vary a lot between shifts (test MSE 2×10⁻⁴ to 3×10⁻³). Figure 11212026_r49_earth2d_moll.png.
 - **Task 4, difference-image medians (running sky-wide, array 713 after 695 ran out of memory):** per exposure, median of the zodi-cleaned
   difference image (unflagged pixels, s = flux − zodi minus its per-cell time median, 3σ MAD clip); empirical zodi =
   ZODI + that median (realdata/tt_diffmed.py; timing 672: ~1.3 s per partition, checked against a full read, 694).
