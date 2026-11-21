@@ -4,7 +4,7 @@ two small tables that can be fetched and plotted locally.
   DEST/tt_diffmed_exposures.parquet  one row per exposure, combined over the partitions it touches:
       t_beg, t_end (from image.parquet), n_part, n_kept, med_d (median over partitions), wmean_d (n_kept-weighted mean),
       zodi (n_kept-weighted mean of the per-partition median ZODI), z_emp = zodi + wmean_d, lam (weighted mean wavelength)
-  DEST/tt_diffmed_parts.parquet      one row per partition (multi-order HEALPix NUNIQ id, nested):
+  DEST/tt_diffmed_parts.parquet      one row per partition (id = 4·4^k + ipix with the pixel at order k − 3, nested):
       order, ipix, ra, dec, elon, elat, n_exp, med_d, mad_d (spread of the per-exposure medians over time),
       ratio (median z_emp / ZODI), zodi (median ZODI)
 Then prints the same overall summary as tt_diffmed_verify.py."""
@@ -36,12 +36,15 @@ P = con.execute("""SELECT partition, count(*) AS n_exp, median(med_d) AS med_d,
                           median(z_emp / med_zodi) AS ratio, median(med_zodi) AS zodi
                    FROM r GROUP BY partition ORDER BY partition""").fetchnumpy()
 nu = P["partition"].astype(np.int64)
-order = (np.floor(np.log2(nu // 4) / 2)).astype(np.int64)
-ipix = nu - 4 * 4 ** order
+# the id is 4·4^k + ipix, but each partition spans 4^16 level-22 cells (hphigh 0..2^32 for id 4^10), so the pixel is
+# ipix at order k − 3 (orders 6–9: ~0.9° down to 6.9′); checked on the hphigh range of parts 1048576 and 1048577
+k = (np.floor(np.log2(nu // 4) / 2)).astype(np.int64)
+order = k - 3
+ipix = nu - 4 * 4 ** k
 ra = np.empty(len(nu)); dec = np.empty(len(nu))
 for o in np.unique(order):
-    k = order == o
-    ra[k], dec[k] = hp.pix2ang(2 ** int(o), ipix[k], nest=True, lonlat=True)
+    m = order == o
+    ra[m], dec[m] = hp.pix2ang(2 ** int(o), ipix[m], nest=True, lonlat=True)
 elon, elat = hp.Rotator(coord=["C", "E"])(ra, dec, lonlat=True)
 import pyarrow as pa, pyarrow.parquet as pq
 pq.write_table(pa.table({"partition": nu, "order": order, "ipix": ipix, "ra": ra, "dec": dec, "elon": np.mod(elon, 360), "elat": elat,

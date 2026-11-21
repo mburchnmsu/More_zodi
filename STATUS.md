@@ -28,11 +28,16 @@ Mentor's Week 15 cards, relayed by the hub; plan approved by the user Nov 20. Th
   literal 7.8% (p95 38%; behind +8.9%, ahead −10.5%). So ~1% of the zodi sky depends on direction (Earth's longitude:
   trailing cloud, cloud tilt/offset); without the Sun direction the literal model can't place the Sun and fails.
   The no-angle runs vary a lot between shifts (test MSE 2×10⁻⁴ to 3×10⁻³). Figure 11212026_r49_earth2d_moll.png.
-- **Task 4, difference-image medians (running sky-wide, array 713 after 695 ran out of memory):** per exposure, median of the zodi-cleaned
+- **Task 4, difference-image medians (full sky done Nov 21, array 713 after 695 ran out of memory; summary job 765):** per exposure, median of the zodi-cleaned
   difference image (unflagged pixels, s = flux − zodi minus its per-cell time median, 3σ MAD clip); empirical zodi =
   ZODI + that median (realdata/tt_diffmed.py; timing 672: ~1.3 s per partition, checked against a full read, 694).
   Local NEP check (realdata/diffimg_timeseries.jl): qr3 frames scatter 0.0008 MJy/sr; qr2 frames split into
   wavelength bands (old calibration). Figure 11202026_nep_diffmed_time.png.
+  Full sky: 63,893 of 64,854 partitions have usable pixels (the rest are in the masked Galactic plane), 243,868
+  exposures, 97.6 billion pixels kept. Empirical / ZODI per exposure 0.982–1.034 (1–99%); median(d) spread
+  0.0020 MJy/sr (~0.4% of zodi). Daily median drifts by up to −0.003 MJy/sr around MJD 61050–61100. The time
+  spread per partition is largest along the ecliptic (ZODI misses some of zodi's change in time there) and the
+  Galactic plane (stars). Figures 11212026_fullsky_diffmed_time.png, _maps.png (realdata/diffmed_fullsky.jl).
 - **Task 5:** the 4 orange lines in 11042026_talltable_nep.png = the 4 wavelengths the NEP is seen at (ZODI scales with λ).
 - **Task 6 (after 4):** NN on the empirical zodi from the difference images (user's choice, reading a).
 - **Task 7:** tall-table points are 6.9′ HEALPix level-9 cells (the NEP time plot: medians over a 0.9° level-6 patch).
