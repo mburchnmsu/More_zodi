@@ -24,9 +24,17 @@ if os.environ.get("TTD_PARTS"):
     parts = os.environ["TTD_PARTS"].replace(":", ",").split(",")       # ":" too: sbatch --export splits on commas
 else:
     parts = [l.strip() for l in open(DB / "parts.txt") if l.strip()][task - 1::ntask]
-con = duckdb.connect(); con.execute(f"SET threads TO {os.environ.get('SLURM_CPUS_PER_TASK', '4')}")
-con.execute(f"CREATE TEMP TABLE w AS SELECT waveid, wavelength FROM read_parquet('{DB / 'waves.parquet'}') "
-            f"WHERE wavelength BETWEEN {LAM_LO} AND {LAM_HI}")
+def connect():
+    """DuckDB capped below the job's memory (its default is 80% of the NODE's RAM: array 695 was OOM-killed at 16 GB),
+    spilling to local scratch; reopened every 200 partitions so its buffer cache cannot creep up."""
+    c = duckdb.connect()
+    c.execute(f"SET threads TO {os.environ.get('SLURM_CPUS_PER_TASK', '4')}")
+    c.execute(f"SET memory_limit = '{os.environ.get('TTD_MEM', '10GB')}'"); c.execute("SET preserve_insertion_order = false")
+    c.execute(f"SET temp_directory = '{os.environ.get('TMPDIR', '/tmp')}/ttd_{os.getpid()}'")
+    c.execute(f"CREATE TEMP TABLE w AS SELECT waveid, wavelength FROM read_parquet('{DB / 'waves.parquet'}') "
+              f"WHERE wavelength BETWEEN {LAM_LO} AND {LAM_HI}")
+    return c
+con = connect()
 print(f"task {task}/{ntask}: {len(parts)} partitions, {con.execute('SELECT count(*) FROM w').fetchone()[0]} wave ids in "
       f"{LAM_LO}–{LAM_HI} μm", flush=True)
 t_all = time.time(); nd = 0
@@ -34,6 +42,8 @@ for p in parts:
     out = OUT / f"part={p}.parquet"
     if out.exists():
         continue
+    if nd and nd % 200 == 0:
+        con.close(); con = connect()
     f = DB / "pixels" / f"part={p}" / "compacted.parquet"
     t0 = time.time()
     sql = f"""
@@ -50,7 +60,10 @@ for p in parts:
            median(zodi) + median(d) FILTER (WHERE abs(d - m) <= 3 * 1.4826 * mad) AS z_emp, median(lam) AS med_lam
     FROM d JOIN m2 USING (imageid) GROUP BY imageid ORDER BY imageid"""
     tmp = OUT / f".part={p}.parquet.tmp"
-    con.execute(f"COPY ({sql}) TO '{tmp}' (FORMAT parquet)"); tmp.rename(out)
+    try:
+        con.execute(f"COPY ({sql}) TO '{tmp}' (FORMAT parquet)"); tmp.rename(out)
+    except duckdb.Error as e:                                        # log and go on; a resubmit retries it
+        print(f"part={p}: FAILED {type(e).__name__}: {e}", flush=True); nd += 1; continue
     n = con.execute(f"SELECT count(*), coalesce(sum(n_pix), 0) FROM read_parquet('{out}')").fetchone(); nd += 1
     print(f"part={p}: {n[0]} exposures, {n[1]} pixels kept, {f.stat().st_size / 1e9:.2f} GB read in {time.time() - t0:.1f} s",
           flush=True)
