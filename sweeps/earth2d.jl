@@ -20,17 +20,21 @@ tag = isempty(ARGS) ? "earth2d" : ARGS[1]
 only_without = get(ENV, "EARTH2D_ONLY_WITHOUT", "0") == "1"
 # EARTH2D_SET=r47 (Nov 17): round 47's leak-free pair (Earth-only inputs, without / with n·δ̂, n·M̂; 2 seeds per shift)
 # EARTH2D_SET=r48 (Nov 17): round 48, how much the model needs Earth (all inputs / Sun angle only / pointing only)
-SET = get(ENV, "EARTH2D_SET", "r43"); r47 = SET == "r47"; r48 = SET == "r48"
-FAMS = r48 ? [("z500h_band_full_cosexp1k_shift", "all Earth inputs"),
+# EARTH2D_SET=r49 (Week 15 card): plain MLP, rotation-invariant inputs / literal reading / full-input reference
+SET = get(ENV, "EARTH2D_SET", "r43"); r47 = SET == "r47"; r48 = SET == "r48"; r49 = SET == "r49"
+FAMS = r49 ? [("z500h_mlp_ref_cosexp1k_shift", "reference: all Earth/orbit inputs (plain MLP)"),
+              ("z500h_mlp_inv_cosexp1k_shift", "no angle: n·z, n·S, S·z, |S|² (rotation-invariant)"),
+              ("z500h_mlp_lit_cosexp1k_shift", "literal: pointing vector + SPHEREx height")] :
+       r48 ? [("z500h_band_full_cosexp1k_shift", "all Earth inputs"),
               ("z500h_band_sunonly_cosexp1k_shift", "no Earth position (Sun angle kept)"),
               ("z500h_band_pointonly_cosexp1k_shift", "no Earth, no Sun (pointing only)")] :
        (r47 ? [("z500h_bandplx_eonly_cosexp1k_shift", "without Earth (Earth-only inputs, no n·δ̂ leak)"),
                ("z500h_bandplx_eonlyc_cosexp1k_shift", "with Earth-centric inputs (n·δ̂, n·M̂)")] :
               [("z500h_bandplx_cosexp1k_shift", "without Earth-centric inputs"),
                ("z500h_bandplx_earthc_cosexp1k_shift", "with Earth-centric inputs (n·δ̂, n·M̂)")])[only_without ? (1:1) : (1:2)]
-const NSEED = (r47 || r48) ? 2 : 5
+const NSEED = (r47 || r48 || r49) ? 2 : 5
 # colour range of the maps (%): removing Earth makes errors far larger than the ±0.03% of the other sets
-CR = parse(Float64, get(ENV, "EARTH2D_CR", r48 ? "10" : "0.03"))
+CR = parse(Float64, get(ENV, "EARTH2D_CR", (r48 || r49) ? "10" : "0.03"))
 β = Float64.(ecliptic_latitude_deg); aβ = abs.(β)
 
 """Out-of-sample % error on the interpolation windows of all 6 shifts (5-network ensemble, or one seed)."""

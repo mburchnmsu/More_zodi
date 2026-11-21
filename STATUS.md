@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-11-14, DESKTOP-BBASC81
+Updated: 2026-11-20, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -11,6 +11,25 @@ ecliptic 0.0285% → 0.0247%). **Round 37: cos×exp at 1000 epochs beats one-cyc
 2000** (mean 1.52 vs 1.74; sky median 0.0130% both; ecliptic 0.0181% vs 0.0162%). **Round 39 (first cluster round):
 cos×exp 2000 gives the best sky map** (median 0.0129%, ecliptic 0.0163%) but overfits again on shifts 30/40. Rounds 40–41: AdamW λ = 1e-4 is a marginal
 gain (ecliptic 0.0161%); round 42's best-epoch selection failed (its validation window leaves a 90-day orbital hole). First real SPHEREx data: the north ecliptic pole at 5 μm (notebook 10292026). **Poster: final (presented 2026-10-23).**
+
+## Week 15 (from 2026-11-20)
+Mentor's Week 15 cards, relayed by the hub; plan approved by the user Nov 20. The full tall table is on Colibrí (read only:
+/fs1/project/18-interstellar/data/talltable, 64,854 partitions, ~146 TB, all qr3; footer check job 664).
+- **Task 1, no wavelength input (running):** real-data best model without λ (flux5m_hub_c50, flux5m_c50; array 673)
+  and a months-held-out memorization test with / without λ (train_real.jl SPLIT=months, 30-day blocks; array 674).
+- **Task 2, parameter counts (done):** MLP 64-64-32-16 = 64n + 6849 for n inputs (each Dense = weights + biases).
+  Best simulated model 7632 (band layer 15 + MLP 7617, n = 12); real-data best with λ 7696; round 48 bandmlp 7629 /
+  7181 / 7053; poster MLP 7425.
+- **Task 3, card input test (round 49, running, Colibrí 666–671):** plain MLP with n·z, n·S, S·z, |S|² (the
+  rotation-invariant reading: no ecliptic longitude) vs the literal reading (pointing vector + S·z) vs all inputs.
+- **Task 4, difference-image medians (running sky-wide, array 695):** per exposure, median of the zodi-cleaned
+  difference image (unflagged pixels, s = flux − zodi minus its per-cell time median, 3σ MAD clip); empirical zodi =
+  ZODI + that median (realdata/tt_diffmed.py; timing 672: ~1.3 s per partition, checked against a full read, 694).
+  Local NEP check (realdata/diffimg_timeseries.jl): qr3 frames scatter 0.0008 MJy/sr; qr2 frames split into
+  wavelength bands (old calibration). Figure 11202026_nep_diffmed_time.png.
+- **Task 5:** the 4 orange lines in 11042026_talltable_nep.png = the 4 wavelengths the NEP is seen at (ZODI scales with λ).
+- **Task 6 (after 4):** NN on the empirical zodi from the difference images (user's choice, reading a).
+- **Task 7:** tall-table points are 6.9′ HEALPix level-9 cells (the NEP time plot: medians over a 0.9° level-6 patch).
 
 ## Week 14 (from 2026-11-13)
 Mentor's Week 14 cards received; tasks 1, 2, 4, 7 and 8 done (task 3 left to the user, task 6 pending data). Running
