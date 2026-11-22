@@ -41,7 +41,11 @@ Mentor's Week 15 cards, relayed by the hub; plan approved by the user Nov 20. Th
   spread per partition is largest along the ecliptic (ZODI misses some of zodi's change in time there) and the
   Galactic plane (stars). Figures 11212026_fullsky_diffmed_time.png, _maps.png (realdata/diffmed_fullsky.jl).
 - **Task 5:** the 4 orange lines in 11042026_talltable_nep.png = the 4 wavelengths the NEP is seen at (ZODI scales with λ).
-- **Task 6 (after 4):** NN on the empirical zodi from the difference images (user's choice, reading a).
+- **Task 6 (redefined Nov 22, approved, no λ input):** a geometric network trained on the CHANGE only (no borrowed
+  absolute level), onboarding registry inputs: A = {n̂, S⃗, ẑ} dots, B = A + v̂_E; plan docs/plan_task6.md. Pixels scaled
+  to 5 μm with (5/λ)^6.1 (slope measured from the masked flux). Local test on the 192 patches, fold 0, 300 epochs
+  (test robust rms of the change, MJy/sr): no change 0.0627, SPHEREx ZODI 0.0094, arm A 0.0188, arm B 0.0074
+  (closer than ZODI on 61% of test rows). Sky-wide extraction + 20 runs wait for Colibrí SSH (down since Nov 22).
 - **Task 7:** tall-table points are 6.9′ HEALPix level-9 cells (the NEP time plot: medians over a 0.9° level-6 patch).
 
 ## Week 14 (from 2026-11-13)
