@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-11-21, DESKTOP-BBASC81
+Updated: 2026-11-22, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -28,6 +28,8 @@ Mentor's Week 15 cards, relayed by the hub; plan approved by the user Nov 20. Th
   literal 7.8% (p95 38%; behind +8.9%, ahead −10.5%). So ~1% of the zodi sky depends on direction (Earth's longitude:
   trailing cloud, cloud tilt/offset); without the Sun direction the literal model can't place the Sun and fails.
   The no-angle runs vary a lot between shifts (test MSE 2×10⁻⁴ to 3×10⁻³). Figure 11212026_r49_earth2d_moll.png.
+  The card means the onboarding base registry {n̂, S⃗, ẑ} (ẑ = ecliptic pole), so the no-angle arm is the answer;
+  the literal arm was a misreading (choices log, Nov 22).
 - **Task 4, difference-image medians (full sky done Nov 21, array 713 after 695 ran out of memory; summary job 765):** per exposure, median of the zodi-cleaned
   difference image (unflagged pixels, s = flux − zodi minus its per-cell time median, 3σ MAD clip); empirical zodi =
   ZODI + that median (realdata/tt_diffmed.py; timing 672: ~1.3 s per partition, checked against a full read, 694).
