@@ -29,3 +29,8 @@ data/tt_flags/
 # Week 15: per-partition difference-image medians from the full tall table (fetched from Colibrí; many small files)
 data/tt_diffmed/
 data/tt_diffmed_sum/
+data/tt_change/
+data/tt_change_ephem.csv
+data/tt_change_train.*
+data/tt_change_local_*.csv
+sweeps/results_change/
