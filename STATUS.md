@@ -1,5 +1,5 @@
 # More_zodi status
-Updated: 2026-11-22, DESKTOP-BBASC81
+Updated: 2026-11-23, DESKTOP-BBASC81
 
 ## Headline
 Round 34 is complete. Training the parallax dust-band model for **2000 epochs instead of 500** gives the best 500-day
@@ -45,7 +45,9 @@ Mentor's Week 15 cards, relayed by the hub; plan approved by the user Nov 20. Th
   absolute level), onboarding registry inputs: A = {n̂, S⃗, ẑ} dots, B = A + v̂_E; plan docs/plan_task6.md. Pixels scaled
   to 5 μm with (5/λ)^6.1 (slope measured from the masked flux). Local test on the 192 patches, fold 0, 300 epochs
   (test robust rms of the change, MJy/sr): no change 0.0627, SPHEREx ZODI 0.0094, arm A 0.0188, arm B 0.0074
-  (closer than ZODI on 61% of test rows). Sky-wide extraction + 20 runs wait for Colibrí SSH (down since Nov 22).
+  (closer than ZODI on 61% of test rows). Nov 23: running on Colibrí. Timing test job 1152 (6 s and 1 GB for 3
+  partitions), sky-wide extraction job 1153 (10 tasks, ~3 h), prep job 1163 (afterok). The 20 training runs are submitted
+  after extraction (30-job submit limit).
 - **Task 7:** tall-table points are 6.9′ HEALPix level-9 cells (the NEP time plot: medians over a 0.9° level-6 patch).
 
 ## Week 14 (from 2026-11-13)
