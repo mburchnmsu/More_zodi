@@ -46,8 +46,13 @@ Mentor's Week 15 cards, relayed by the hub; plan approved by the user Nov 20. Th
   to 5 μm with (5/λ)^6.1 (slope measured from the masked flux). Local test on the 192 patches, fold 0, 300 epochs
   (test robust rms of the change, MJy/sr): no change 0.0627, SPHEREx ZODI 0.0094, arm A 0.0188, arm B 0.0074
   (closer than ZODI on 61% of test rows). Nov 23: running on Colibrí. Timing test job 1152 (6 s and 1 GB for 3
-  partitions), sky-wide extraction job 1153 (10 tasks, ~3 h), prep job 1163 (afterok). The 20 training runs are submitted
+  partitions), sky-wide extraction job 1153 (10 tasks, 3.5–6.4 h), prep job 1163 (afterok). The 20 training runs are submitted
   after extraction (30-job submit limit).
+  **Result (job 1274, 20/20 done):** arm B beats ZODI in all 10 runs, robust rms 0.0090–0.0100 vs 0.0134–0.0146
+  (B/ZODI 0.68, range 0.65–0.75), closer on 61.5% of held-out visits (58.5–63.3); pooled 1.36M visits: B 0.0096,
+  ZODI 0.0140, arm A 0.0220. Arm A loses in all 10 (1.6× ZODI; overfits after epoch 50). B better in 83% of 6° sky bins;
+  ties at the ecliptic poles, worse in a few low-latitude patches. ZODI drifts ±0.007 over time, B stays flat; both drift
+  up to +0.02 above 5.0 μm (shared, so not the α scaling). Figures: figures/11232026_task6_{folds,maps,lambda}.png.
 - **Task 7:** tall-table points are 6.9′ HEALPix level-9 cells (the NEP time plot: medians over a 0.9° level-6 patch).
 
 ## Week 14 (from 2026-11-13)
